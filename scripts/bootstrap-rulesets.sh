@@ -31,7 +31,11 @@ if [[ ! -d "$RULESETS_DIR" ]]; then
 fi
 
 # List existing rulesets once so we can detect updates vs creates.
-existing_json="$(gh api "repos/${TARGET}/rulesets" 2>/dev/null || echo "[]")"
+# Coerce to an array even if the endpoint returns an error object (e.g. empty
+# repo, or a plan that doesn't support rulesets — in which case a later POST
+# surfaces the real error message with exit).
+existing_raw="$(gh api "repos/${TARGET}/rulesets" 2>/dev/null || echo "[]")"
+existing_json="$(printf '%s' "$existing_raw" | jq 'if type == "array" then . else [] end')"
 
 shopt -s nullglob
 for file in "$RULESETS_DIR"/*.json; do

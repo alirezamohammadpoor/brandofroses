@@ -33,6 +33,7 @@ Type scale and spacing are exposed as Tailwind utilities (`text-display`, `text-
 - **Always use `const`/`let` and arrow functions in JavaScript. Never use `var`.**
 - **Never use inline `<script>` in any Liquid file for interactive behavior.** Taxi.js SPA navigation does not re-execute inline scripts after page transitions. All event listeners and DOM behavior live in TypeScript components (`_scripts/components/`), extended from `BaseComponent`, wired in `constructor()` and cleaned up in `destroy()`. Register standalone components in `app.ts`.
 - **Translations:** every user-facing string uses the `t` filter. Locale strings in `locales/en.default.json`, exported to JS via `snippets/head-scripts.liquid` → `window.app.strings`.
+- **Never co-author commits.** Do not add `Co-Authored-By: Claude...` trailers to git commit messages. Commits are authored solely by the user.
 
 ## Data contracts (customize per brand)
 

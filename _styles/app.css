@@ -3,19 +3,20 @@
 @source not '../assets/app.bundle.js';
 
 @theme {
-  /* Design tokens — override with brand values in a new project.
-     Only three semantic colors are exposed intentionally. Add accents
-     here if the brand requires them; never hardcode hex values in components. */
-  --color-bg: #FFFFFF;
-  --color-fg: #111111;
-  --color-muted: #6B6B6B;
+  /* Design tokens — Brand of Roses. Match the Figma source of truth. */
+  --color-bg:         #FAFAF8;  /* warm cream — page background */
+  --color-bg-surface: #F5F0E8;  /* warm beige — footer, surfaces */
+  --color-fg:         #1A1A18;  /* near-black — primary text */
+  --color-fg-dark:    #2C2826;  /* warmer dark — on-surface text */
+  --color-muted:      #8A8580;  /* mid stone — secondary text, dividers */
+  --color-accent:     #722F37;  /* oxblood — accent, sale, badges */
 
   --color-white: #FFFFFF;
   --color-black: #000000;
 
   --spacing-container: 8px;
 
-  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-sans: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 
   --z-1: 1;
   --z-2: 2;
@@ -26,12 +27,17 @@
   --z-skip: 10000;
 }
 
-@utility text-display { font-size: 48px; font-weight: 300; line-height: 120%; }
-@utility text-h1 { font-size: 40px; font-weight: 400; line-height: 120%; }
-@utility text-h2 { font-size: 28px; font-weight: 400; line-height: 120%; }
-@utility text-h3 { font-size: 20px; font-weight: 400; line-height: 120%; }
+/* Typography — mirrors Figma text styles. */
+@utility text-display { font-size: 72px; font-weight: 700; line-height: 110%; letter-spacing: -0.01em; }
+@utility text-h1 { font-size: 40px; font-weight: 700; line-height: 110%; letter-spacing: -0.005em; }
+@utility text-h2 { font-size: 32px; font-weight: 700; line-height: 120%; }
+@utility text-h3 { font-size: 24px; font-weight: 700; line-height: 125%; }
 @utility text-body { font-size: 16px; font-weight: 400; line-height: 150%; }
+@utility text-body-medium { font-size: 16px; font-weight: 500; line-height: 150%; }
+@utility text-caption { font-size: 12px; font-weight: 400; line-height: 140%; }
+@utility text-nav { font-size: 12px; font-weight: 400; line-height: 140%; text-transform: uppercase; letter-spacing: 0.04em; }
 @utility text-label { font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; }
+@utility text-section-label { font-size: 10px; font-weight: 500; line-height: 140%; text-transform: uppercase; letter-spacing: 0.08em; }
 
 @utility container {
   max-width: none;
