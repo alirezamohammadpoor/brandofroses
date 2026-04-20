@@ -19,13 +19,13 @@
           "msg_1": {
             "type": "message",
             "settings": {
-              "text": "Complimentary shipping on all orders"
+              "text": "Free shipping on all orders"
             }
           },
           "msg_2": {
             "type": "message",
             "settings": {
-              "text": "Handcrafted in Italy — Swedish design"
+              "text": "Sign up for drops and early access"
             }
           }
         },
@@ -68,7 +68,7 @@
           "footer_menu_legal"
         ],
         "settings": {
-          "copyright_text": "© $year Sania D'Mina"
+          "copyright_text": "© $year Brand of Roses"
         }
       },
       "mobile-menu": {
@@ -81,7 +81,7 @@
         "type": "ajax-cart",
         "settings": {
           "checkout_button_text": "Checkout",
-          "empty_text": "Your bag is empty"
+          "empty_text": "Your cart is empty"
         }
       }
     }
