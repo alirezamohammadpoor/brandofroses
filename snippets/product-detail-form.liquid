@@ -1,0 +1,257 @@
+{% # theme-check-disable RemoteAsset %}
+{% # theme-check-disable UnusedAssign %}
+
+{% doc %}
+  Product Detail Form
+
+  @param {object} product - The product to display - required
+  @param {object} [current_variant] - The current variant to display - optional
+  @param {object} [current_collection] - The collection the product was reached from (for breadcrumb) - optional
+
+  @example
+    {% render 'product-detail-form',
+              product: product,
+              current_variant: current_variant,
+              current_collection: collection
+    %}
+{% enddoc %}
+
+{% unless product == empty %}
+
+  {%- liquid
+    assign current_variant = current_variant | default: product.selected_or_first_available_variant
+  %}
+
+  <div
+    class="h-full"
+    data-component="product-detail-form"
+  >
+    {% form 'product', product, style: 'height: 100%' %}
+      <div class="lg:sticky lg:top-[var(--chrome-height)] lg:min-h-[calc(100dvh-var(--chrome-height))] lg:flex lg:items-center lg:justify-center">
+        <div class="px-2 py-6 lg:py-10 lg:px-0 lg:w-[80%] lg:max-w-[480px]">
+
+          {%- comment -%}
+            Breadcrumb parent collection, fallback chain:
+              1. custom.primary_collection metafield — merchant-pinned authoritative parent
+              2. current_collection — collection the visitor arrived from (if any)
+              3. product.collections.first — last-resort default
+          {%- endcomment -%}
+          {%- liquid
+            assign breadcrumb_col = product.metafields.custom.primary_collection.value | default: current_collection | default: product.collections.first
+            assign breadcrumb_parent = nil
+            assign main_menu = linklists['main-menu']
+            if breadcrumb_col and main_menu
+              for link in main_menu.links
+                for sublink in link.links
+                  assign sub_handle = sublink.url | split: '/collections/' | last | split: '?' | first
+                  if sub_handle == breadcrumb_col.handle
+                    assign breadcrumb_parent = link
+                    break
+                  endif
+                endfor
+                if breadcrumb_parent
+                  break
+                endif
+              endfor
+            endif
+          -%}
+          {% if breadcrumb_col %}
+            <nav class="mb-3" aria-label="Breadcrumb">
+              <ol class="flex items-center gap-1 text-[12px] text-fg">
+                {% if breadcrumb_parent and breadcrumb_parent.title != breadcrumb_col.title %}
+                  <li><a href="{{ breadcrumb_parent.url }}">{{ breadcrumb_parent.title }}</a></li>
+                  <li>/</li>
+                {% endif %}
+                <li><a href="{{ breadcrumb_col.url }}">{{ breadcrumb_col.title }}</a></li>
+                <li>/</li>
+                <li>{{ product.title }}</li>
+              </ol>
+            </nav>
+          {% endif %}
+
+          {%- comment -%} Title {%- endcomment -%}
+          <h1 class="text-[20px] lg:text-[28px] font-normal text-left text-fg mb-2">
+            {{ product.title }}
+          </h1>
+
+          {%- comment -%} Price {%- endcomment -%}
+          <div class="text-left text-[12px] text-fg mb-6">
+            {% render 'product-detail-price',
+                      product: product,
+                      current_variant: current_variant
+            %}
+          </div>
+
+          {%- comment -%} Description {%- endcomment -%}
+          {% if product.description != blank %}
+            <div class="text-[12px] text-fg mb-6 leading-relaxed">
+              {{ product.description }}
+            </div>
+          {% endif %}
+
+          {%- comment -%}
+            Brand-specific variant group (e.g. sibling products with different heel heights,
+            frame sizes, bottle volumes, etc.) was intentionally removed in the template.
+            Re-introduce here per brand. Pattern:
+
+              {%- assign siblings = product.metafields.custom.<your_key>.value -%}
+              {% if siblings != blank %}
+                …render sibling picker…
+              {% endif %}
+          {%- endcomment -%}
+
+          <div itemprop="offers" itemscope itemtype="http://schema.org/Offer">
+            <meta itemprop="priceCurrency" content="{{ shop.currency }}">
+            <meta itemprop="price" content="{{ current_variant.price | divided_by: 100.00 }}">
+            <link itemprop="availability" href="http://schema.org/{% if current_variant.available %}InStock{% else %}OutOfStock{% endif %}">
+
+            {%- comment -%} Variant Picker {%- endcomment -%}
+            <div
+              data-component="variant-picker"
+              class="flex flex-col gap-6"
+              {% if product.has_only_default_variant %}
+                style="display: none;"
+                aria-hidden="true"
+              {% endif %}
+            >
+              {% for option in product.options_with_values %}
+                {%- liquid
+                  assign option_name_handle = option.name | handle
+                  assign selection_type = 'select'
+
+                  if option_name_handle == 'color'
+                    assign selection_type = 'radio'
+                  endif
+
+                  if option_name_handle == 'size'
+                    assign selection_type = 'radio'
+                  endif
+                -%}
+
+                <div>
+                  {% render 'variant-picker-option',
+                            option: option,
+                            product: product,
+                            selection_type: selection_type
+                  %}
+                </div>
+              {% endfor %}
+            </div>
+
+            {%- comment -%} No-JS variant select fallback {%- endcomment -%}
+            <label class="sr-only" for="no-js-variant-select">Select Variant</label>
+            <select name="id" class="no-js" id="no-js-variant-select">
+              {% for variant in product.variants %}
+                <option
+                  {% if variant == current_variant %}selected="selected"{% endif %}
+                  {% unless variant.available %}disabled="disabled"{% endunless %}
+                  value="{{ variant.id }}"
+                >
+                    {{ variant.title }}
+                </option>
+              {% endfor %}
+            </select>
+
+            <input type="hidden" value="1" name="quantity" />
+
+            {%- comment -%} Add to Bag button {%- endcomment -%}
+            <button
+              type="submit"
+              name="add"
+              class="w-full h-12 bg-fg text-bg text-[12px] font-medium flex items-center justify-between px-6 mt-6 disabled:bg-muted disabled:cursor-not-allowed"
+              {% if current_variant.available == false %}
+                disabled="disabled"
+              {% endif %}
+              data-component="atc-button"
+            >
+              <span data-label>
+                {% if current_variant.available %}
+                  {{ 'app.add_to_cart' | t }}
+                {% else %}
+                  {{ 'app.sold_out' | t }}
+                {% endif %}
+              </span>
+              <span data-atc-price class="font-normal">
+                {{ current_variant.price | money_without_trailing_zeros }}
+              </span>
+            </button>
+
+            <div>
+              <div>
+                {{ form | payment_terms }}
+              </div>
+            </div>
+
+            {%- comment -%} Info links — open modal {%- endcomment -%}
+            <div class="mt-6 flex flex-col gap-3">
+              <button type="button" class="text-[12px] text-fg text-left" data-info-trigger="materials-care">{{ 'products.info.materials_care' | t }}</button>
+              <button type="button" class="text-[12px] text-fg text-left" data-info-trigger="size-guide">{{ 'products.info.size_guide' | t }}</button>
+              <button type="button" class="text-[12px] text-fg text-left" data-info-trigger="shipping-returns">{{ 'products.info.shipping_returns' | t }}</button>
+              <button type="button" class="text-[12px] text-fg text-left" data-info-trigger="payments">{{ 'products.info.payments' | t }}</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <script type="application/json" data-product-json>
+        {% render 'product-json-lite', product: product %}
+      </script>
+    {% endform %}
+  </div>
+
+  {%- comment -%} Product Info Modal — tab navigation {%- endcomment -%}
+  <div class="fixed inset-0 z-200 pointer-events-none" data-product-info-modal data-component="product-info-modal" role="dialog" aria-modal="true" aria-label="{{ 'products.info.modal_label' | t }}" aria-hidden="true">
+    <div class="absolute inset-0 bg-fg/30 z-0 opacity-0 transition-opacity duration-300" data-modal-backdrop></div>
+    <div class="absolute right-0 top-0 bottom-0 w-full lg:w-[480px] bg-bg overflow-y-auto z-10 translate-x-full transition-transform duration-300" data-modal-panel>
+      {%- comment -%} Header: close button, same height/padding as main header {%- endcomment -%}
+      <div class="flex items-center justify-end container h-[var(--header-height)]">
+        <button type="button" class="text-[12px] text-fg" data-modal-close>{{ 'general.close' | t }}</button>
+      </div>
+
+      {%- comment -%} Tab navigation — vertical tablist {%- endcomment -%}
+      <div
+        class="flex flex-col gap-1 px-4 pb-6 border-b border-fg/10"
+        role="tablist"
+        aria-orientation="vertical"
+        aria-label="{{ 'products.info.modal_label' | t }}"
+      >
+        <button type="button" id="InfoTab-materials-care" role="tab" aria-selected="true" aria-controls="InfoPanel-materials-care" tabindex="0" class="text-[12px] font-medium text-fg text-left py-1" data-info-tab="materials-care">{{ 'products.info.materials_care' | t }}</button>
+        <button type="button" id="InfoTab-size-guide" role="tab" aria-selected="false" aria-controls="InfoPanel-size-guide" tabindex="-1" class="text-[12px] font-normal text-muted text-left py-1" data-info-tab="size-guide">{{ 'products.info.size_guide' | t }}</button>
+        <button type="button" id="InfoTab-shipping-returns" role="tab" aria-selected="false" aria-controls="InfoPanel-shipping-returns" tabindex="-1" class="text-[12px] font-normal text-muted text-left py-1" data-info-tab="shipping-returns">{{ 'products.info.shipping_returns' | t }}</button>
+        <button type="button" id="InfoTab-payments" role="tab" aria-selected="false" aria-controls="InfoPanel-payments" tabindex="-1" class="text-[12px] font-normal text-muted text-left py-1" data-info-tab="payments">{{ 'products.info.payments' | t }}</button>
+      </div>
+
+      {%- comment -%}
+        Tab content panels — default bodies are brand-agnostic placeholders.
+        Replace with brand copy, or keep the metafield-backed pattern
+        (e.g. product.metafields.custom.materials_care) so merchants can edit
+        per-product content in the Shopify admin.
+      {%- endcomment -%}
+      <div class="px-4 py-8">
+        <div id="InfoPanel-materials-care" role="tabpanel" aria-labelledby="InfoTab-materials-care" tabindex="0" data-info-panel="materials-care">
+          <p class="text-[12px] text-fg leading-relaxed">
+            {{ product.metafields.custom.materials_care | default: 'Describe materials and care instructions here. This content can also be populated per product via the `custom.materials_care` metafield.' }}
+          </p>
+        </div>
+        <div id="InfoPanel-size-guide" role="tabpanel" aria-labelledby="InfoTab-size-guide" tabindex="0" data-info-panel="size-guide" class="hidden">
+          <p class="text-[12px] text-fg leading-relaxed">
+            Replace with the brand’s size guide. Consider a metafield (`custom.size_guide`) if sizing differs per product.
+          </p>
+        </div>
+        <div id="InfoPanel-shipping-returns" role="tabpanel" aria-labelledby="InfoTab-shipping-returns" tabindex="0" data-info-panel="shipping-returns" class="hidden">
+          <p class="text-[12px] text-fg leading-relaxed">
+            {{ product.metafields.custom.shipping_returns | default: 'Describe shipping and returns policy here. Can be overridden per product via the `custom.shipping_returns` metafield.' }}
+          </p>
+        </div>
+        <div id="InfoPanel-payments" role="tabpanel" aria-labelledby="InfoTab-payments" tabindex="0" data-info-panel="payments" class="hidden">
+          <p class="text-[12px] text-fg leading-relaxed">
+            List the accepted payment methods. This copy typically comes from the brand’s commerce team.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {%- comment -%} Info modal behavior handled by TS component (productInfoModal.ts) {%- endcomment -%}
+
+{% endunless %}

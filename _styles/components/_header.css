@@ -1,0 +1,4 @@
+header.header {
+  @apply relative z-(--z-header) bg-bg;
+  height: var(--header-height);
+}

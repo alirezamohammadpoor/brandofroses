@@ -1,0 +1,89 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "current": {
+    "sections": {
+      "announcement-bar": {
+        "type": "announcement-bar",
+        "settings": {
+          "speed": 4
+        },
+        "blocks": {
+          "msg_1": {
+            "type": "message",
+            "settings": {
+              "text": "Complimentary shipping on all orders"
+            }
+          },
+          "msg_2": {
+            "type": "message",
+            "settings": {
+              "text": "Handcrafted in Italy — Swedish design"
+            }
+          }
+        },
+        "block_order": ["msg_1", "msg_2"]
+      },
+      "header": {
+        "type": "header",
+        "settings": {
+          "primary_menu": "main-menu"
+        }
+      },
+      "footer": {
+        "type": "footer",
+        "blocks": {
+          "footer_menu_support": {
+            "type": "menu",
+            "settings": {
+              "title": "Support",
+              "menu": "footer-support"
+            }
+          },
+          "footer_menu_about": {
+            "type": "menu",
+            "settings": {
+              "title": "About",
+              "menu": "footer-about"
+            }
+          },
+          "footer_menu_legal": {
+            "type": "menu",
+            "settings": {
+              "title": "Legal",
+              "menu": "footer-legal"
+            }
+          }
+        },
+        "block_order": [
+          "footer_menu_support",
+          "footer_menu_about",
+          "footer_menu_legal"
+        ],
+        "settings": {
+          "copyright_text": "© $year Sania D'Mina"
+        }
+      },
+      "mobile-menu": {
+        "type": "mobile-menu",
+        "settings": {
+          "primary_menu": "main-menu"
+        }
+      },
+      "ajax-cart": {
+        "type": "ajax-cart",
+        "settings": {
+          "checkout_button_text": "Checkout",
+          "empty_text": "Your bag is empty"
+        }
+      }
+    }
+  }
+}

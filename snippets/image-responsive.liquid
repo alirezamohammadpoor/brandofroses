@@ -1,0 +1,90 @@
+{%- comment %}
+
+  Image Responsive
+  ------------------------------------------------------------------------------
+
+  Usage:
+
+  {% render 'image-responsive',
+             image: { image } - optional
+             image_mobile: { image } - optional
+             loading: { string } - optional - default: 'eager'
+             fetch_priority: { boolean } - optional - defaults to false
+             alt_text: { string } - optional - defaults to image.alt
+             sizes: { string } - optional - defaults to nil             
+  %}
+
+{% endcomment -%}
+
+
+{% if image != blank %}
+  {%- liquid
+    assign mobile = image_mobile
+    assign desktop = image
+
+    if mobile == blank
+      assign mobile = desktop
+    endif 
+
+    if loading == blank
+      assign loading = 'lazy'
+    endif
+
+    if fetch_priority == blank
+      assign fetch_priority = nil
+    endif
+
+    if sizes == blank
+      assign sizes = nil
+    endif
+
+    capture style
+      if desktop.presentation.focal_point
+        echo '--object-position-desktop: ' | append: desktop.presentation.focal_point | append: ';'
+      endif
+      if mobile.presentation.focal_point
+        echo '--object-position-mobile: ' | append: mobile.presentation.focal_point | append: ';'
+      endif
+    endcapture
+
+    assign style = style | strip
+
+    assign alt = alt_text | default: desktop.alt
+    assign alt = alt | escape    
+  %}
+
+  <picture>
+    <source
+      srcset="
+        {{ mobile | image_url: width: 180 }} 180w,
+        {{ mobile | image_url: width: 300 }} 300w,
+        {{ mobile | image_url: width: 500 }} 500w,
+        {{ mobile | image_url: width: 700 }} 700w,
+        {{ mobile | image_url: width: 900 }} 900w,
+        {{ mobile | image_url: width: 1100 }} 1100w
+      "
+      media="(max-width: 1023.99px)"
+    >
+      
+    <source
+      srcset="
+        {{ desktop | image_url: width: 1400 }} 1400w,
+        {{ desktop | image_url: width: 1600 }} 1600w,
+        {{ desktop | image_url: width: 1800 }} 1800w
+      "
+      media="(min-width: 1024px)"
+    >
+
+    {{
+      desktop
+      | image_url: width: 1200
+      | image_tag:
+        loading: loading,
+        alt: alt,
+        style: style,
+        class: 'image-responsive lazy-image',
+        fetchpriority: fetch_priority,
+        sizes: sizes
+    }}          
+  </picture>
+{% endif %}

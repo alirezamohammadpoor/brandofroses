@@ -1,0 +1,106 @@
+{%- comment -%}
+  Card Grid
+  Up to 4 image cards in a row with label, excerpt, and read more link.
+  Desktop: 4 columns. Mobile: 2 columns.
+{%- endcomment -%}
+
+{% if section.blocks.size > 0 %}
+  <section class="px-2 py-6 lg:py-10" data-section-id="{{ section.id }}">
+    {% if section.settings.title != blank or section.settings.subtitle != blank %}
+      <div class="flex items-center justify-between mb-4">
+        {% if section.settings.title != blank %}
+          <h3 class="text-h3 text-fg">{{ section.settings.title }}</h3>
+        {% endif %}
+        {% if section.settings.subtitle != blank %}
+          <p class="text-[14px] text-muted">{{ section.settings.subtitle }}</p>
+        {% endif %}
+      </div>
+    {% endif %}
+
+    <div class="flex gap-1 overflow-x-auto snap-x snap-mandatory no-scrollbar lg:grid lg:grid-cols-{{ section.blocks.size | at_most: 4 }} lg:overflow-visible">
+      {% for block in section.blocks %}
+        <div class="w-[70%] shrink-0 snap-start lg:w-auto lg:shrink" {{ block.shopify_attributes }}>
+          {% if block.settings.link != blank %}<a href="{{ block.settings.link }}" class="block" aria-label="{{ block.settings.label }}">{% endif %}
+            <div class="aspect-[2/3] overflow-hidden bg-[#E8E5E0]">
+              {% if block.settings.image %}
+                {{ block.settings.image
+                  | image_url: width: 800
+                  | image_tag:
+                    loading: 'lazy',
+                    class: 'w-full h-full object-cover',
+                    sizes: '(max-width: 1023px) 50vw, 25vw',
+                    alt: block.settings.label | default: ''
+                }}
+              {% endif %}
+            </div>
+
+            {% if block.settings.label != blank %}
+              <p class="text-label text-fg mt-3">{{ block.settings.label }}</p>
+            {% endif %}
+
+            {% if block.settings.excerpt != blank %}
+              <p class="text-[14px] text-fg mt-2 line-clamp-2">{{ block.settings.excerpt }}</p>
+            {% endif %}
+
+            {% if block.settings.link != blank %}
+              <p class="text-label text-fg mt-3">&#9654; Read more</p>
+            {% endif %}
+          {% if block.settings.link != blank %}</a>{% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+{% endif %}
+
+{% schema %}
+{
+  "name": "Card Grid",
+  "max_blocks": 4,
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title",
+      "default": "Journal"
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "Right side text"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "card",
+      "name": "Card",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Title"
+        },
+        {
+          "type": "textarea",
+          "id": "excerpt",
+          "label": "Excerpt"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Card Grid"
+    }
+  ]
+}
+{% endschema %}

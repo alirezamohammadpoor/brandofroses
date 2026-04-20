@@ -1,0 +1,15 @@
+.section-header {
+  @apply flex flex-col gap-y-4 lg:gap-y-6 items-center my-8 lg:my-12 text-center;
+
+  .section-header__title {
+    @apply text-2xl lg:text-3xl font-bold;
+  }
+
+  .section-header__subtitle {
+    @apply font-medium;
+  }
+
+  .section-header__actions {
+
+  }
+}

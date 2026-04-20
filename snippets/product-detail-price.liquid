@@ -1,0 +1,64 @@
+{% doc %}
+  Product Detail Price
+
+  Price displayed on the product detail page.
+
+  @param {object} product - The product to display - required
+  @param {object} [current_variant] - The current variant to display - optional
+
+  @example
+    {% render 'product-price',
+              product: product,
+              current_variant: product.variants.first
+    %}
+{% enddoc %}
+
+{%- liquid
+  assign current_variant = current_variant | default: product.selected_or_first_available_variant
+
+  comment
+    Template Vars
+  endcomment
+  assign has_compare = false
+  assign current_variant_on_sale = false
+
+  if product.compare_at_price_max > product.price
+    assign has_compare = true
+  endif
+
+  if current_variant.compare_at_price > current_variant.price
+    assign current_variant_on_sale = true
+  endif  
+%}
+
+<div
+  data-component="product-price"
+  role="status"
+>
+  {% if current_variant_on_sale %}
+    <span class="sr-only">
+      {{ 'products.product.price.sale_price' | t }}
+    </span>
+  {% endif %}
+  <span data-price>
+    {{ current_variant.price | money_without_trailing_zeros }}
+  </span>
+
+  {% if has_compare %}
+    <span data-compare>
+      <span class="sr-only">
+        {{ 'products.product.regular_price' | t }}
+      </span>
+
+      <s
+        {% if current_variant_on_sale != true %}class="hidden"{% endif %}
+        data-compare-price
+        aria-hidden="true"
+      >
+        {% if current_variant_on_sale %}
+          {{ current_variant.compare_at_price | money_without_trailing_zeros }}
+        {% endif %}
+      </s>
+    </span>
+  {% endif %}
+</div>    

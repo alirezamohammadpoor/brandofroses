@@ -1,0 +1,64 @@
+<div
+  data-section-id="{{ section.id }}"
+  data-section-type="announcement-bar"
+  class="bg-fg text-bg"
+  role="status"
+  aria-live="polite"
+>
+  {% if section.blocks.size > 0 %}
+    <div
+      class="relative overflow-hidden h-[var(--announcement-height)]"
+      data-component="announcement-rotator"
+      data-speed="{{ section.settings.speed }}"
+    >
+      {% for block in section.blocks %}
+        <div
+          class="absolute inset-0 flex items-center justify-center transition-transform duration-500 {% if forloop.first %}translate-y-0{% else %}translate-y-full{% endif %}"
+          data-announcement-message
+          {{ block.shopify_attributes }}
+        >
+          <p class="text-label text-[10px]">
+            {{ block.settings.text }}
+          </p>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="flex items-center justify-center h-[var(--announcement-height)]">
+      <p class="text-label text-[10px]">
+        {{ 'announcement_bar.default_message' | t }}
+      </p>
+    </div>
+  {% endif %}
+</div>
+
+{% schema %}
+{
+  "name": "Announcement Bar",
+  "settings": [
+    {
+      "type": "range",
+      "id": "speed",
+      "label": "Rotation speed (seconds)",
+      "min": 3,
+      "max": 8,
+      "step": 1,
+      "default": 4
+    }
+  ],
+  "blocks": [
+    {
+      "type": "message",
+      "name": "Message",
+      "settings": [
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Text",
+          "default": "Free shipping over $100"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

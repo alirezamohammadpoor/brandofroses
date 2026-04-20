@@ -1,0 +1,19 @@
+/* Hide inactive color galleries */
+.product-detail-gallery:not([aria-current="true"]) {
+  display: none;
+}
+
+/* Hide ATC price during form submission */
+form[aria-busy="true"] [data-atc-price] {
+  display: none;
+}
+
+/* Size box checked state */
+.composable-input input[type="radio"]:checked + label .size-box {
+  @apply bg-fg text-bg;
+}
+
+/* Size box disabled state */
+.composable-input input[type="radio"]:disabled + label .size-box {
+  @apply border-muted text-muted cursor-not-allowed;
+}

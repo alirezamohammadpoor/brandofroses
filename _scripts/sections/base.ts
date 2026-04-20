@@ -1,0 +1,190 @@
+import type {
+  ThemeEditorSectionUnloadEvent,
+  ThemeEditorSectionSelectEvent,
+  ThemeEditorSectionDeselectEvent,
+  ThemeEditorSectionReorderEvent,
+  ThemeEditorBlockSelectEvent,
+  ThemeEditorBlockDeselectEvent,
+} from '@/types/shopify'
+
+import type {
+  TaxiNavigateOutEvent,
+  TaxiNavigateInEvent,
+  TaxiNavigateEndEvent,
+} from '@/types/taxi'
+
+import LazyImageController from '@/core/lazyImageController'
+import { doComponentCleanup } from '@/components/base'
+
+// Standard components
+import GraphicCoverVideo from '@/components/graphicCoverVideo'
+
+export interface BaseSectionSettings {
+  watchIntersection?: boolean;
+  intersectionOptions?: IntersectionObserverInit;
+}
+
+export default class BaseSection {
+  static TYPE: string
+
+  #settings: BaseSectionSettings;
+  #intersectionObserver: IntersectionObserver | null;
+
+  container: HTMLElement
+  id: string
+  type: string
+  parent: HTMLElement
+  parentId: string
+  lazyImageController: LazyImageController
+  graphicCoverVideos: GraphicCoverVideo[]
+
+  constructor(container: HTMLElement, options: BaseSectionSettings = {}) {
+    this.#settings = {
+      watchIntersection: false,
+      intersectionOptions: {
+        rootMargin: '0px',
+        threshold: 0.01,        
+      },
+      ...options
+    }
+
+    this.#intersectionObserver = null
+
+    this.container = container
+    this.id = this.dataset.sectionId
+    this.type = (this.constructor as typeof BaseSection).TYPE
+    this.parent = this.container.parentElement // Automatically generated wrapper element
+    this.parentId = this.parent.id
+
+    if (!this.id) {
+      console.warn('Section ID not found', this)
+    }
+
+    this.onNavigateOut = this.onNavigateOut.bind(this)
+    this.onNavigateIn  = this.onNavigateIn.bind(this)
+    this.onNavigateEnd = this.onNavigateEnd.bind(this)
+    this.onIntersection = this.onIntersection.bind(this)
+
+    window.addEventListener('taxi.navigateOut', this.onNavigateOut)
+    window.addEventListener('taxi.navigateIn', this.onNavigateIn)
+    window.addEventListener('taxi.navigateEnd', this.onNavigateEnd)
+
+    if (this.#settings.watchIntersection) {
+      this.#intersectionObserver = new IntersectionObserver(this.onIntersection, this.#settings.intersectionOptions)
+      this.#intersectionObserver.observe(this.container)
+    }      
+
+    this.lazyImageController = new LazyImageController(this.container)
+
+    // Below are standard components that can be initialized at the base section level (until there's a reason for them to get pushed down somewhere more specific)
+    this.graphicCoverVideos = this.qsa(GraphicCoverVideo.SELECTOR).map(el => {
+      return new GraphicCoverVideo(el)
+    })
+
+
+    // Good for testing...
+    // Array.from(container.querySelectorAll('img')).forEach(el => {
+    //   if (!el.getAttribute('alt')) {
+    //     console.log('No alt text found for => ', el)
+    //   }
+    // })    
+  }
+
+  get dataset(): DOMStringMap {
+    return this.container.dataset
+  }
+
+  /**
+   * Query selector helper that returns the first matching element within the section container
+   * @param {string} selector - CSS selector string
+   * @param {HTMLElement} [dom=this.container] - Parent element to query within (defaults to section container)
+   * @returns {HTMLElement|undefined} First matching element or undefined if none found
+   */
+  qs(selector: string, dom: HTMLElement = this.container): HTMLElement | undefined {
+    return this.qsa(selector, dom)[0]
+  }
+
+  /**
+   * Query selector all helper that returns an array of matching elements within the section container,
+   * filtering out nested components that match the selector.
+   * 
+   * @param {string} selector - CSS selector string to match elements
+   * @param {HTMLElement} [dom=this.container] - Parent element to query within (defaults to section container)
+   * @returns {HTMLElement[]} Array of matching elements, excluding nested component matches
+   *
+   */
+  qsa(selector: string, dom: HTMLElement = this.container): HTMLElement[] {
+    return Array.from(dom.querySelectorAll(selector)).filter(el => {
+      const closest = el.closest('[data-component]')
+
+      return !closest || closest.isSameNode(el)
+    }) as HTMLElement[]
+  }
+
+  onIntersection(entries: IntersectionObserverEntry[]) {
+    // override in subclass
+  }
+
+  stopIntersectionObserver() {
+    this.#intersectionObserver?.disconnect()
+    this.#intersectionObserver = null
+  }
+
+  /**
+   * Called before the page transition begins to allow sections to run their own exit animations.
+   * This method is awaited by the page transition system, so any async animations or cleanup
+   * can delay the start of the main page transition until they complete.
+   * 
+   * the `transitionDuration` parameter is included to allow sections to sync their animations with the main page transition.
+   * 
+   * @param {number} transitionDuration - Duration of the main page transition in seconds
+   * @returns {Promise<void>} Promise that resolves when section exit animations are complete
+   *
+   */
+  async onRendererLeaveStart(transitionDuration: number) : Promise<void> {
+
+  }
+
+  onUnload(e: ThemeEditorSectionUnloadEvent) {
+    window.removeEventListener('taxi.navigateOut', this.onNavigateOut)
+    window.removeEventListener('taxi.navigateIn', this.onNavigateIn)
+    window.removeEventListener('taxi.navigateEnd', this.onNavigateEnd)
+
+    this.lazyImageController.destroy()
+    this.#intersectionObserver?.disconnect()
+
+    doComponentCleanup(this) // This automatically calls this.destroy() up all components recursively
+  }
+
+  onSectionSelect(e: ThemeEditorSectionSelectEvent) {
+    
+  }
+
+  onSectionDeselect(e: ThemeEditorSectionDeselectEvent) {
+
+  }
+
+  onSectionReorder(e: ThemeEditorSectionReorderEvent) {
+
+  }
+
+  onBlockSelect(e: ThemeEditorBlockSelectEvent) {
+
+  }
+
+  onBlockDeselect(e: ThemeEditorBlockDeselectEvent) {
+
+  }
+
+  onNavigateOut(e: TaxiNavigateOutEvent) {
+    
+  }
+
+  onNavigateIn(e: TaxiNavigateInEvent) {
+    
+  }
+
+  onNavigateEnd(e: TaxiNavigateEndEvent) {
+    
+  }    
+}

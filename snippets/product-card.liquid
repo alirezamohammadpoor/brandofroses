@@ -1,0 +1,155 @@
+{% doc %}
+  @param {product} product - The product to display - required
+  @param {string} [loading] - Optional loading attribute for the image - defaults to "lazy"
+  @param {string} [sizes] - Optional sizes attribute for the image
+  @param {number} [image_min_width] - Optional minimum width for the image - defaults to 500
+  @param {number} [image_max_width] - Optional maximum width for the image - defaults to 900
+  @param {object} [collection] - Optional collection the product was reached from; used to build `within:` URLs for PDP breadcrumb context
+
+  @example
+  {% render 'product-card',
+             product: product,
+             loading: 'eager',
+             collection: collection
+  %}
+{% enddoc %}
+
+{% if product %}
+  {%- liquid
+    if image_min_width == blank
+      assign image_min_width = 500
+    endif
+
+    if image_max_width == blank
+      assign image_max_width = 900
+    endif
+
+    capture image_widths
+      render 'image-widths', min_width: image_min_width, max_width: image_max_width
+    endcapture
+
+    if loading == blank
+      assign loading = 'lazy'
+    endif
+
+    if sizes == blank
+      assign sizes = '(max-width: 767.98px) 50vw, (max-width: 1023.98px) 33vw, 25vw'
+    endif
+
+    assign product_url = product.url
+    if collection and collection.handle != 'all'
+      assign product_url = product.url | within: collection
+    endif
+
+    assign badge = blank
+    for tag in product.tags
+      if tag contains 'badge:'
+        assign badge = tag | remove: 'badge:' | replace: '-', ' '
+      endif
+    endfor
+  -%}
+
+  {%- capture alt_text %}
+    {% if product.featured_image.alt %}
+      {{ product.featured_image.alt }}
+    {% else %}
+      "{{ product.title }}" Featured Image
+    {% endif %}
+  {%- endcapture %}
+  {% assign alt_text = alt_text | strip_newlines | strip %}
+
+  {%- assign card_title_id = 'ProductCardTitle-' | append: product.id -%}
+
+  <article
+    class="product-card group h-full pb-6"
+    data-component="product-card"
+    aria-labelledby="{{ card_title_id }}"
+  >
+    <a href="{{ product_url }}" class="flex flex-col gap-2" tabindex="-1" aria-hidden="true">
+      {%- comment -%} Image — 3:4 ratio {%- endcomment -%}
+      <div class="relative w-full aspect-[2/3] overflow-hidden bg-[#E8E5E0]">
+        {{ product.featured_image
+          | image_url: width: image_max_width
+          | image_tag:
+            loading: loading,
+            widths: image_widths,
+            alt: alt_text,
+            class: 'h-full w-full object-cover lazy-image absolute inset-0 transition-opacity duration-300 group-hover:opacity-0',
+            sizes: sizes
+        }}
+
+        {%- comment -%} Second image: second image whose alt contains the featured color name {%- endcomment -%}
+        {%- assign featured_color = product.selected_or_first_available_variant.option1 | upcase -%}
+        {%- assign hover_image = nil -%}
+        {%- assign color_image_count = 0 -%}
+        {%- for image in product.images -%}
+          {%- assign image_alt_up = image.alt | upcase -%}
+          {%- if image_alt_up contains featured_color -%}
+            {%- assign color_image_count = color_image_count | plus: 1 -%}
+            {%- if color_image_count == 2 -%}
+              {%- assign hover_image = image -%}
+              {%- break -%}
+            {%- endif -%}
+          {%- endif -%}
+        {%- endfor -%}
+
+        {% if hover_image %}
+          {{ hover_image
+            | image_url: width: image_max_width
+            | image_tag:
+              loading: 'lazy',
+              widths: image_widths,
+              alt: alt_text,
+              class: 'h-full w-full object-cover absolute inset-0 transition-opacity duration-300 opacity-0 group-hover:opacity-100',
+              sizes: sizes
+          }}
+        {% endif %}
+
+        {% if badge != blank %}
+          <span class="absolute top-2 right-2 text-label text-fg text-[10px]">
+            {{ badge | upcase }}
+          </span>
+        {% endif %}
+      </div>
+
+    </a>
+
+    {%- comment -%} Meta: title, price, color name, swatches — outside <a> so swatches don't navigate {%- endcomment -%}
+    <div class="mt-2 flex flex-col gap-0.5">
+      <a href="{{ product_url }}" id="{{ card_title_id }}" class="text-[12px] text-fg">{{ product.title }}</a>
+
+      <a href="{{ product_url }}" class="text-[12px] text-fg" tabindex="-1" aria-hidden="true">
+        {% if product.available %}
+          {{ product.selected_or_first_available_variant.price | money_without_trailing_zeros }}
+        {% else %}
+          {{ 'products.product.sold_out' | t }}
+        {% endif %}
+      </a>
+
+      {% for option in product.options_with_values %}
+        {% if option.name == 'Color' %}
+          {%- assign color_count = option.values.size -%}
+          {%- assign max_mobile = 3 -%}
+          {%- assign overflow = color_count | minus: max_mobile -%}
+          <span class="text-[12px] text-muted mt-1">{{ product.selected_or_first_available_variant.option1 }}</span>
+          <ul
+            class="flex items-center gap-1 mt-1"
+            role="list"
+            aria-label="{{ 'products.product.available_colors' | t }}"
+          >
+            {% for value in option.values %}
+              <li
+                class="block w-2.5 h-2.5{% if forloop.index > max_mobile %} hidden lg:block{% endif %}"
+                style="{% if value.swatch.color %}background-color: {{ value.swatch.color }};{% else %}background-color: #1A1A18;{% endif %}"
+                title="{{ value }}"
+              ><span class="sr-only">{{ value }}</span></li>
+            {% endfor %}
+            {% if overflow > 0 %}
+              <li class="text-[10px] text-muted lg:hidden" aria-label="{{ 'products.product.more_colors' | t: count: overflow }}">+{{ overflow }}</li>
+            {% endif %}
+          </ul>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </article>
+{% endif %}

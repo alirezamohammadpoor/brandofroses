@@ -1,0 +1,26 @@
+.graphic-cover {
+  &, img, video {
+    @apply absolute top-0 left-0 h-full w-full pointer-events-none;
+  }
+
+  img, video {
+    @apply object-cover;
+  }
+  
+  img {
+    @apply z-1; /* img opacity is automatically animated via lazy-image */
+  }
+
+  video {
+    @apply z-2;
+  }
+
+  video {
+    @apply opacity-0;
+    transition: var(--lazy-image-transition);
+  
+    &.is-ready {
+      @apply opacity-100;
+    }
+  }  
+}

@@ -1,0 +1,199 @@
+<header
+  class="header"
+  data-section-id="{{ section.id }}"
+  data-section-type="header"
+  role="banner"
+>
+  <div class="container">
+    <div class="relative flex items-center justify-between h-[var(--header-height)]">
+      {%- comment -%} Left: Menu {%- endcomment -%}
+      <div class="relative">
+        {%- comment -%} Mobile: opens drawer {%- endcomment -%}
+        <button
+          type="button"
+          class="text-[12px] text-fg lg:hidden"
+          data-mobile-menu-toggle
+          aria-label="Toggle Menu"
+          aria-controls="mobile-menu"
+          aria-expanded="false"
+        >
+          Menu
+        </button>
+
+        {%- comment -%} Desktop: toggles dropdown {%- endcomment -%}
+        <button
+          type="button"
+          class="text-[12px] text-fg hidden lg:block"
+          data-desktop-menu-toggle
+          aria-label="Toggle Menu"
+          aria-controls="desktop-menu-panel"
+          aria-expanded="false"
+        >
+          Menu
+        </button>
+      </div>
+
+      {%- comment -%} Center: Brand wordmark — pulls from Shopify shop name; swap for an SVG logo if the brand has one {%- endcomment -%}
+      <a href="{{ routes.root_url }}" class="absolute left-1/2 -translate-x-1/2 text-[12px] text-fg whitespace-nowrap" aria-label="{{ shop.name }}">
+        {{ shop.name | upcase }}
+      </a>
+
+      {%- comment -%} Right: Currency + Bag {%- endcomment -%}
+      <div class="flex items-center gap-4">
+        <div class="hidden lg:block">
+          {% render 'currency-selector', style: 'header' %}
+        </div>
+        <button
+          type="button"
+          class="text-[12px] text-fg"
+          data-ajax-cart-toggle
+          aria-label="Toggle Bag"
+          aria-controls="ajax-cart"
+          aria-expanded="false"
+        >
+          <span
+            class="{% if cart.item_count > 0 %}has-items{% endif %}"
+            data-component="header-cart-control"
+          >
+            Bag (<span data-count>{{ cart.item_count }}</span>)
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  {%- comment -%} Desktop mega menu — matches Figma node 25:2 {%- endcomment -%}
+  {% if section.settings.primary_menu != blank %}
+    <div
+      id="desktop-menu-panel"
+      class="hidden lg:block opacity-0 pointer-events-none transition-opacity duration-300"
+      data-desktop-menu-panel
+      data-component="desktop-menu"
+    >
+      <div class="border-b border-fg bg-bg">
+        <div class="flex gap-14 items-start px-4 py-8 overflow-hidden">
+
+          {%- comment -%} Nav columns — one per top-level menu item {%- endcomment -%}
+          {% for link in section.settings.primary_menu.links %}
+            <div class="flex flex-col gap-1 shrink-0">
+              <span class="text-[12px] text-muted leading-[22px]">{{ link.title }}</span>
+              <div class="h-2"></div>
+              {% if link.links.size > 0 %}
+                {% for sublink in link.links %}
+                  <a
+                    href="{{ sublink.url }}"
+                    class="text-[12px] text-fg leading-[22px] hover:text-muted transition-colors"
+                    data-menu-link
+                    data-collection-handle="{{ sublink.url | split: '/collections/' | last | split: '?' | first }}"
+                    {% if sublink.current %}aria-current="page"{% endif %}
+                  >
+                    {{ sublink.title }}
+                  </a>
+                {% endfor %}
+              {% endif %}
+            </div>
+          {% endfor %}
+
+          {%- comment -%} Editorial block — right side {%- endcomment -%}
+          {%- liquid
+            assign default_col = collections['new-arrivals']
+          -%}
+          <div class="flex items-end ml-auto shrink-0" data-menu-editorial>
+            <div class="flex flex-col gap-2 pr-6 shrink-0 w-[250px]">
+              <h3 class="text-h3 text-fg transition-opacity duration-500" data-menu-preview-title>
+                {{ default_col.title }}
+              </h3>
+              <p class="text-[12px] text-fg leading-[18px] transition-opacity duration-500" data-menu-preview-desc>
+                {{ default_col.description | strip_html }}
+              </p>
+            </div>
+            <div class="w-[350px] aspect-[4/5] shrink-0 overflow-hidden bg-[#dcd7d0]" data-menu-preview-image>
+              {% if default_col.image %}
+                <img
+                  src="{{ default_col.image | image_url: width: 700 }}"
+                  alt="{{ default_col.title }}"
+                  width="700"
+                  height="875"
+                  class="w-full h-full object-cover transition-opacity duration-500"
+                  data-default-image
+                >
+              {% endif %}
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    {%- comment -%} Preload collection images for hover swap — all links + sub-links {%- endcomment -%}
+    <div class="hidden" data-menu-collection-images>
+      {% for link in section.settings.primary_menu.links %}
+        {% if link.url contains '/collections/' %}
+          {%- assign col_handle = link.url | split: '/collections/' | last | split: '?' | first -%}
+          {%- assign col = collections[col_handle] -%}
+          {% if col.image %}
+            <img
+              src="{{ col.image | image_url: width: 700 }}"
+              alt="{{ col.title }}"
+              width="700"
+              height="875"
+              data-collection="{{ col_handle }}"
+              data-title="{{ col.title }}"
+              data-desc="{{ col.description | strip_html | escape }}"
+            >
+          {% endif %}
+        {% endif %}
+        {% for sublink in link.links %}
+          {% unless sublink.url contains '/collections/' %}{% continue %}{% endunless %}
+          {%- assign sub_handle = sublink.url | split: '/collections/' | last | split: '?' | first -%}
+          {%- assign sub_col = collections[sub_handle] -%}
+          {% if sub_col.image and sub_handle != col_handle %}
+            <img
+              src="{{ sub_col.image | image_url: width: 700 }}"
+              alt="{{ sub_col.title }}"
+              width="700"
+              height="875"
+              data-collection="{{ sub_handle }}"
+              data-title="{{ sub_col.title }}"
+              data-desc="{{ sub_col.description | strip_html | escape }}"
+            >
+          {% endif %}
+        {% endfor %}
+      {% endfor %}
+    </div>
+  {% endif %}
+</header>
+
+{%- comment -%} Desktop menu behavior moved to _scripts/components/desktopMenu.ts for Taxi.js SPA compatibility {%- endcomment -%}
+
+<script type="application/ld+json">
+  {
+    "@context": "http://schema.org",
+    "@type": "Organization",
+    "name": {{ shop.name | json }},
+    {% if shop.brand.logo %}
+      "logo": {{ shop.brand.logo | image_url: width: 500 | prepend: "https:" | json }},
+    {% endif %}
+    "sameAs": [
+      {{ settings.social_link_twitter   | json }},
+      {{ settings.social_link_facebook  | json }},
+      {{ settings.social_link_youtube   | json }},
+      {{ settings.social_link_tiktok    | json }},
+      {{ settings.social_link_instagram | json }}
+    ],
+    "url": {{ request.origin | append: page.url | json }}
+  }
+</script>
+
+{% schema %}
+{
+  "name": "Header",
+  "settings": [
+    {
+      "type": "link_list",
+      "id": "primary_menu",
+      "label": "Primary Menu"
+    }
+  ]
+}
+{% endschema %}

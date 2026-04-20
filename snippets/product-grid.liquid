@@ -1,0 +1,47 @@
+{% doc %}
+  Product Grid
+  ------------------------------------------------------------------------------
+  Standard grid layout for product cards. Reusable across sections.
+
+  @param {object} products - Collection of products to display - required
+  @param {string} [title] - Optional heading text
+  @param {number} [columns_mobile] - Grid columns on mobile - defaults to 2
+  @param {number} [columns_desktop] - Grid columns on desktop - defaults to 4
+  @param {number} [limit] - Maximum products to show
+  @param {object} [collection] - Optional collection context forwarded to each product-card
+
+  @example
+    {% render 'product-grid',
+               products: collection.products,
+               title: 'New Arrivals',
+               columns_mobile: 2,
+               columns_desktop: 4
+    %}
+{% enddoc %}
+
+{%- comment -%}
+  Tailwind safelist: grid-cols-2 grid-cols-3 grid-cols-4 lg:grid-cols-2 lg:grid-cols-3 lg:grid-cols-4
+{%- endcomment -%}
+
+{%- liquid
+  if columns_mobile == blank
+    assign columns_mobile = 2
+  endif
+  if columns_desktop == blank
+    assign columns_desktop = 4
+  endif
+-%}
+
+{% if title != blank %}
+  <div class="mb-6">
+    <h2 class="text-h2 text-fg">{{ title }}</h2>
+  </div>
+{% endif %}
+
+<div>
+  <ul class="grid grid-cols-{{ columns_mobile }} lg:grid-cols-{{ columns_desktop }} gap-1">
+    {%- for product in products limit: limit -%}
+      <li>{% render 'product-card', product: product, collection: collection %}</li>
+    {%- endfor -%}
+  </ul>
+</div>

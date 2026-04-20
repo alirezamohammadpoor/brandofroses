@@ -1,0 +1,29 @@
+table {
+  @apply w-full max-w-full bg-transparent border-spacing-0;
+
+  /* Override any styles that get set from Shopify WYSIWYG */
+  tr, td {
+    height: auto !important;
+    width: auto !important;
+  }
+
+  td, th {
+    @apply border-b py-3 px-1;
+  }
+
+  tr:last-child td {
+    @apply border-b-0;
+  }
+
+  th {
+    @apply align-bottom;
+  }
+
+  td {
+    @apply align-top;
+  }
+
+  tfoot tr:first-child td {
+    @apply border-t pt-12;
+  }
+}

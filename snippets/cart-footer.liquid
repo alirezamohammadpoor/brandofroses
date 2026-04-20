@@ -1,0 +1,34 @@
+{% doc %}
+
+  Cart Footer
+  ------------------------------------------------------------------------------
+
+  Renders the sticky footer of the ajax cart (subtotal and checkout button).
+  Reads strings from locale; takes no params.
+
+  @example
+    {% render 'cart-footer' %}
+{% enddoc %}
+
+<div
+  class="ajax-cart__footer"
+  data-component="cart-footer"
+>
+  <div class="flex justify-between items-center text-[12px] text-muted">
+    <span>{{ 'ajax_cart.general.shipping' | t }}</span>
+    <span>{{ 'ajax_cart.general.calculated_in_checkout' | t }}</span>
+  </div>
+
+  <div class="flex justify-between items-center text-[12px] text-fg">
+    <span>{{ 'ajax_cart.general.total_value' | t }}</span>
+    <span data-subtotal-price>{{ cart.items_subtotal_price | money_without_trailing_zeros }}</span>
+  </div>
+
+  <button
+    type="submit"
+    name="checkout"
+    class="w-full h-12 bg-fg text-bg text-[12px] font-medium flex items-center justify-center mt-1"
+  >
+    {{ 'ajax_cart.general.checkout' | t }}
+  </button>
+</div>

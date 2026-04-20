@@ -1,0 +1,122 @@
+{%- comment -%}
+  Journal Featured
+  Pulls latest articles from a blog and displays them in a horizontal scroll (mobile) / grid (desktop).
+  Reuses article-card snippet.
+{%- endcomment -%}
+
+{%- liquid
+  assign selected_blog = section.settings.blog
+  if selected_blog == blank
+    assign selected_blog = blogs['journal']
+  endif
+-%}
+
+{% if selected_blog and selected_blog.articles_count > 0 %}
+  <section class="px-2 py-6 lg:py-10" data-section-id="{{ section.id }}">
+    {% if section.settings.title != blank or section.settings.subtitle != blank %}
+      <div class="flex items-center justify-between mb-4">
+        {% if section.settings.title != blank %}
+          <h3 class="text-h3 text-fg">{{ section.settings.title }}</h3>
+        {% endif %}
+        {% if section.settings.subtitle != blank %}
+          <a href="{{ selected_blog.url }}" class="text-label text-fg">{{ section.settings.subtitle }}</a>
+        {% endif %}
+      </div>
+    {% endif %}
+
+    <div class="flex gap-4 overflow-x-auto snap-x snap-mandatory no-scrollbar lg:grid lg:grid-cols-{{ section.settings.limit | at_most: 4 }} lg:overflow-visible">
+      {% for article in selected_blog.articles limit: section.settings.limit %}
+        <div class="w-[70%] shrink-0 snap-start lg:w-auto lg:shrink">
+          <article class="flex h-full flex-col gap-y-3">
+            <a href="{{ article.url }}" title="{{ article.title | escape }}">
+              <div class="relative aspect-[2/3] overflow-hidden bg-[#E8E5E0]">
+                {% if article.image != blank %}
+                  <img
+                    src="{{ article.image | image_url: width: 900 }}"
+                    alt="{{ article.image.alt | default: article.title | escape }}"
+                    loading="lazy"
+                    width="{{ article.image.width }}"
+                    height="{{ article.image.height }}"
+                    class="h-full w-full object-cover"
+                  >
+                {% endif %}
+              </div>
+            </a>
+
+            <div class="flex grow flex-col gap-y-2">
+              <a href="{{ article.url }}" title="{{ article.title | escape }}">
+                <h3 class="text-h3 text-fg">{{ article.title }}</h3>
+              </a>
+
+              {% if section.settings.show_excerpt and article.excerpt_or_content != blank %}
+                <p class="text-[12px] text-fg line-clamp-2">
+                  {{ article.excerpt_or_content | strip_html | truncate: 160 }}
+                </p>
+              {% endif %}
+
+              {% if section.settings.show_tags and article.tags.size > 0 %}
+                <div class="mt-auto pt-4 flex flex-wrap gap-x-3 gap-y-1">
+                  {% for tag in article.tags %}
+                    <a href="{{ selected_blog.url }}/tagged/{{ tag | handleize }}" class="text-label text-muted">
+                      {{ tag }}
+                    </a>
+                  {% endfor %}
+                </div>
+              {% endif %}
+            </div>
+          </article>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+{% endif %}
+
+{% schema %}
+{
+  "name": "Journal Featured",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title",
+      "default": "Journal"
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "Right side link text",
+      "default": "View all"
+    },
+    {
+      "type": "blog",
+      "id": "blog",
+      "label": "Blog"
+    },
+    {
+      "type": "range",
+      "id": "limit",
+      "label": "Articles to show",
+      "min": 2,
+      "max": 4,
+      "default": 4
+    },
+    {
+      "type": "checkbox",
+      "id": "show_excerpt",
+      "label": "Show excerpts",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_tags",
+      "label": "Show tags",
+      "default": true
+    }
+  ],
+  "presets": [
+    {
+      "name": "Journal Featured"
+    }
+  ]
+}
+{% endschema %}

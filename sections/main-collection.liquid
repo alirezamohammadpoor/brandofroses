@@ -1,0 +1,237 @@
+{%- comment %}
+
+  Collection Main Section
+  ------------------------------------------------------------------------------
+  Hero + filter bar + product grid.
+  Products rendered in 4-product rows using limit/offset.
+  Editorial images inserted between rows, alternating left/right on desktop.
+  results-display always mounted for JS compatibility.
+
+{% endcomment -%}
+
+{% paginate collection.products by 12 %}
+
+{%- liquid
+  assign current_page = paginate.current_page
+  assign hero_image = section.settings.hero_image | default: collection.image
+  assign total_products = collection.products.size
+
+  comment
+    Count editorial blocks with images
+  endcomment
+  assign editorial_count = 0
+  for block in section.blocks
+    if block.type == 'editorial' and block.settings.image != blank
+      assign editorial_count = editorial_count | plus: 1
+    endif
+  endfor
+
+  comment
+    Calculate how many 4-product rows we have
+  endcomment
+  assign row_count = total_products | divided_by: 4
+  assign remainder = total_products | modulo: 4
+  if remainder > 0
+    assign row_count = row_count | plus: 1
+  endif
+-%}
+
+<div data-section-id="{{ section.id }}" data-section-type="collection">
+
+  {%- comment -%} ===== HERO (page 1 only) ===== {%- endcomment -%}
+  {% if current_page == 1 and section.settings.show_hero %}
+    <div class="flex flex-col gap-4 px-2 py-10 lg:flex-row lg:items-stretch lg:gap-0 lg:py-16 lg:px-2">
+      <div class="flex flex-col gap-4 lg:w-1/2 lg:pr-2">
+        <h1 class="text-h2 font-light text-fg">{{ collection.title }}</h1>
+        {% if collection.description != blank %}
+          <p class="text-body text-fg lg:text-muted max-w-[300px] lg:max-w-[400px]">
+            {{ collection.description }}
+          </p>
+        {% endif %}
+      </div>
+      {% if hero_image %}
+        <div class="w-full overflow-hidden bg-[#d9d4cc] lg:w-1/2 lg:h-auto">
+          {{ hero_image
+            | image_url: width: 1440
+            | image_tag:
+              loading: 'eager',
+              class: 'w-full h-full object-cover lazy-image',
+              sizes: '(max-width: 1023.98px) 100vw, 50vw'
+          }}
+        </div>
+      {% endif %}
+    </div>
+  {% endif %}
+
+  {%- comment -%} ===== PRODUCT COUNT (page 1 only) ===== {%- endcomment -%}
+  {% if current_page == 1 %}
+    <div class="flex justify-end items-center px-2 py-6 lg:py-8">
+      <span class="text-[12px] text-fg lg:text-muted">
+        {{ collection.products_count }} {{ 'collections.general.products' | t | default: 'products' }}
+      </span>
+    </div>
+  {% endif %}
+
+  {%- comment -%} ===== STRUCTURED GRID (page 1) ===== {%- endcomment -%}
+  {% if current_page == 1 and total_products > 0 %}
+    <div class="flex flex-col gap-8 px-2 lg:gap-10">
+
+      {%- comment -%} === ROW 1: first 4 products (always plain 4-col) === {%- endcomment -%}
+      <ul class="grid grid-cols-2 lg:grid-cols-4 gap-1">
+        {% for product in collection.products limit: 4 %}
+          <li>{% render 'product-card', product: product, loading: 'eager', collection: collection %}</li>
+        {% endfor %}
+      </ul>
+
+      {%- comment -%} === ROW 2: editorial[0] + products 5-8 === {%- endcomment -%}
+      {% if total_products > 4 %}
+        {% if editorial_count > 0 %}
+          {%- assign ed_block = section.blocks[0] -%}
+          {%- assign ed_link = ed_block.settings.product.url | default: '' -%}
+          {%- comment -%} Mobile: editorial then grid {%- endcomment -%}
+          <div class="lg:hidden flex flex-col gap-1">
+            {% if ed_link != blank %}<a href="{{ ed_link }}" class="block">{% endif %}
+            <div class="w-full h-[80dvh] overflow-hidden bg-[#d9d4cc]">
+              {{ ed_block.settings.image | image_url: width: 780 | image_tag: loading: 'lazy', class: 'w-full h-full object-cover lazy-image', sizes: '100vw' }}
+            </div>
+            {% if ed_link != blank %}</a>{% endif %}
+            <ul class="grid grid-cols-2 gap-1">
+              {% for product in collection.products limit: 4 offset: 4 %}
+                <li>{% render 'product-card', product: product, loading: 'eager', collection: collection %}</li>
+              {% endfor %}
+            </ul>
+          </div>
+          {%- comment -%} Desktop: image LEFT, products RIGHT — stretches to match 2×2 grid {%- endcomment -%}
+          <div class="hidden lg:flex lg:items-stretch lg:gap-1">
+            {% if ed_link != blank %}<a href="{{ ed_link }}" class="w-1/2 shrink-0">{% endif %}
+            <div class="{% if ed_link == blank %}w-1/2 shrink-0{% endif %} overflow-hidden bg-[#d9d4cc] h-full">
+              {{ ed_block.settings.image | image_url: width: 1420 | image_tag: loading: 'lazy', class: 'w-full h-full object-cover lazy-image', sizes: '50vw' }}
+            </div>
+            {% if ed_link != blank %}</a>{% endif %}
+            <ul class="flex-1 grid grid-cols-2 gap-1">
+              {% for product in collection.products limit: 4 offset: 4 %}
+                <li>{% render 'product-card', product: product, loading: 'eager', collection: collection %}</li>
+              {% endfor %}
+            </ul>
+          </div>
+        {% else %}
+          <ul class="grid grid-cols-2 lg:grid-cols-4 gap-1">
+            {% for product in collection.products limit: 4 offset: 4 %}
+              <li>{% render 'product-card', product: product, loading: 'eager', collection: collection %}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      {% endif %}
+
+      {%- comment -%} === ROW 3: editorial[1] + products 9-12 === {%- endcomment -%}
+      {% if total_products > 8 %}
+        {% if editorial_count > 1 %}
+          {%- assign ed_block = section.blocks[1] -%}
+          {%- assign ed_link = ed_block.settings.product.url | default: '' -%}
+          {%- comment -%} Mobile: editorial then grid {%- endcomment -%}
+          <div class="lg:hidden flex flex-col gap-1">
+            {% if ed_link != blank %}<a href="{{ ed_link }}" class="block">{% endif %}
+            <div class="w-full h-[80dvh] overflow-hidden bg-[#d9d4cc]">
+              {{ ed_block.settings.image | image_url: width: 780 | image_tag: loading: 'lazy', class: 'w-full h-full object-cover lazy-image', sizes: '100vw' }}
+            </div>
+            {% if ed_link != blank %}</a>{% endif %}
+            <ul class="grid grid-cols-2 gap-1">
+              {% for product in collection.products limit: 4 offset: 8 %}
+                <li>{% render 'product-card', product: product, collection: collection %}</li>
+              {% endfor %}
+            </ul>
+          </div>
+          {%- comment -%} Desktop: products LEFT, image RIGHT — stretches to match 2×2 grid {%- endcomment -%}
+          <div class="hidden lg:flex lg:items-stretch lg:gap-1">
+            <ul class="flex-1 grid grid-cols-2 gap-1">
+              {% for product in collection.products limit: 4 offset: 8 %}
+                <li>{% render 'product-card', product: product, collection: collection %}</li>
+              {% endfor %}
+            </ul>
+            {% if ed_link != blank %}<a href="{{ ed_link }}" class="w-1/2 shrink-0">{% endif %}
+            <div class="{% if ed_link == blank %}w-1/2 shrink-0{% endif %} overflow-hidden bg-[#d9d4cc] h-full">
+              {{ ed_block.settings.image | image_url: width: 1420 | image_tag: loading: 'lazy', class: 'w-full h-full object-cover lazy-image', sizes: '50vw' }}
+            </div>
+            {% if ed_link != blank %}</a>{% endif %}
+          </div>
+        {% else %}
+          <ul class="grid grid-cols-2 lg:grid-cols-4 gap-1">
+            {% for product in collection.products limit: 4 offset: 8 %}
+              <li>{% render 'product-card', product: product, collection: collection %}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      {% endif %}
+
+    </div>
+
+  {% elsif current_page == 1 and total_products == 0 %}
+    <p class="text-center text-[12px] text-muted py-10 px-2">Nothing found.</p>
+  {% endif %}
+
+  {%- comment -%} ===== RESULTS DISPLAY (always mounted) ===== {%- endcomment -%}
+  <div
+    class="results-display px-2 mt-4"
+    data-component="results-display"
+  >
+    <ul class="grid grid-cols-2 lg:grid-cols-4 gap-1">
+      {% if current_page > 1 %}
+        {% for product in collection.products %}
+          <li>{% render 'product-card', product: product, collection: collection %}</li>
+        {% endfor %}
+      {% endif %}
+    </ul>
+
+    {% if paginate.next %}
+      <a
+        href="{{- paginate.next.url -}}"
+        class="h-0 w-0 overflow-hidden opacity-0"
+        aria-hidden="true"
+        data-more
+      >
+        Load more
+      </a>
+    {% endif %}
+  </div>
+
+</div>
+
+{% endpaginate %}
+
+{% schema %}
+{
+  "name": "Collection - Main",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_hero",
+      "label": "Show hero section",
+      "default": true
+    },
+    {
+      "type": "image_picker",
+      "id": "hero_image",
+      "label": "Hero editorial image",
+      "info": "Falls back to collection image if not set"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "editorial",
+      "name": "Editorial Image",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "product",
+          "id": "product",
+          "label": "Link to product"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

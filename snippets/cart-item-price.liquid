@@ -1,0 +1,43 @@
+{% doc %}
+  
+  Cart Item Price
+  ------------------------------------------------------------------------------
+
+  This displays the price of the cart item.
+
+  Note: This displays the price of the item, not the final price "of all of the items in the line item".
+
+  See: https://shopify.dev/docs/api/liquid/objects/line_item  
+
+  @param {object} item - The cart line_item object
+
+  @example
+    {% render 'cart-item-price', item: item %}
+{% enddoc %}
+
+{% if item != empty %}
+  <div data-price>
+    {% if item.variant.compare_at_price and item.variant.compare_at_price > item.final_price %}
+      <span>
+        <span class="sr-only">
+          {{ 'products.product.price.regular_price' | t }}
+        </span>
+        <s class="opacity-50" aria-hidden="true">{{ item.variant.compare_at_price | money_without_trailing_zeros }}</s>
+      </span>
+    {% elsif item.original_price != item.final_price %}
+      <span>
+        <span class="sr-only">
+          {{ 'products.product.price.regular_price' | t }}
+        </span>
+        <s aria-hidden="true">{{ item.original_price | money_without_trailing_zeros }}</s>
+      </span>
+    {% endif %}
+
+    <span>
+      <span class="sr-only">
+        {{ 'products.product.price.price' | t }}
+      </span>
+      <span>{{ item.final_price | money_without_trailing_zeros }}</span>
+    </span>
+  </div>
+{% endif %}

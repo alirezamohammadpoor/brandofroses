@@ -1,0 +1,52 @@
+{% doc %}
+  Product Gallery Slideshow
+  ====================================
+
+  @param {string} slides - The slides to display - required
+  @param {number} slides_count - The total number of slides - required
+
+  @example
+    {% render 'product-gallery-slideshow', slides: slides, slides_count: slides_count %}
+{% enddoc %}
+
+<div class="product-detail-gallery__slideshow relative">
+  <div class="embla">
+    <div class="embla__viewport">
+      <div class="embla__container" aria-live="polite">
+        {{ slides }}
+      </div>
+    </div>
+
+    {%- comment -%} A11y pagination — sr-only, updated by existing JS {%- endcomment -%}
+    <div class="sr-only" data-pagination aria-hidden="true"></div>
+
+    {%- comment -%} Visual dot pagination — bottom-left of image {%- endcomment -%}
+    {% if slides_count > 1 %}
+      <div class="absolute bottom-3 left-4 flex items-center gap-2" data-dots aria-hidden="true">
+        {% for i in (1..slides_count) %}
+          <span
+            class="block w-1.5 h-1.5 {% if forloop.first %}bg-fg{% else %}bg-muted{% endif %}"
+            data-dot="{{ forloop.index0 }}"
+          ></span>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {%- comment -%} Prev/Next buttons — visible on keyboard focus only {%- endcomment -%}
+    {% if slides_count > 1 %}
+      <button
+        type="button"
+        class="sr-only focus:not-sr-only focus:absolute focus:left-3 focus:top-1/2 focus:-translate-y-1/2 focus:bg-bg focus:text-fg focus:px-3 focus:py-2 focus:text-[12px] focus:border focus:border-fg"
+        aria-label="{{ 'products.product.previous_image' | t }}"
+        data-previous
+      >{{ 'products.product.previous_image_short' | t }}</button>
+      <button
+        type="button"
+        class="sr-only focus:not-sr-only focus:absolute focus:right-3 focus:top-1/2 focus:-translate-y-1/2 focus:bg-bg focus:text-fg focus:px-3 focus:py-2 focus:text-[12px] focus:border focus:border-fg"
+        aria-label="{{ 'products.product.next_image' | t }}"
+        data-next
+      >{{ 'products.product.next_image_short' | t }}</button>
+    {% endif %}
+  </div>
+
+</div>

@@ -1,0 +1,69 @@
+{% doc %}
+  LiteCart JSON response used by cartAPI.js
+
+  - Any changes to this file should be reflected in the 'LiteCart' type in @/types/shopify.ts
+  - see: https://shopify.dev/docs/api/liquid/objects/cart
+
+  @example
+    {% render 'cart-json' %}
+{% enddoc %}
+
+{
+  "total_price": {{ cart.total_price }},
+  "total_price_formatted": {{ cart.total_price | money_without_trailing_zeros | json }},
+  "original_total_price": {{ cart.original_total_price }},
+  "original_total_price_formatted": {{ cart.original_total_price | money_without_trailing_zeros | json }},
+  "items_subtotal_price": {{ cart.items_subtotal_price | json }},
+  "items_subtotal_price_formatted": {{ cart.items_subtotal_price | money_without_trailing_zeros | json }},
+  "item_count": {{ cart.item_count }},
+  "items" : [
+    {% for item in cart.items %}
+      {%- liquid
+        assign product = item.product
+        assign variant = item.variant
+
+        capture item_html
+          render 'cart-item', item: item
+        endcapture
+
+        capture item_price_html
+          render 'cart-item-price', item: item
+        endcapture        
+      -%}
+
+      {
+        "id": {{ item.id | json }},
+        "key": {{ item.key | json }},
+        "index": {{ item.index | json }}, {% comment %} NOTE: This is not a documented property {% endcomment %}
+        "title": {{ item.title | json }},
+        "price": {{ item.price }},
+        "final_line_price": {{ item.final_line_price }},
+        "original_line_price": {{ item.original_line_price }},
+        "original_price": {{ item.original_price }},
+        "quantity": {{ item.quantity }},
+        "sku": {{ item.sku | json }},
+        "vendor": {{ item.vendor | json }},
+        "properties": {
+          {% for property in item.properties %}
+            {{ property.first | json }}: {{ property.last | json }}
+            {% unless forloop.last %},{% endunless %}
+          {% endfor %}
+        },
+        "variant_id": {{ item.variant_id | json }},
+        "url": {{ item.url | json }},
+        "image": {{ item.image | json }},
+        "handle": {{ product.handle | json }},
+        "product_title": {{ product.title | json }},
+        "variant_title": {{ variant.title | json }},
+        "variant_options": [
+          {% if variant.option1 != blank %}{{ variant.option1 | json }}{% endif %}
+          {% if variant.option2 != blank %}, {{ variant.option2 | json }}{% endif %}
+          {% if variant.option3 != blank %}, {{ variant.option3 | json }}{% endif %}
+        ],
+        {% comment %} Additional fields below here {% endcomment %}
+        "item_html": {{ item_html | strip_newlines | strip | json }},
+        "item_price_html": {{ item_price_html | strip_newlines | strip | json }}
+      }{% unless forloop.last %},{% endunless %}
+    {% endfor %}
+  ]
+}

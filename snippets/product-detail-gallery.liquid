@@ -1,0 +1,166 @@
+{% doc %}
+  Product Detail Gallery
+  ====================================
+
+  @param {object} product - The product to display - required
+  @param {object} [current_variant] - The current variant to display - optional
+
+  @example
+    {% render 'product-detail-gallery', product: product, current_variant: product.variants[1] %}
+{% enddoc %}
+
+{%- liquid
+  assign current_variant = current_variant | default: product.selected_or_first_available_variant
+
+  comment
+    This block of logic loops through all product images and checks if we have at least 1 with valid alt text for *each* color option.
+  endcomment
+  assign color_galleries_possible = false
+
+  for option in product.options_with_values
+    assign option_name_upcase = option.name | upcase
+
+    if option_name_upcase == 'COLOR'
+      assign colors_with_images = 0
+
+      for color in option.values
+        assign color_upcase = color | upcase
+
+        for image in product.images
+          assign image_alt_upcase = image.alt | upcase
+
+          if image_alt_upcase == color_upcase
+            assign colors_with_images = colors_with_images | plus: 1
+            break
+          endif
+        endfor
+      endfor
+
+      if colors_with_images == option.values.size
+        assign color_galleries_possible = true
+      endif
+    endif
+  endfor
+%}
+
+{% comment %} If possible, make a gallery for each color option value {% endcomment %}
+{% if color_galleries_possible %}
+  {% for option in product.options_with_values %}
+    {% assign option_name_upcase = option.name | upcase %}
+    {% assign option_position_label = 'option' | append: option.position %}
+
+    {% if option_name_upcase == "COLOR" %}
+      {% for color in option.values %}
+        {%- liquid
+          assign color_upcase = color | upcase
+          assign list_items = ''
+          assign slides = ''
+          assign slides_count = 0
+          assign is_active = false
+
+          if current_variant[option_position_label] == color
+            assign is_active = true
+          endif
+
+          for image in product.images
+            assign image_alt_upcase = image.alt | upcase
+            assign loading = 'lazy'
+
+            if image_alt_upcase == color_upcase
+              assign fp = nil
+              if slides_count == 0 and is_active
+                assign loading = 'eager'
+                assign fp = 'high'
+              endif
+
+              capture list_item
+                render 'product-detail-gallery-item', image: image, loading: loading
+              endcapture
+
+              capture slide
+                render 'product-detail-gallery-slide', image: image, loading: loading, fetch_priority: fp
+              endcapture
+
+              assign list_items = list_items | append: list_item
+              assign slides = slides | append: slide
+              assign slides_count = slides_count | plus: 1
+            endif
+          endfor
+        -%}
+
+        <div
+          class="product-detail-gallery transition-opacity duration-500"
+          {% if is_active %}
+            aria-current="true"
+          {% endif %}
+          data-component="product-detail-gallery"
+          data-product-title="{{ product.title | escape }}"
+          data-color="{{ color }}"
+          role="region"
+          aria-roledescription="carousel"
+          aria-label="{{ 'products.product.gallery_aria_label' | t: title: product.title, color: color }}"
+        >
+          {%- comment -%} Mobile: Embla carousel {%- endcomment -%}
+          <div class="lg:hidden">
+            {% render 'product-gallery-slideshow', slides: slides, slides_count: slides_count %}
+          </div>
+
+          {%- comment -%} Desktop: stacked vertical scroll {%- endcomment -%}
+          <div class="hidden lg:flex lg:flex-col lg:gap-1">
+            {{ list_items }}
+          </div>
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endfor %}
+{% else %}
+  {%- liquid
+    comment
+      Make one gallery for all colors ....
+    endcomment
+
+    assign list_items = ''
+    assign slides = ''
+    assign slides_count = 0
+
+    for image in product.images
+      assign loading = 'lazy'
+
+      if forloop.first
+        assign loading = 'eager'
+      endif
+
+      capture list_item
+        render 'product-detail-gallery-item', image: image, loading: loading
+      endcapture
+
+      capture slide
+        render 'product-detail-gallery-slide', image: image, loading: loading
+      endcapture
+
+      assign list_items = list_items | append: list_item
+      assign slides = slides | append: slide
+      assign slides_count = slides_count | plus: 1
+    endfor
+  -%}
+
+  <div
+    class="product-detail-gallery"
+    aria-current="true"
+    data-component="product-detail-gallery"
+    data-product-title="{{ product.title | escape }}"
+    role="region"
+    aria-roledescription="carousel"
+    aria-label="{{ 'products.product.gallery_aria_label_single' | t: title: product.title }}"
+  >
+    {%- comment -%} Mobile: Embla carousel {%- endcomment -%}
+    <div class="lg:hidden">
+      {% render 'product-gallery-slideshow', slides: slides, slides_count: slides_count %}
+    </div>
+
+    {%- comment -%} Desktop: stacked vertical scroll {%- endcomment -%}
+    <div class="hidden lg:flex lg:flex-col lg:gap-1">
+      {{ list_items }}
+    </div>
+  </div>
+{% endif %}

@@ -1,0 +1,51 @@
+{%- comment %}
+
+  Currency Selector (Visual Only)
+  ------------------------------------------------------------------------------
+
+  Usage:
+
+  {% render 'currency-selector',
+             style: 'header' | 'mobile' | 'footer'
+  %}
+
+{% endcomment -%}
+
+{% if settings.show_currency_selector %}
+  {%- liquid
+    assign currencies = settings.currency_options | default: 'SEK,EUR,USD,GBP' | split: ','
+    assign default_currency = currencies | first | strip
+  -%}
+
+  <div
+    class="relative"
+    data-component="currency-selector"
+    data-currencies="{{ settings.currency_options | default: 'SEK,EUR,USD,GBP' }}"
+  >
+    <button
+      class="{% if style == 'header' %}text-[12px] text-fg{% elsif style == 'mobile' %}text-[12px] text-muted uppercase tracking-[0.96px] leading-[16px]{% else %}text-label text-muted{% endif %}"
+      data-currency-toggle
+      aria-expanded="false"
+      aria-haspopup="listbox"
+    >
+      <span data-currency-label>{{ default_currency | strip }}</span>
+    </button>
+
+    <div
+      class="absolute {% if style == 'mobile' %}bottom-full left-0 mb-2{% elsif style == 'footer' %}bottom-full left-0 mb-2{% else %}top-full right-0 mt-2{% endif %} bg-bg border border-fg/10 py-2 opacity-0 pointer-events-none transition-opacity duration-200 z-50"
+      data-currency-dropdown
+      role="listbox"
+    >
+      {% for currency in currencies %}
+        {%- assign currency_stripped = currency | strip -%}
+        <button
+          class="block w-full px-4 py-1 text-left text-[12px] text-muted hover:text-fg transition-colors"
+          data-currency-option="{{ currency_stripped }}"
+          role="option"
+        >
+          {{ currency_stripped }}
+        </button>
+      {% endfor %}
+    </div>
+  </div>
+{% endif %}

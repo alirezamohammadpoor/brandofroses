@@ -1,0 +1,45 @@
+{% doc %}
+  Product Scroll
+  ------------------------------------------------------------------------------
+  Horizontal scrolling product card strip. Reusable across sections.
+
+  @param {object} products - Collection of products to display - required
+  @param {string} [title] - Optional heading text
+  @param {number} [limit] - Maximum products to show - defaults to 6
+  @param {object} [collection] - Optional collection context forwarded to each product-card
+
+  @example
+    {% render 'product-scroll',
+               products: collection.products,
+               title: 'You may also like',
+               limit: 6
+    %}
+{% enddoc %}
+
+{%- liquid
+  if limit == blank
+    assign limit = 6
+  endif
+-%}
+
+{%- assign scroll_label = title | default: 'products.product.scroll_default_label' | t -%}
+<section
+  data-component="scroll-section"
+  aria-label="{{ scroll_label }}"
+>
+  {% if title != blank %}
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-h3 text-fg">{{ title }}</h3>
+
+      {% render 'scroll-arrows' %}
+    </div>
+  {% endif %}
+
+  <div class="flex gap-1 overflow-x-auto overflow-y-hidden snap-x snap-mandatory no-scrollbar" data-scroll-container>
+    {%- for product in products limit: limit -%}
+      <div class="w-[47%] lg:w-[calc(25%-6px)] shrink-0 snap-start">
+        {% render 'product-card', product: product, collection: collection %}
+      </div>
+    {%- endfor -%}
+  </div>
+</section>

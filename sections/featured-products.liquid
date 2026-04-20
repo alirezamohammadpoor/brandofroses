@@ -1,0 +1,109 @@
+{%- liquid
+  assign product_source = section.settings.collection.products
+
+  if section.settings.source == 'product_list'
+    assign product_source = section.settings.product_list
+  endif
+-%}
+
+<section
+  data-section-id="{{ section.id }}"
+  data-section-type="featured-products"
+  class="py-(--layout-padding-top)"
+>
+  <div class="px-2">
+    {% if section.settings.display == 'scroll' %}
+      {% render 'product-scroll',
+        products: product_source,
+        title: section.settings.title,
+        limit: section.settings.limit
+      %}
+    {% else %}
+      {% render 'product-grid',
+        products: product_source,
+        title: section.settings.title,
+        limit: section.settings.limit
+      %}
+    {% endif %}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Featured Products",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title",
+      "default": "New Arrivals"
+    },
+    {
+      "type": "header",
+      "content": "Products"
+    },
+    {
+      "type": "select",
+      "id": "display",
+      "label": "Display",
+      "options": [
+        {
+          "value": "grid",
+          "label": "Grid"
+        },
+        {
+          "value": "scroll",
+          "label": "Horizontal Scroll"
+        }
+      ],
+      "default": "scroll"
+    },
+    {
+      "type": "select",
+      "id": "source",
+      "label": "Source",
+      "options": [
+        {
+          "value": "collection",
+          "label": "Collection"
+        },
+        {
+          "value": "product_list",
+          "label": "Product List"
+        }
+      ],
+      "default": "collection"
+    },
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Collection"
+    },
+    {
+      "type": "product_list",
+      "id": "product_list",
+      "label": "Product List"
+    },
+    {
+      "type": "range",
+      "id": "limit",
+      "label": "Products to show",
+      "min": 2,
+      "max": 12,
+      "step": 1,
+      "default": 8
+    }
+  ],
+  "presets": [
+    {
+      "name": "Featured Products",
+      "settings": {
+        "title": "New Arrivals",
+        "source": "collection",
+        "display": "scroll",
+        "collection": "frontpage"
+      }
+    }
+  ]
+}
+{% endschema %}

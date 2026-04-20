@@ -1,0 +1,62 @@
+{%- comment -%}
+  Global scroll arrow handler — event delegation.
+  Include once on any page that uses scroll arrows.
+{%- endcomment -%}
+
+<script>
+  (function() {
+    if (window.__scrollArrowsInit) return;
+    window.__scrollArrowsInit = true;
+
+    const findContainer = (btn) => {
+      // Walk up to find a parent that contains both the button and a scroll container
+      let el = btn.parentElement;
+      while (el) {
+        const container = el.querySelector('[data-scroll-container]');
+        if (container) return container;
+        el = el.parentElement;
+      }
+      return null;
+    };
+
+    const findArrows = (container) => {
+      let el = container.parentElement;
+      while (el) {
+        const prev = el.querySelector('[data-scroll-prev]');
+        const next = el.querySelector('[data-scroll-next]');
+        if (prev && next) return { prev, next };
+        el = el.parentElement;
+      }
+      return {};
+    };
+
+    const updateColors = (container) => {
+      const { prev, next } = findArrows(container);
+      if (!prev || !next) return;
+      const atStart = container.scrollLeft <= 8;
+      const atEnd = container.scrollLeft + container.offsetWidth >= container.scrollWidth - 8;
+      prev.classList.toggle('text-muted', atStart);
+      prev.classList.toggle('text-fg', !atStart);
+      next.classList.toggle('text-muted', atEnd);
+      next.classList.toggle('text-fg', !atEnd);
+    };
+
+    document.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-scroll-prev], [data-scroll-next]');
+      if (!btn) return;
+      const container = findContainer(btn);
+      if (!container) return;
+      const isPrev = btn.hasAttribute('data-scroll-prev');
+      const firstCard = container.querySelector(':scope > *');
+      const amount = firstCard ? firstCard.offsetWidth + 8 : container.offsetWidth * 0.25;
+      container.scrollBy({ left: isPrev ? -amount : amount, behavior: 'smooth' });
+      setTimeout(() => updateColors(container), 350);
+    });
+
+    document.addEventListener('scroll', (e) => {
+      if (e.target?.hasAttribute?.('data-scroll-container')) {
+        updateColors(e.target);
+      }
+    }, true);
+  })();
+</script>

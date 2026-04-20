@@ -1,0 +1,86 @@
+{%- capture actions -%}
+  <div style="max-width: 625px; margin: 0 auto 40px">
+    {% render 'search-inline', id: 'main-search-inline', include_terms: true %}
+  </div>   
+{%- endcapture -%}
+
+{% paginate search.results by 12 %}
+
+<div data-section-id="{{ section.id }}" data-section-type="search">
+  <div class="container">
+    {% render 'section-header',
+              title: 'Search Our Site',
+              actions: actions,
+              title_tag: 'h1'
+    %}
+  </div>
+
+  <div class="container">
+    <div
+      class="results-display"
+      data-component="results-display"
+    >
+      <ul>
+        {% if search.performed %}
+          {% if search.results_count == 0 %}
+            <li class="col-span-full text-center">
+              <p>
+                Your search for "{{ search.terms | url_decode }}" did not yield any results.
+              </p>
+            </li>
+          {% else %}
+            {%- liquid
+              assign product_card_set_html = blank
+    
+              for item in search.results
+                assign loading = blank
+
+                if forloop.index <= 8
+                  assign loading = 'eager'
+                endif
+
+                if item.object_type == 'product'
+                  capture card_html
+                    echo '<li>'
+                      render 'product-card', product: item, loading: loading
+                    echo '</li>'
+                  endcapture
+    
+                  assign product_card_set_html = product_card_set_html | append: card_html
+
+                comment
+                elsif item.object_type == 'article'
+                  capture card_html
+                    echo '<div>'
+                      render 'article-card', article: item
+                    echo '</div>'
+                  endcapture
+    
+                  assign article_grid_html = article_grid_html | append: card_html
+                endcomment
+                endif
+              endfor
+            %}
+    
+            {% if product_card_set_html != blank %}
+              {{ product_card_set_html }}
+            {% endif %}
+          {% endif %}
+        {% endif %}
+      </ul>
+
+      {% if paginate.next %}
+        <a
+          href="{{- paginate.next.url -}}"
+          class="h-0 w-0 overflow-hidden opacity-0"
+          aria-hidden="true"
+          data-more
+        >
+          Load more
+        </a>
+      {% endif %}      
+    </div>  
+  </div>
+</div>
+
+{% endpaginate %}

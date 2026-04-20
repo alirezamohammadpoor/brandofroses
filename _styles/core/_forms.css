@@ -1,0 +1,265 @@
+label {
+  @apply inline-block;
+}
+
+/* Hide the cancel button on search inputs */
+input[type="search"]::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  appearance: none;
+  display: none;
+}
+
+input[type="search"] {
+  &::-webkit-search-decoration,
+  &::-webkit-search-results-button,
+  &::-webkit-search-results-decoration {
+    display: none;
+  }
+}
+
+/* Hide the up / down buttons on number inputs */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+/* Fix font size on form elements in iOS */
+@media screen and (-webkit-min-device-pixel-ratio: 0) and (max-device-width: 1024px) {
+  select,
+  textarea,
+  input {
+    font-size: 16px !important;
+  }
+}
+
+.form-group {
+  & + & {
+    @apply mt-4;
+  }
+
+  label {
+    @apply font-medium text-fg mb-1 text-sm;
+  }
+
+  .form-group__helper,
+  .form-group__error {
+    @apply block mt-1 text-sm;
+  }
+
+  .form-group__helper {
+    @apply text-muted;
+  }
+
+  .form-group__error {
+    @apply text-fg;
+  }  
+}
+
+/* This wraps the input, icon, etc. */
+/* Markup / styling is heavily inspired by -> https://primer.style/components/text-input/react/alpha */
+.form-control {
+  @apply relative w-full flex items-stretch gap-x-2 appearance-none overflow-hidden;
+  @apply border border-fg;
+  @apply text-fg;
+
+  transition-property: background-color, border-color, color;
+  transition-duration: 250ms;
+  transition-timing-function: ease;
+
+  /* Add hover states */
+  @apply hover:border-fg active:border-fg focus:border-fg;
+
+  /* When disabled... */
+  &:has([aria-disabled="true"]),
+  &:has([disabled]) {
+    @apply cursor-not-allowed;
+    @apply bg-muted/20;
+  }
+
+  &:focus-within {
+    @apply border-fg;
+  }
+
+  &:has(input:focus-visible),
+  &:has(select:focus-visible),
+  &:has(textarea:focus-visible) {
+    @apply outline-none; /* Applies outline-width and offset */
+    @apply outline-fg;
+
+    input {
+      @apply outline-none;
+    }    
+  }  
+
+  &:has([aria-invalid="true"]) {
+    @apply border-fg;
+  }
+
+  &:has(select) {
+    select {
+      @apply pr-8;
+      appearance: none; /* Hide the default browser icon */
+
+      &:not([disabled]) {
+        @apply cursor-pointer;
+      }
+    }
+
+    /* Uncomment to add an icon to the right of the select */
+    .form-control__affix:last-child {
+      @apply absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none;
+    }
+  }
+
+  &:has(textarea) {
+    .form-control__affix {
+      display: none !important;
+    }
+  }
+
+  input,
+  select,
+  textarea {
+    @apply w-full px-3 placeholder-muted;
+
+    &[aria-disabled="true"],
+    &[disabled] {
+      @apply cursor-not-allowed;
+    }
+  }
+
+  input,
+  select {
+    @apply h-8;
+  }
+
+  textarea {
+    @apply py-3;
+  }  
+}
+
+.form-control__affix {
+  @apply inline-flex items-center;
+
+  button {
+    @apply h-full;
+  }
+
+  &:first-child {
+    @apply pl-3 pr-0;
+  }
+
+  &:last-child {
+    @apply pr-3 pl-0;
+  }
+}
+
+
+
+/* Checkbox + Radio */
+.form-check {
+  display: block;
+  min-height: 1.5rem;
+  padding-left: 2.2em;
+
+  label {
+    margin-bottom: 0;
+  }
+
+  & + & {
+    margin-top: 0.5rem;
+  }
+}
+
+.form-check-input {
+  width: 20px;
+  height: 20px;
+  margin-top: 0.15em;
+  vertical-align: top;
+  background-color: var(--color-bg);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  border: 1px solid rgba(0,0,0,.25);
+  /* border: none; */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+
+  &[type="checkbox"] {
+    border-radius: 5px;
+  }
+
+  &[type="radio"] {
+    border-radius: 50%;
+    border: 1px solid var(--color-fg);
+  }
+
+  &:checked {
+    &[type="checkbox"] {
+      background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="12.584" height="10.259" viewBox="0 0 12.584 10.259"><path id="Path_1501" data-name="Path 1501" d="M37.724,283.022l-5.808,5.808L29.587,286.5l-1.516,1.514,2.327,2.328,0,0,1.514,1.517,7.33-7.327Z" transform="translate(-27.364 -282.314)" fill="%23295024" stroke="rgba(0,0,0,0)" stroke-miterlimit="10" stroke-width="1"/></svg>');
+      background-size: 70% 70%;
+      background-position: center;
+    }
+  }
+}
+
+.form-check .form-check-input {
+  float: left;
+  margin-left: -2.3em;
+}
+
+
+/* Quantity Adjuster */
+.quantity-adjuster {
+  @apply inline-flex items-center gap-2;
+
+  button,
+  input[type="number"] {
+    @apply bg-transparent outline-none;
+  }
+
+  button {
+    @apply inline-flex items-center justify-center text-[12px] text-muted;
+
+    &[disabled] {
+      @apply opacity-50;
+    }
+
+    svg {
+      width: 8px;
+      height: auto;
+    }
+  }
+
+  input[type="number"] {
+    @apply w-5 text-center appearance-none font-sans text-[14px] text-fg;
+  }
+}
+
+.composable-input {
+  position: relative;
+
+  label {
+    position: relative;
+    width: 100%;
+  }
+  
+  input[type="radio"],
+  input[type="checkbox"] {
+    @apply sr-only;
+  }
+
+  /* Child (input) elements are responsible for focus-visible styles */
+  &:focus-visible {
+    @apply outline-none;
+  }
+}
