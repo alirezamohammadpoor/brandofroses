@@ -73,12 +73,34 @@ Additional product-specific metafields the template assumes (opt in as needed):
 3. Confirm the `SHOPIFY_FLAG_STORE` env var in `.github/workflows/deploy-*.yml` matches the new store.
 4. Push `main` — the production workflow runs; push `staging` — staging workflow runs.
 
-### 7. Add branch protection (GitHub admin)
+### 7. Add branch protection (one command)
 
-Recreate the rulesets from the source project:
+Rulesets are kept in this repo as JSON at `.github/rulesets/`. Apply them to the new GitHub repo with:
 
-- **main ruleset:** Require PR before merging (0 approvals, merge-commit only), block force pushes, restrict deletions.
-- **staging ruleset:** Require PR before merging (0 approvals, squash-only), block force pushes, restrict deletions.
+```bash
+scripts/bootstrap-rulesets.sh <owner>/<repo>
+```
+
+This creates two rulesets (idempotent — re-running updates existing ones with the same name):
+
+| Name | Target | Allowed merge | Linear history | Block force push | Restrict deletions |
+|---|---|---|---|---|---|
+| `main-require-pr-from-staging` | `main` | merge commit only | off | ✓ | ✓ |
+| `staging-require-pr-from-feature` | `staging` | squash only | off | ✓ | ✓ |
+
+Requirements: `gh` CLI authenticated as a repo admin, `jq` on PATH.
+
+To customize rules for the new brand, edit the JSON files directly and re-run the script. To re-export live rulesets from GitHub back to JSON (after changes made in the UI):
+
+```bash
+gh api repos/<owner>/<repo>/rulesets \
+  | jq -r '.[] | .id' \
+  | while read id; do
+      gh api "repos/<owner>/<repo>/rulesets/$id" \
+        | jq 'del(.id, .source, .source_type, .node_id, ._links, .links, .created_at, .updated_at, .current_user_can_bypass)' \
+        > ".github/rulesets/$(gh api repos/<owner>/<repo>/rulesets/$id --jq '.name').json"
+    done
+```
 
 ## Development
 
