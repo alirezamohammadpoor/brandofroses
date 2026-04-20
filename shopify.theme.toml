@@ -10,8 +10,8 @@
 
 [environments.production]
 store = "brandofroses-2.myshopify.com"
-theme = "<live-theme-id>"
+theme = "200018919755"
 
 [environments.staging]
 store = "brandofroses-2.myshopify.com"
-theme = "<unpublished-staging-theme-id>"
+theme = "200020328779"
