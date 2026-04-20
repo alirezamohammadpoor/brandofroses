@@ -27,6 +27,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Build assets (Vite)
+        # Produces assets/app.bundle.{css,js} used by the theme.
+        # Building in CI guarantees deploy matches source, regardless of
+        # whether the committed bundles are up to date.
+        run: bun run build
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
