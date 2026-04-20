@@ -32,6 +32,17 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Install dependencies
+        # Use npm in CI — bun.lock is macOS-only (doesn't include Linux
+        # rollup binaries). Local dev still uses bun; scripts are identical.
+        run: npm install --no-audit --no-fund
+
+      - name: Build assets (Vite)
+        # Produces assets/app.bundle.{css,js} used by the theme.
+        # Building in CI guarantees deploy matches source, regardless of
+        # whether the committed bundles are up to date.
+        run: npm run build
+
       - name: Install Shopify CLI
         run: npm install -g @shopify/cli@latest
 

@@ -29,5 +29,8 @@
     "gsap": "^3.12.7",
     "lodash.debounce": "^4.0.8",
     "tailwindcss": "^4.1.17"
+  },
+  "optionalDependencies": {
+    "@rollup/rollup-linux-x64-gnu": "^4.52.4"
   }
 }
