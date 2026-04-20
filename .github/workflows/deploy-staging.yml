@@ -27,26 +27,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
-
-      - name: Install dependencies
-        # Not --frozen-lockfile: lockfile is macOS-generated and doesn't include
-        # Linux platform optional deps (e.g. @rollup/rollup-linux-x64-gnu).
-        run: bun install
-
-      - name: Build assets (Vite)
-        # Produces assets/app.bundle.{css,js} used by the theme.
-        # Building in CI guarantees deploy matches source, regardless of
-        # whether the committed bundles are up to date.
-        run: bun run build
-
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+
+      - name: Install dependencies
+        # Use npm in CI — bun.lock is macOS-only (doesn't include Linux
+        # rollup binaries). Local dev still uses bun; scripts are identical.
+        run: npm install --no-audit --no-fund
+
+      - name: Build assets (Vite)
+        run: npm run build
 
       - name: Install Shopify CLI
         run: npm install -g @shopify/cli@latest
