@@ -33,7 +33,11 @@ jobs:
           bun-version: latest
 
       - name: Install dependencies
-        run: bun install --frozen-lockfile
+        # Not --frozen-lockfile: lockfile is macOS-generated and doesn't include
+        # Linux platform optional deps (e.g. @rollup/rollup-linux-x64-gnu).
+        # bun install still respects pinned versions from the lockfile for
+        # regular deps; only platform-specific optional deps get resolved fresh.
+        run: bun install
 
       - name: Build assets (Vite)
         # Produces assets/app.bundle.{css,js} used by the theme.

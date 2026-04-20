@@ -29,7 +29,9 @@ jobs:
           bun-version: latest
 
       - name: Install dependencies
-        run: bun install --frozen-lockfile
+        # Not --frozen-lockfile: lockfile is macOS-generated and doesn't include
+        # Linux platform optional deps (e.g. @rollup/rollup-linux-x64-gnu).
+        run: bun install
 
       - name: Build (lint + typecheck + bundle)
         # Vite runs with vite-plugin-eslint; any ESLint error fails the build.
