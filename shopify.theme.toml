@@ -9,9 +9,9 @@
 # Docs: https://shopify.dev/docs/themes/tools/cli/environments
 
 [environments.production]
-store = "<your-store>.myshopify.com"
+store = "brandofroses-2.myshopify.com"
 theme = "<live-theme-id>"
 
 [environments.staging]
-store = "<your-store>.myshopify.com"
+store = "brandofroses-2.myshopify.com"
 theme = "<unpublished-staging-theme-id>"
