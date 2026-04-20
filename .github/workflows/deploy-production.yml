@@ -1,0 +1,58 @@
+name: Deploy theme (production)
+
+# Prerequisites:
+# - shopify.theme.toml has `[environments.production]` with `store` and `theme` set
+# - Repo secret SHOPIFY_CLI_THEME_TOKEN contains a Theme Access password
+#   generated via the "Theme Access" Shopify app
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: shopify-theme-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: shopify-production
+    env:
+      SHOPIFY_CLI_THEME_TOKEN: ${{ secrets.SHOPIFY_CLI_THEME_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        # No --frozen-lockfile: bun.lock is generated on macOS and doesn't
+        # record Linux platform optional deps. The required Linux rollup
+        # binary is declared explicitly in package.json optionalDependencies.
+        run: bun install
+
+      - name: Build assets (Vite)
+        # Produces assets/app.bundle.{css,js} used by the theme.
+        # Building in CI guarantees deploy matches source, regardless of
+        # whether the committed bundles are up to date.
+        run: bun run build
+
+      - name: Setup Node (for Shopify CLI)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Shopify CLI
+        run: npm install -g @shopify/cli@latest
+
+      - name: Push to live theme
+        # --allow-live is required when pushing to the published theme
+        # --nodelete preserves config/settings_data.json edits made in the admin
+        run: shopify theme push -e production --allow-live --nodelete --json

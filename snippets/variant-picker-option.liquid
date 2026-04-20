@@ -1,0 +1,146 @@
+{% doc %}
+
+  Variant Picker Option
+  ------------------------------------------------------------------------------
+
+  @param {object} option - The option to display
+  @param {object} product - The product object (for metafield access)
+  @param {string} [selection_type] - The type of selection to display
+
+  @example
+    {% render 'variant-picker-option', option: option, product: product, selection_type: 'select' %}
+{% enddoc %}
+
+{%- liquid
+  assign option_name_handle = option.name | handle
+  assign option_parent_id = 'vpo-' | append: option_name_handle | append: '-' | append: product.id
+  assign swatch_count = option.values | map: 'swatch' | compact | size
+  assign is_radio = false
+  assign is_size = false
+  assign is_color = false
+
+  if selection_type == 'radio'
+    assign is_radio = true
+  endif
+
+  if option_name_handle == 'size'
+    assign is_size = true
+  endif
+
+  if option_name_handle == 'color'
+    assign is_color = true
+  endif
+
+  comment
+    Size toggle data — shop-level metafields (one chart for all products)
+  endcomment
+  assign has_size_toggle = false
+  assign sizes_us = shop.metafields.custom.sizes_us.value
+  assign sizes_uk = shop.metafields.custom.sizes_uk.value
+
+  if is_size and sizes_us != blank and sizes_uk != blank
+    assign has_size_toggle = true
+  endif
+-%}
+
+{% capture option_values_content %}
+  {% if is_radio %}
+    <div class="{% if is_size %}grid grid-cols-6 auto-rows-[40px] gap-1{% else %}flex flex-wrap gap-1{% endif %}">
+      {%- for value in option.values -%}
+        {%- liquid
+          assign input_id = option_parent_id | append: forloop.index0
+        -%}
+
+        <div>
+          <input
+            type="radio"
+            id="{{ input_id }}"
+            name="{{ option.name | escape }}"
+            value="{{ value | escape }}"
+            aria-label="{{ value | escape }}"
+            class="sr-only peer"
+            {% if value.selected %}
+              checked
+            {% endif %}
+            {% if value.available != true %}
+              disabled
+              aria-disabled="true"
+            {% endif %}
+          >
+
+          <label for="{{ input_id }}" class="cursor-pointer{% if is_size %} block w-full text-[12px] text-center leading-[40px] peer-checked:border-b peer-checked:border-fg peer-disabled:opacity-40 peer-disabled:line-through{% endif %}">
+            {% if is_color and swatch_count > 0 and value.swatch %}
+              {% render 'swatch', option_value: value, swatch: value.swatch, variant_image: value.variant.featured_media, use_variant_image: false, extra_class: '!w-6 !h-6' %}
+            {% elsif is_size %}
+              <span data-size-eu>{{ value }}</span>
+              {% if has_size_toggle %}
+                <span data-size-us class="hidden">{{ sizes_us[forloop.index0] | default: value }}</span>
+                <span data-size-uk class="hidden">{{ sizes_uk[forloop.index0] | default: value }}</span>
+              {% endif %}
+            {% else %}
+              <span class="inline-block py-2 px-4 border border-fg text-[12px] leading-none cursor-pointer">
+                {{- value -}}
+              </span>
+            {% endif %}
+          </label>
+        </div>
+      {%- endfor -%}
+    </div>
+  {% else %}
+    <div class="form-control">
+      <select
+        id="{{ option_parent_id }}"
+        name="{{ option.name | escape }}"
+      >
+        {%- for value in option.values -%}
+          <option
+            value="{{ value | escape }}"
+            {% if value.selected %}
+              selected="selected"
+            {% endif %}
+            {% if value.available != true %}
+              disabled
+            {% endif %}
+          >
+            {{ value }}
+          </option>
+        {%- endfor -%}
+      </select>
+    </div>
+  {% endif %}
+{% endcapture %}
+
+<div
+  data-component="variant-picker-option"
+  data-name="{{ option.name }}"
+>
+  {% if is_radio %}
+    <fieldset>
+      <legend class="sr-only">{{ option.name }}</legend>
+      <div class="text-[12px] font-normal text-fg mb-3 flex items-center justify-between">
+        <span>{{ option.name }}{% if is_color %}: <span class="font-normal" data-selected-color>{{ option.selected_value }}</span>{% endif %}</span>
+
+        {%- comment -%} Size system toggle (EU/US/UK) {%- endcomment -%}
+        {% if is_size and has_size_toggle %}
+          <div class="flex items-center gap-3" data-size-toggle>
+            <button type="button" class="text-[12px] font-medium text-fg cursor-pointer" data-toggle-system="eu">EU</button>
+            <button type="button" class="text-[12px] font-normal text-muted cursor-pointer" data-toggle-system="us">US</button>
+            <button type="button" class="text-[12px] font-normal text-muted cursor-pointer" data-toggle-system="uk">UK</button>
+          </div>
+        {% endif %}
+      </div>
+
+      {{ option_values_content }}
+    </fieldset>
+
+    {%- comment -%} Color sync and size toggle behavior handled by TS component (variantPickerOption.ts) {%- endcomment -%}
+  {% else %}
+    <div>
+      <label for="{{ option_parent_id }}" class="text-[12px] font-normal text-fg mb-3 block">
+        {{ option.name }}
+      </label>
+
+      {{ option_values_content }}
+    </div>
+  {% endif %}
+</div>

@@ -1,0 +1,132 @@
+<div data-section-id="{{ section.id }}" data-section-type="mobile-menu">
+  <div
+    id="{{ section.id }}"
+    class="drawer"
+    data-component="mobile-menu-drawer"
+    aria-hidden="true"
+    role="dialog"
+    aria-label="Menu"
+    inert
+  >
+    <div
+      class="h-full flex flex-col overflow-y-scroll no-scrollbar"
+      data-scroller
+    >
+      {%- comment -%} Header: just Close top-left, same height/padding as main header {%- endcomment -%}
+      <div class="sticky top-0 bg-bg container flex items-center h-[var(--header-height)] z-10">
+        <button
+          class="text-[12px] text-fg"
+          data-close
+          aria-label="Close Menu"
+        >Close</button>
+      </div>
+
+      <div class="container pb-10">
+        {%- comment -%} Search — expandable bar {%- endcomment -%}
+        <div class="pt-5 pb-3">
+          <button type="button" class="text-[12px] text-fg leading-[22px]" data-search-toggle>Search</button>
+          <form action="{{ routes.search_url }}" method="get" class="hidden mt-3" data-search-form>
+            <input
+              type="search"
+              name="q"
+              placeholder="Search"
+              class="w-full border-b border-fg bg-transparent text-[14px] text-fg pb-2 placeholder-muted outline-none"
+              autocomplete="off"
+            >
+          </form>
+        </div>
+
+        {%- comment -%} Navigation — first top-level item's sub-links as standalone (Highlights) {%- endcomment -%}
+        {% if section.settings.primary_menu != blank %}
+          {% for link in section.settings.primary_menu.links %}
+            {% if forloop.first %}
+              {%- comment -%} First group: standalone bold links (New Arrivals, Shop All Shoes) {%- endcomment -%}
+              {% if link.links.size > 0 %}
+                <div class="flex flex-col gap-0.5 pb-5">
+                  {% for sublink in link.links %}
+                    <a href="{{ sublink.url }}" class="text-[12px] font-medium text-fg leading-[22px]">
+                      {{ sublink.title }}
+                    </a>
+                  {% endfor %}
+                </div>
+              {% endif %}
+            {% else %}
+              {%- comment -%} Category groups: muted heading + sub-links {%- endcomment -%}
+              {% assign link_handle = link.title | handle %}
+              {% if link_handle != 'info' %}
+                <div class="flex flex-col gap-0.5 pb-5">
+                  <span class="text-[12px] text-muted leading-[22px] mb-0.5">{{ link.title }}</span>
+                  {% if link.links.size > 0 %}
+                    {% for sublink in link.links %}
+                      <a href="{{ sublink.url }}" class="text-[12px] text-fg leading-[22px]">
+                        {{ sublink.title }}
+                      </a>
+                    {% endfor %}
+                  {% else %}
+                    <a href="{{ link.url }}" class="text-[12px] text-fg leading-[22px]">
+                      {{ link.title }}
+                    </a>
+                  {% endif %}
+                </div>
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+
+          {%- comment -%} Divider {%- endcomment -%}
+          <div class="border-t border-muted/30 my-6"></div>
+
+          {%- comment -%} Info/Secondary links {%- endcomment -%}
+          {% for link in section.settings.primary_menu.links %}
+            {% assign link_handle = link.title | handle %}
+            {% if link_handle == 'info' %}
+              <div class="flex flex-col gap-0.5 pb-5">
+                {% if link.links.size > 0 %}
+                  {% for sublink in link.links %}
+                    <a href="{{ sublink.url }}" class="text-[12px] text-fg leading-[22px]">
+                      {{ sublink.title }}
+                    </a>
+                  {% endfor %}
+                {% endif %}
+              </div>
+            {% endif %}
+          {% endfor %}
+        {% endif %}
+
+        {%- comment -%} Contact + locale {%- endcomment -%}
+        <div class="flex flex-col gap-2 pt-5">
+          <a href="mailto:shop@saniadmina.com" class="text-[12px] text-muted uppercase tracking-[0.96px] leading-[16px]">shop@saniadmina.com</a>
+          <a href="https://instagram.com" target="_blank" rel="noopener" class="text-[12px] text-muted uppercase tracking-[0.96px] leading-[16px]">Instagram</a>
+        </div>
+        <div class="pt-4">
+          {% render 'currency-selector', style: 'mobile' %}
+        </div>
+      </div>
+    </div>
+
+    {%- comment -%} Search component — required by MobileMenuDrawer JS {%- endcomment -%}
+    <div class="sr-only">
+      {%- liquid
+        assign id = section.id | append: '-search'
+        render 'search-inline', id: id
+      -%}
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Mobile Menu",
+  "settings": [
+    {
+      "type": "link_list",
+      "id": "primary_menu",
+      "label": "Primary Menu"
+    },
+    {
+      "type": "link_list",
+      "id": "secondary_menu",
+      "label": "Secondary Menu"
+    }
+  ]
+}
+{% endschema %}

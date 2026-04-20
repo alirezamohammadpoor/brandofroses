@@ -1,0 +1,55 @@
+{% # theme-check-disable RemoteAsset %}
+
+<!doctype html>
+<html class="no-js" lang="{{ request.locale.iso_code }}">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+
+    <link rel="canonical" href="{{ canonical_url }}">
+    <link rel="preconnect" href="https://cdn.shopify.com" crossorigin>
+
+    {% render 'head-favicon' %}
+    {% render 'head-meta-title' %}
+    {% render 'head-meta-tags' %}
+    {% render 'head-font-face' %}
+
+    {{ 'app.bundle.css' | asset_url | stylesheet_tag }}
+
+    {% render 'head-scripts' %}
+
+    {{ content_for_header }}
+  </head>
+
+  {% capture body_class %}
+    template-{{ template.name | handle }}
+    {% if template.suffix != blank %} template-{{ template.name | append: '-' | append: template.suffix | handle }} {% endif %}
+  {% endcapture %}
+
+  <body id="{{ page_title | handle }}" class="{{ body_class | strip | strip_newlines }}">
+    <a class="z-(--z-skip) sr-only focus:not-sr-only" href="#view-container">
+      {{ 'accessibility.skip_to_content' | t }}
+    </a>
+
+    {% section 'announcement-bar' %}
+    {% section 'header' %}
+    {% section 'mobile-menu' %}
+
+    <div class="flex flex-col">
+      <main id="view-container" class="min-h-[100lvh]" role="main" data-taxi>
+        <div data-taxi-view>
+          {{ content_for_layout }}
+        </div>
+      </main>
+
+      {% section 'footer' %}
+    </div>
+
+    {% section 'ajax-cart' %}
+
+    <ul hidden>
+      <li id="a11y-new-window-message">{{ 'accessibility.link_messages.new_window' | t }}</li>
+    </ul>
+  </body>
+</html>

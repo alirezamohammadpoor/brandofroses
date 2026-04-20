@@ -1,0 +1,141 @@
+<footer
+  class="footer"
+  data-section-id="{{ section.id }}"
+  data-section-type="footer"
+>
+  <div class="container py-10 lg:py-10">
+    <div class="flex flex-col gap-10 lg:flex-row lg:justify-between">
+      {%- comment -%} Left: links {%- endcomment -%}
+      <div class="flex flex-col gap-6 lg:flex-row lg:gap-20">
+        <div class="flex flex-col gap-1">
+          <span class="text-label text-fg">Customer Care</span>
+          <a href="mailto:{{ section.settings.email | default: shop.email }}" class="text-[14px] text-muted">
+            {{ section.settings.email | default: shop.email }}
+          </a>
+        </div>
+
+        {% for block in section.blocks %}
+          <div class="flex flex-col gap-1" {{ block.shopify_attributes }}>
+            <span class="text-label text-fg">
+              {{ block.settings.title }}
+            </span>
+
+            {%- if block.settings.menu != blank -%}
+              <nav aria-label="{{ block.settings.title }}">
+                <ul class="flex flex-col gap-1">
+                  {%- for link in block.settings.menu.links -%}
+                    <li>
+                      <a
+                        href="{{ link.url }}"
+                        class="text-[14px] text-muted"
+                        {% if link.current %}aria-current="page"{% endif %}
+                      >
+                        {{ link.title }}
+                      </a>
+                    </li>
+                  {%- endfor -%}
+                </ul>
+              </nav>
+            {%- endif -%}
+          </div>
+        {% endfor %}
+      </div>
+
+      {%- comment -%} Right: newsletter {%- endcomment -%}
+      <div class="w-full lg:w-[400px] shrink-0 flex flex-col gap-1">
+        <span class="text-label text-fg">Newsletter</span>
+        {% render 'newsletter-form', id_prefix: section.id, source: 'footer' %}
+      </div>
+    </div>
+
+    {%- comment -%} Copyright {%- endcomment -%}
+    {%- comment -%} Currency selector {%- endcomment -%}
+    <div class="mt-6">
+      {% render 'currency-selector', style: 'footer' %}
+    </div>
+
+    {% if section.settings.copyright_text != blank %}
+      {%- liquid
+        assign current_year = 'now' | date: '%Y'
+        assign shop_name = shop.name
+      %}
+      <div class="mt-10 text-[12px] text-muted">
+        {{ section.settings.copyright_text | replace: '$year', current_year | replace: '$shop', shop_name }}
+      </div>
+    {% endif %}
+
+  </div>
+
+  {%- comment -%} Payment icons {%- endcomment -%}
+  {% if section.settings.show_payment_icons %}
+    {% if shop.enabled_payment_types.size > 0 %}
+      <div class="flex items-center justify-center gap-3 pb-6 [&_svg]:h-5 [&_svg]:w-auto [&_svg]:opacity-100">
+        {% for type in shop.enabled_payment_types %}
+          {{ type | payment_type_svg_tag }}
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="flex items-center justify-center gap-3 pb-6 opacity-40">
+        <span class="text-label text-muted">Visa</span>
+        <span class="text-label text-muted">Mastercard</span>
+        <span class="text-label text-muted">Amex</span>
+        <span class="text-label text-muted">Klarna</span>
+      </div>
+    {% endif %}
+  {% endif %}
+
+  {%- comment -%} Large brand text — edge to edge; pulls from Shopify shop name {%- endcomment -%}
+  <div class="text-[15vw] font-light leading-none text-fg overflow-hidden text-center">
+    {{ shop.name | upcase }}
+  </div>
+</footer>
+
+{% schema %}
+{
+  "name": "Footer",
+  "max_blocks": 4,
+  "settings": [
+    {
+      "type": "text",
+      "id": "email",
+      "label": "Customer Care Email",
+      "info": "Leave blank to use the store email from Shopify settings."
+    },
+    {
+      "type": "header",
+      "content": "Copyright"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_payment_icons",
+      "label": "Show payment icons",
+      "default": true
+    },
+    {
+      "type": "textarea",
+      "id": "copyright_text",
+      "label": "Copyright Text",
+      "info": "Use $year for current year. Use $shop for shop name.",
+      "default": "© $year $shop"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "menu",
+      "name": "Menu",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title"
+        },
+        {
+          "type": "link_list",
+          "id": "menu",
+          "label": "Menu"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

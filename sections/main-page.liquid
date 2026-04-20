@@ -1,0 +1,12 @@
+<div class="container">
+  {% render 'section-header',
+            title: page.title,
+            title_tag: 'h1'
+  %}
+
+  <div class="mx-auto" style="max-width: 560px">
+    <div class="rte">
+      {{ page.content }}
+    </div>
+  </div>
+</div>

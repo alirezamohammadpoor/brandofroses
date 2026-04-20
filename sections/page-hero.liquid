@@ -1,0 +1,61 @@
+<div data-section-id="{{ section.id }}" data-section-type="page-hero">
+  <div class="relative h-[calc(100dvh-var(--chrome-height))] min-h-[500px] flex flex-col items-center justify-end pt-12 text-white">
+    {% render 'graphic-cover'
+                image: section.settings.image,
+                image_mobile: section.settings.image_mobile,
+                video: section.settings.video,
+                loading: 'eager',
+                fetch_priority: 'high'
+    %}
+
+    <div class="relative z-2 py-12">
+      {% if section.settings.title != blank %}
+        <h2 class="max-w-[7em] lg:max-w-[11em] mx-auto text-center">
+          {{ section.settings.title }}
+        </h2>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+{% schema %}
+  {
+    "name": "Page Hero",
+    "settings": [
+      {
+        "type": "header",
+        "content": "Graphic"
+      }, 
+      {
+        "type": "image_picker",
+        "id": "image",
+        "label": "Image"
+      },
+      {
+        "type": "image_picker",
+        "id": "image_mobile",
+        "label": "Image - Mobile",
+        "info": "Optional - If left blank, above image will be used"
+      },      
+      {
+        "type": "video",
+        "id": "video",
+        "label": "Video"
+      },      
+      {
+        "type": "header",
+        "content": "Content"
+      },
+      {
+        "type": "text",
+        "id": "title",
+        "label": "Title"
+      }
+    ],
+    "presets": [
+      {
+        "name": "Page Hero"
+      }
+    ]
+  }
+{% endschema %}

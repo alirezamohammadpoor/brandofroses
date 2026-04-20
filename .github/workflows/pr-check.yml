@@ -1,0 +1,50 @@
+name: PR Check
+
+# Runs on every PR targeting main or staging.
+# Fails the PR if:
+# - Dependencies can't install from the lockfile
+# - Vite build has a TypeScript or ESLint error (vite-plugin-eslint is wired in)
+# - Shopify theme check reports any offense
+
+on:
+  pull_request:
+    branches: [main, staging]
+
+concurrency:
+  group: pr-check-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        # No --frozen-lockfile: bun.lock is macOS-generated. Linux rollup
+        # binary is declared in package.json optionalDependencies.
+        run: bun install
+
+      - name: Build (lint + typecheck + bundle)
+        # Vite runs with vite-plugin-eslint; any ESLint error fails the build.
+        # TypeScript source is transpiled by Vite — syntactic/module errors fail here.
+        run: bun run build
+
+      - name: Setup Node (for Shopify CLI)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Shopify CLI
+        run: npm install -g @shopify/cli@latest
+
+      - name: Shopify theme check
+        run: shopify theme check --fail-level=error

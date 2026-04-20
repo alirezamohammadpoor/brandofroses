@@ -1,0 +1,189 @@
+{
+  "sizes_all": ["35", "35.5", "36", "36.5", "37", "37.5", "38", "38.5", "39", "39.5", "40", "40.5", "41", "41.5", "42", "42.5", "43", "43.5"],
+  "shipping": "Free worldwide delivery with taxes/duties included. Free returns.",
+  "products": [
+    {
+      "model": "CARLA 7",
+      "category": "Heels",
+      "type": "Pumps",
+      "description": "CARLA 7 is designed with comfort in mind and features a 7 cm heel with a real feel of 3 cm. Leather soles.",
+      "heel_height_mm": 70,
+      "variants": [
+        { "color": "Black", "material": "Leather", "price_sek": 7500, "url": "https://www.saniadmina.com/product/carla-7-black-leather/", "images": ["https://www.saniadmina.com/wp-content/uploads/2026/01/Carla7-black-leather-pumps-sania-dmina-front.jpg", "https://www.saniadmina.com/wp-content/uploads/2026/01/frontpagesaniadminacarla7pumpsiliridaarton.jpg"] }
+      ]
+    },
+    {
+      "model": "ELENA",
+      "category": "Heels",
+      "type": "Slingbacks",
+      "description": "This classic suede slingback is a must-have. ELENA is designed with comfort in mind and features a 7 cm heel with a real feel of 3 cm. Leather soles.",
+      "heel_height_mm": 70,
+      "variants": [
+        { "color": "Black", "material": "Suede", "price_sek": 6000, "url": "https://www.saniadmina.com/product/elena-black-suede/", "images": ["https://www.saniadmina.com/wp-content/uploads/2025/07/ELENA-black-suede_comfortable-slingback-shoes-sania-dmina_1-scaled-1.jpg", "https://www.saniadmina.com/wp-content/uploads/2025/07/ELENA-black-suede_comfortable-slingback-shoes-sania-dmina_2-scaled-1.jpg", "https://www.saniadmina.com/wp-content/uploads/2025/07/ELENA-black-suede_comfortable-slingback-shoes-sania-dmina_3-scaled-1.jpg", "https://www.saniadmina.com/wp-content/uploads/2025/07/sania-dmina-ELENA-black-suede-slingback-shoes-comfortable-everyday_.jpg", "https://www.saniadmina.com/wp-content/uploads/2025/07/sania-dmina-ELENA-black-suede-slingback-shoes-comfortable-everyday.jpg"] },
+        { "color": "White", "material": "Leather", "price_sek": 6000, "url": "https://www.saniadmina.com/product/elena-white-leather/" },
+        { "color": "Green", "material": "Suede", "price_sek": 6000, "url": "https://www.saniadmina.com/product/elena-green-suede/" },
+        { "color": "Red", "material": "Suede", "price_sek": 6000, "url": "https://www.saniadmina.com/product/elena-red-suede/" },
+        { "color": "Blue", "material": "Suede", "price_sek": 6000, "url": "https://www.saniadmina.com/product/elena-blue-suede/" },
+        { "color": "Beige", "material": "Leather", "price_sek": 6000, "url": "https://www.saniadmina.com/product/elena-beige-leather/" },
+        { "color": "Pistachio", "material": "Suede", "price_sek": 6000, "url": "https://www.saniadmina.com/product/elena-pistachio-suede/" },
+        { "color": "Ivory Pearl", "material": "Pearl", "price_sek": 8600, "url": "https://www.saniadmina.com/product/elena-ivory-pearl/" },
+        { "color": "Perforated Beige", "material": "Suede", "price_sek": 7300, "url": "https://www.saniadmina.com/product/elena-perforated-beige-suede/" },
+        { "color": "Perforated Nougat", "material": "Leather", "price_sek": 7300, "url": "https://www.saniadmina.com/product/elena-perforated-nougat-leather/" },
+        { "color": "Glitter Silver", "material": "Glitter", "price_sek": 6600, "url": "https://www.saniadmina.com/product/elena-glitter-silver/" },
+        { "color": "Glitter Black", "material": "Glitter", "price_sek": 6600, "url": "https://www.saniadmina.com/product/elena-glitter-black/" },
+        { "color": "Patent Black", "material": "Patent Leather", "price_sek": 6000, "url": "https://www.saniadmina.com/product/elena-patent-black-leather/" },
+        { "color": "Patent Bordeaux", "material": "Patent Leather", "price_sek": 6000, "url": "https://www.saniadmina.com/product/elena-patent-bordeaux-leather/" }
+      ]
+    },
+    {
+      "model": "PERLINO",
+      "category": "Heels",
+      "type": "Pumps",
+      "description": "A refined pump with an elegant silhouette. Designed with comfort in mind. 7 cm heel with a real feel of 3 cm. Leather soles.",
+      "heel_height_mm": 70,
+      "variants": [
+        { "color": "Pink", "material": "Suede", "price_sek": 7900, "url": "https://www.saniadmina.com/product/perlino-pink-suede/" },
+        { "color": "Ivory", "material": "Leather", "price_sek": 7900, "url": "https://www.saniadmina.com/product/perlino-ivory-leather/" },
+        { "color": "Black", "material": "Leather", "price_sek": 7900, "url": "https://www.saniadmina.com/product/perlino-black-leather/" }
+      ]
+    },
+    {
+      "model": "GIANNA",
+      "category": "Sandals",
+      "type": "Mules",
+      "description": "A playful glitter mule sandal. Designed for special occasions with comfort in mind.",
+      "heel_height_mm": 70,
+      "variants": [
+        { "color": "Glitter Gold", "material": "Glitter", "price_sek": 5600, "url": "https://www.saniadmina.com/product/gianna-glitter-gold/" },
+        { "color": "Glitter Green Black", "material": "Glitter", "price_sek": 5600, "url": "https://www.saniadmina.com/product/gianna-glitter-green-black/" },
+        { "color": "Glitter Pink", "material": "Glitter", "price_sek": 5600, "url": "https://www.saniadmina.com/product/gianna-glitter-pink/" }
+      ]
+    },
+    {
+      "model": "DUN",
+      "category": "Sandals",
+      "type": "Strappy Sandals",
+      "description": "An elegant strappy sandal. Designed with comfort in mind. Leather soles.",
+      "heel_height_mm": 70,
+      "variants": [
+        { "color": "Ivory", "material": "Suede", "price_sek": 6200, "url": "https://www.saniadmina.com/product/dun-ivory-suede/" },
+        { "color": "Black", "material": "Suede", "price_sek": 6200, "url": "https://www.saniadmina.com/product/dun-black-suede/" }
+      ]
+    },
+    {
+      "model": "YUNA",
+      "category": "Sandals",
+      "type": "Strappy Sandals",
+      "description": "A minimal strappy sandal with clean lines. Designed with comfort in mind. Leather soles.",
+      "heel_height_mm": 70,
+      "variants": [
+        { "color": "Black", "material": "Leather", "price_sek": 6400, "url": "https://www.saniadmina.com/product/yuna-black-leather/" },
+        { "color": "Ivory", "material": "Leather", "price_sek": 6400, "url": "https://www.saniadmina.com/product/yuna-ivory-leather/" },
+        { "color": "Brown", "material": "Leather", "price_sek": 6400, "url": "https://www.saniadmina.com/product/yuna-brown-leather/" }
+      ]
+    },
+    {
+      "model": "BONDI",
+      "category": "Sandals",
+      "type": "Strappy Sandals",
+      "description": "A gorgeous pair of sandals with a knot detail, inspired by classic vintage dancing shoes. The 8 cm heel is perfectly matched with the last for ultimate comfort and stability.",
+      "heel_height_mm": 80,
+      "variants": [
+        { "color": "Black", "material": "Leather", "price_sek": 6900, "url": "https://www.saniadmina.com/product/bondi-black-leather/", "images": ["https://www.saniadmina.com/wp-content/uploads/2025/07/BONDI-black-leather-knot-strappy-sandals-sania-dmina_1-scaled-1.jpg", "https://www.saniadmina.com/wp-content/uploads/2025/07/BONDI-black-leather-knot-strappy-sandals-sania-dmina_2-scaled-1.jpg", "https://www.saniadmina.com/wp-content/uploads/2025/07/BONDI-black-leather-knot-strappy-sandals-sania-dmina_3-scaled-1.jpg"] },
+        { "color": "Ivory", "material": "Leather", "price_sek": 6900, "url": "https://www.saniadmina.com/product/bondi-ivory-leather/" },
+        { "color": "Brick Red", "material": "Leather", "price_sek": 6900, "url": "https://www.saniadmina.com/product/bondi-brick-red-leather/" },
+        { "color": "Silver Metallic", "material": "Leather", "price_sek": 6900, "url": "https://www.saniadmina.com/product/bondi-silver-metallic-leather/" },
+        { "color": "Green Metallic", "material": "Leather", "price_sek": 6900, "url": "https://www.saniadmina.com/product/bondi-green-metallic-leather/" },
+        { "color": "Nougat", "material": "Leather", "price_sek": 6900, "url": "https://www.saniadmina.com/product/bondi-nougat-leather/" }
+      ]
+    },
+    {
+      "model": "VENUS",
+      "category": "Sandals",
+      "type": "Strappy Sandals",
+      "description": "An elegant sandal with a timeless silhouette. Designed with comfort in mind. Leather soles.",
+      "heel_height_mm": 70,
+      "variants": [
+        { "color": "Red", "material": "Suede", "price_sek": 6300, "url": "https://www.saniadmina.com/product/venus-red-suede/" },
+        { "color": "Ivory", "material": "Leather", "price_sek": 6300, "url": "https://www.saniadmina.com/product/venus-ivory-leather/" },
+        { "color": "Vintage Brown", "material": "Leather", "price_sek": 6300, "url": "https://www.saniadmina.com/product/venus-vintage-brown/" },
+        { "color": "Black", "material": "Leather", "price_sek": 6300, "url": "https://www.saniadmina.com/product/venus-black-leather/" },
+        { "color": "Gold Metallic", "material": "Leather", "price_sek": 6300, "url": "https://www.saniadmina.com/product/venus-gold-metallic-leather/" },
+        { "color": "Silver Metallic", "material": "Leather", "price_sek": 6300, "url": "https://www.saniadmina.com/product/venus-silver-metallic-leather/" }
+      ]
+    },
+    {
+      "model": "AVENUE HIGH",
+      "category": "Boots",
+      "type": "Knee-High Boots",
+      "description": "These classic boots are like gloves for your legs. AVENUE are designed with comfort in mind and feature 7 cm heels with a real feel of 3 cm.",
+      "heel_height_mm": 70,
+      "variants": [
+        { "color": "Black", "material": "Leather", "price_sek": 11700, "url": "https://www.saniadmina.com/product/avenue-high-black-leather/", "images": ["https://www.saniadmina.com/wp-content/uploads/2025/07/AVENUE-HIGH-black-leather-boots-sania-dmina-745x1024.jpg", "https://www.saniadmina.com/wp-content/uploads/2025/07/AVENUE-HIGH-black-leather-boots-sania-dmina.jpg"] },
+        { "color": "Brown", "material": "Leather", "price_sek": 11700, "url": "https://www.saniadmina.com/product/avenue-high-brown-leather/" },
+        { "color": "Glitter Black", "material": "Glitter", "price_sek": 13000, "url": "https://www.saniadmina.com/product/avenue-high-glitter-black/" },
+        { "color": "Glitter Silver", "material": "Glitter", "price_sek": 13000, "url": "https://www.saniadmina.com/product/avenue-high-glitter-silver/" },
+        { "color": "Grey", "material": "Suede", "price_sek": 11700, "url": "https://www.saniadmina.com/product/avenue-high-grey-suede/" }
+      ]
+    },
+    {
+      "model": "AVENUE HIGH WIDE SHAFT",
+      "category": "Boots",
+      "type": "Knee-High Boots",
+      "description": "The AVENUE HIGH with a wider shaft for a more relaxed fit. Same comfort, same 7 cm heel with a real feel of 3 cm.",
+      "heel_height_mm": 70,
+      "variants": [
+        { "color": "Black", "material": "Leather", "price_sek": 11700, "url": "https://www.saniadmina.com/product/avenue-high-wide-shaft-black-leather/" },
+        { "color": "Brown", "material": "Leather", "price_sek": 11700, "url": "https://www.saniadmina.com/product/avenue-high-wide-shaft-brown-leather/" },
+        { "color": "Glitter Black", "material": "Glitter", "price_sek": 13000, "url": "https://www.saniadmina.com/product/avenue-high-wide-shaft-glitter-black/" },
+        { "color": "Glitter Silver", "material": "Glitter", "price_sek": 13000, "url": "https://www.saniadmina.com/product/avenue-high-wide-shaft-glitter-silver/" },
+        { "color": "Grey", "material": "Suede", "price_sek": 11700, "url": "https://www.saniadmina.com/product/avenue-high-wide-shaft-grey-suede/" }
+      ]
+    },
+    {
+      "model": "AVENUE MID",
+      "category": "Boots",
+      "type": "Mid-Calf Boots",
+      "description": "A mid-calf version of the AVENUE boot. Designed with comfort in mind. 7 cm heel with a real feel of 3 cm.",
+      "heel_height_mm": 70,
+      "variants": [
+        { "color": "Black", "material": "Leather", "price_sek": 9700, "url": "https://www.saniadmina.com/product/avenue-mid-black-leather/" },
+        { "color": "Brown", "material": "Leather", "price_sek": 9700, "url": "https://www.saniadmina.com/product/avenue-mid-brown-leather/" },
+        { "color": "Grey", "material": "Leather", "price_sek": 9700, "url": "https://www.saniadmina.com/product/avenue-mid-grey-leather/" }
+      ]
+    },
+    {
+      "model": "AVENUE MID WIDE SHAFT",
+      "category": "Boots",
+      "type": "Mid-Calf Boots",
+      "description": "The AVENUE MID with a wider shaft. Same comfort, same 7 cm heel with a real feel of 3 cm.",
+      "heel_height_mm": 70,
+      "variants": [
+        { "color": "Black", "material": "Leather", "price_sek": 9700, "url": "https://www.saniadmina.com/product/avenue-mid-wide-shaft-black-leather/" },
+        { "color": "Brown", "material": "Leather", "price_sek": 9700, "url": "https://www.saniadmina.com/product/avenue-mid-wide-shaft-brown-leather/" },
+        { "color": "Grey", "material": "Leather", "price_sek": 9700, "url": "https://www.saniadmina.com/product/avenue-mid-wide-shaft-grey-leather/" }
+      ]
+    },
+    {
+      "model": "CHER",
+      "category": "Boots",
+      "type": "Ankle Boots",
+      "description": "These classic boots are a must-have. 8 cm heel. CHER are designed with comfort in mind.",
+      "heel_height_mm": 80,
+      "variants": [
+        { "color": "Black", "material": "Leather", "price_sek": 11900, "url": "https://www.saniadmina.com/product/cher-black-leather/", "images": ["https://www.saniadmina.com/wp-content/uploads/2025/07/CHER-black-leather-boots-sania-dmina.jpg"] },
+        { "color": "Black Snake Print", "material": "Leather", "price_sek": 13200, "url": "https://www.saniadmina.com/product/cher-black-snake-print-leather/" }
+      ]
+    },
+    {
+      "model": "ROE",
+      "category": "Boots",
+      "type": "Ankle Boots",
+      "description": "A sleek ankle boot with a modern silhouette. Designed with comfort in mind.",
+      "heel_height_mm": 70,
+      "variants": [
+        { "color": "Black", "material": "Leather", "price_sek": 9900, "url": "https://www.saniadmina.com/product/roe-black-leather/" }
+      ]
+    }
+  ]
+}

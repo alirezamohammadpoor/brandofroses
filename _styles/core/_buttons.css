@@ -1,0 +1,35 @@
+button[disabled] {
+  @apply cursor-not-allowed;
+}
+
+.btn-group {
+  @apply flex flex-wrap gap-x-12 gap-y-5;
+}
+
+.btn {
+  @apply inline-flex items-center justify-center text-center; /* Layout */
+  @apply py-3 px-5 border; /* Design */
+  @apply bg-fg text-bg border-fg; /* Colors */
+  @apply uppercase text-sm leading-none font-bold; /* Text */
+
+  transition-property: background-color, border-color, color;
+  transition-duration: 250ms;
+  transition-timing-function: ease;
+
+  &[disabled] {
+    @apply bg-muted border-muted text-bg;
+  }
+
+  &:not([disabled]) {
+    @apply hover:bg-fg/80 hover:border-fg/80;
+    @apply active:bg-fg active:border-fg;
+  }
+
+  &:focus-visible {
+    @apply outline outline-fg;
+  }
+}
+
+.btn-block {
+  @apply w-full flex-1;
+}

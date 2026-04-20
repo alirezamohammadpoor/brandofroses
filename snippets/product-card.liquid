@@ -1,0 +1,210 @@
+{% doc %}
+  @param {product} product - The product to display - required
+  @param {string} [loading] - Optional loading attribute for the image - defaults to "lazy"
+  @param {string} [sizes] - Optional sizes attribute for the image
+  @param {number} [image_min_width] - Optional minimum width for the image - defaults to 500
+  @param {number} [image_max_width] - Optional maximum width for the image - defaults to 900
+  @param {object} [collection] - Optional collection the product was reached from; used to build `within:` URLs for PDP breadcrumb context
+
+  Badge priority (first match wins):
+    1. SOLD OUT   — !product.available
+    2. -XX%       — variant.compare_at_price > variant.price
+    3. PRE-ORDER  — tag `badge:pre-order`
+    4. NEW        — tag `badge:new`
+
+  @example
+  {% render 'product-card',
+             product: product,
+             loading: 'eager',
+             collection: collection
+  %}
+{% enddoc %}
+
+{% if product %}
+  {%- liquid
+    if image_min_width == blank
+      assign image_min_width = 500
+    endif
+
+    if image_max_width == blank
+      assign image_max_width = 900
+    endif
+
+    capture image_widths
+      render 'image-widths', min_width: image_min_width, max_width: image_max_width
+    endcapture
+
+    if loading == blank
+      assign loading = 'lazy'
+    endif
+
+    if sizes == blank
+      assign sizes = '(max-width: 767.98px) 50vw, (max-width: 1023.98px) 33vw, 25vw'
+    endif
+
+    assign product_url = product.url
+    if collection and collection.handle != 'all'
+      assign product_url = product.url | within: collection
+    endif
+
+    assign current_variant = product.selected_or_first_available_variant
+    assign on_sale = false
+    assign discount_pct = 0
+    if current_variant.compare_at_price > current_variant.price
+      assign on_sale = true
+      assign discount_pct = current_variant.compare_at_price | minus: current_variant.price | times: 100 | divided_by: current_variant.compare_at_price
+    endif
+
+    assign badge_text = blank
+    assign badge_classes = ''
+    if product.available == false
+      assign badge_text = 'products.product.sold_out' | t | upcase
+      assign badge_classes = 'bg-muted text-fg'
+    elsif on_sale
+      assign badge_text = '-' | append: discount_pct | append: '%'
+      assign badge_classes = 'bg-accent text-bg'
+    else
+      for tag in product.tags
+        if tag == 'badge:pre-order'
+          assign badge_text = 'products.product.pre_order' | t | upcase
+          assign badge_classes = 'bg-fg text-bg'
+          break
+        elsif tag == 'badge:new'
+          assign badge_text = 'products.product.new' | t | upcase
+          assign badge_classes = 'bg-accent text-bg'
+          break
+        endif
+      endfor
+    endif
+  -%}
+
+  {%- capture alt_text %}
+    {% if product.featured_image.alt %}
+      {{ product.featured_image.alt }}
+    {% else %}
+      "{{ product.title }}" Featured Image
+    {% endif %}
+  {%- endcapture %}
+  {% assign alt_text = alt_text | strip_newlines | strip %}
+
+  {%- assign card_title_id = 'ProductCardTitle-' | append: product.id -%}
+
+  <article
+    class="product-card group h-full pb-6"
+    data-component="product-card"
+    aria-labelledby="{{ card_title_id }}"
+  >
+    <a href="{{ product_url }}" class="flex flex-col gap-2" tabindex="-1" aria-hidden="true">
+      {%- comment -%} Image — 3:4 ratio, bg-surface placeholder {%- endcomment -%}
+      <div class="relative w-full aspect-[3/4] overflow-hidden bg-bg-surface">
+        {{ product.featured_image
+          | image_url: width: image_max_width
+          | image_tag:
+            loading: loading,
+            widths: image_widths,
+            alt: alt_text,
+            class: 'h-full w-full object-cover lazy-image absolute inset-0 transition-opacity duration-300 group-hover:opacity-0',
+            sizes: sizes
+        }}
+
+        {%- comment -%} Hover image — second image whose alt matches the featured color {%- endcomment -%}
+        {%- assign featured_color = product.selected_or_first_available_variant.option1 | upcase -%}
+        {%- assign hover_image = nil -%}
+        {%- assign color_image_count = 0 -%}
+        {%- for image in product.images -%}
+          {%- assign image_alt_up = image.alt | upcase -%}
+          {%- if image_alt_up contains featured_color -%}
+            {%- assign color_image_count = color_image_count | plus: 1 -%}
+            {%- if color_image_count == 2 -%}
+              {%- assign hover_image = image -%}
+              {%- break -%}
+            {%- endif -%}
+          {%- endif -%}
+        {%- endfor -%}
+
+        {% if hover_image %}
+          {{ hover_image
+            | image_url: width: image_max_width
+            | image_tag:
+              loading: 'lazy',
+              widths: image_widths,
+              alt: alt_text,
+              class: 'h-full w-full object-cover absolute inset-0 transition-opacity duration-300 opacity-0 group-hover:opacity-100',
+              sizes: sizes
+          }}
+        {% endif %}
+
+        {% if badge_text != blank %}
+          <span class="absolute top-2 left-2 text-section-label {{ badge_classes }} px-2 py-[3px] rounded-[4px]">
+            {{ badge_text }}
+          </span>
+        {% endif %}
+      </div>
+    </a>
+
+    {%- comment -%}
+      Meta — outside the outer <a> so swatches don't navigate.
+      Layout:
+        Row 1: title (left) + swatches (right)
+        Row 2: price (sale-aware)
+    {%- endcomment -%}
+    <div class="mt-2 flex flex-col gap-1">
+      {%- comment -%} Row 1: title + swatches {%- endcomment -%}
+      <div class="flex items-center justify-between gap-2">
+        <a
+          href="{{ product_url }}"
+          id="{{ card_title_id }}"
+          class="text-caption text-fg truncate"
+        >{{ product.title }}</a>
+
+        {% for option in product.options_with_values %}
+          {% if option.name == 'Color' %}
+            {%- assign color_count = option.values.size -%}
+            {%- assign max_mobile = 3 -%}
+            {%- assign overflow = color_count | minus: max_mobile -%}
+            <ul
+              class="flex items-center gap-1 shrink-0"
+              role="list"
+              aria-label="{{ 'products.product.available_colors' | t }}"
+            >
+              {% for value in option.values %}
+                <li
+                  class="block w-2.5 h-2.5 rounded-full border border-muted/30{% if forloop.index > max_mobile %} hidden lg:block{% endif %}"
+                  style="{% if value.swatch.color %}background-color: {{ value.swatch.color }};{% else %}background-color: #1A1A18;{% endif %}"
+                  title="{{ value }}"
+                ><span class="sr-only">{{ value }}</span></li>
+              {% endfor %}
+              {% if overflow > 0 %}
+                <li
+                  class="text-section-label text-muted lg:hidden"
+                  aria-label="{{ 'products.product.more_colors' | t: count: overflow }}"
+                >+{{ overflow }}</li>
+              {% endif %}
+            </ul>
+          {% endif %}
+        {% endfor %}
+      </div>
+
+      {%- comment -%} Row 2: price — strikethrough compare + sale price when on sale {%- endcomment -%}
+      <div class="flex items-center gap-2 text-caption">
+        {% if on_sale %}
+          <s class="text-muted" aria-hidden="true">
+            {{ current_variant.compare_at_price | money_without_trailing_zeros }}
+          </s>
+          <span class="text-accent">
+            <span class="sr-only">{{ 'products.product.price.sale_price' | t }}</span>
+            {{ current_variant.price | money_without_trailing_zeros }}
+          </span>
+          <span class="sr-only">
+            {{ 'products.product.price.regular_price' | t }}
+            {{ current_variant.compare_at_price | money_without_trailing_zeros }}
+          </span>
+        {% else %}
+          <span class="text-fg">
+            {{ current_variant.price | money_without_trailing_zeros }}
+          </span>
+        {% endif %}
+      </div>
+    </div>
+  </article>
+{% endif %}

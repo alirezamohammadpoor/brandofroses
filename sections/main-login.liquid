@@ -1,0 +1,191 @@
+{%- liquid
+  assign recover_success = false
+-%}
+
+{% capture recover_content %}
+  <div id="recover-password-form" style="display: none;">
+    <h4 class="mb-2">
+      Reset Your Password
+    </h4>
+
+    <p>We'll send you an email to reset your password</p>
+
+    {% form 'recover_customer_password' %}
+
+      {{ form.errors | default_errors }}
+
+      {% assign recover_success = form.posted_successfully? %}
+
+      <div class="form-group">
+        <label for="RecoverEmail">
+          Email
+        </label>
+
+        <div class="form-control">              
+          <input
+            type="email"
+            value=""
+            name="email"
+            id="RecoverEmail"
+            autocorrect="off"
+            autocapitalize="off"
+            autocomplete="email"
+            required="true"
+            {% if form.errors %}
+              aria-invalid="true"
+              aria-describedby="RecoverEmail-email-error"
+              autofocus
+            {% endif %}
+            placeholder="Email"
+          >
+        </div>
+
+        {%- if form.errors -%}
+          <div id="RecoverEmail-email-error" class="form-group__error">
+            {{ form.errors.messages.form }}
+          </div>
+        {%- endif -%}
+      </div>
+
+      <div class="form-group">
+        <div class="flex justify-between items-center">
+          <button type="submit" class="btn">Submit</button>
+          <div class="px-3">
+            <button type="button" data-toggle-recover="false" class="underline">Cancel</button>
+          </div>
+        </div>
+      </div>
+    {% endform %}
+  </div>
+{% endcapture %}
+
+<section data-section-id="{{ section.id }}" data-section-type="login">
+  <div class="container">
+    {% render 'section-header',
+              title: 'Log In / Create Account',
+              title_tag: 'h1'
+    %}
+
+    <div class="mx-auto max-w-[560px]">
+      {% if recover_success %}
+        <div class="mb-4 italic text-center">
+          Check your email for a link to reset your password.
+        </div>
+      {% endif %}
+
+      <div class="flex flex-col gap-15">
+        {% if section.settings.new_message != blank %}
+          <div>
+            <h4 class="mb-2">New Customers</h4>
+            <p>
+              {{ section.settings.new_message }}
+            </p>
+            <p>
+              <a href="{{ routes.account_register_url }}" class="btn">Create Account</a>
+            </p>
+          </div>
+        {% endif %}
+
+        <div id="customer-login-form">
+          <h4 class="mb-2">Registered Customers</h4>
+          <div>
+            {% if section.settings.registered_message != blank %}
+              <p>{{ section.settings.registered_message }}</p>
+            {% endif %}
+
+            {% form 'customer_login' %}
+              {{ form.errors | default_errors }}
+
+              <div class="form-group">
+                <label for="CustomerEmail">Email</label>
+
+                <div class="form-control">              
+                  <input
+                    type="email"
+                    name="customer[email]"
+                    id="CustomerEmail"
+                    autocomplete="email"
+                    autocorrect="off"
+                    autocapitalize="off"
+                    {% if form.errors contains 'form' %}
+                      aria-invalid="true"
+                    {% endif %}
+                    placeholder="Email"
+                    autofocus           
+                  >
+                </div>
+              </div>
+
+              {% if form.password_needed %}
+                <div class="form-group">
+                  <label for="CustomerPassword">{{ 'customer.login.password' | t }}</label>
+
+                  <div class="form-control">                
+                    <input
+                      type="password"
+                      value=""
+                      name="customer[password]"
+                      id="CustomerPassword"
+                      autocomplete="current-password"
+                      {% if form.errors contains 'form' %}
+                        aria-invalid="true"
+                      {% endif %}
+                      placeholder="{{ 'customer.login.password' | t }}"
+                    >
+                  </div>
+                </div>
+              {% endif %}
+      
+              <div class="form-group">
+                <div class="flex justify-between items-center">
+                  <button type="submit" class="btn">Login</button>
+                  <div class="px-3">
+                    <button type="button" data-toggle-recover="true" class="underline">
+                      Forgot your password?
+                    </button>
+                  </div>
+                </div>
+              </div>
+            {% endform %}          
+          </div>
+        </div>
+
+        {% comment %}
+          If accounts are set as optional, the following will be shown as an option
+          during checkout, not on the default /login page.
+        {% endcomment %}
+        {% if shop.checkout.guest_login %}
+          <div>
+            {% form 'guest_login' %}
+              <div>
+                <button type="submit" class="btn btn-block" value="Continue">
+                  Continue Checkout As Guest
+                </button>
+              </div>
+            {% endform %}
+          </div>
+        {% endif %}      
+
+        {{ recover_content }}
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Account - Login",
+  "settings": [
+    {
+      "type": "inline_richtext",
+      "id": "new_message",
+      "label": "New Customers Message"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "registered_message",
+      "label": "Registered Customers Message"
+    }
+  ]
+}
+{% endschema %}

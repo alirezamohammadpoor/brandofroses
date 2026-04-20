@@ -1,0 +1,40 @@
+{% doc %}
+  Product Detail Gallery Slide
+  ====================================
+
+  @param {image} image - The image to display - required
+  @param {string} [loading] - The loading attribute value - optional, defaults to 'lazy'
+  @param {string} [fetch_priority] - The fetchpriority attribute value (e.g. 'high' for above-the-fold) - optional
+
+  @example
+    {% render 'product-detail-gallery-slide', image: product.images[0], loading: 'eager', fetch_priority: 'high' %}
+{% enddoc %}
+
+{% if image != blank %}
+  {%- liquid
+    assign loading = loading | default: 'lazy'
+    assign fetch_priority = fetch_priority | default: nil
+
+    capture main_image_widths
+      render 'image-widths', max_width: 1100
+    endcapture
+  -%}
+  
+  <div
+    class="relative aspect-[2/3] embla__slide"
+    role="group"
+    aria-roledescription="slide"
+  >
+    {{
+      image
+      | image_url: width: 720
+      | image_tag:
+        loading: loading,
+        fetchpriority: fetch_priority,
+        widths: main_image_widths,
+        sizes: '100vw',
+        alt: image.alt,
+        class: 'h-full w-full object-cover lazy-image'
+    }}
+  </div>     
+{% endif %}

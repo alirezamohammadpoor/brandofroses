@@ -1,0 +1,121 @@
+{%- comment -%}
+  In Focus / As Seen On Section
+  Displays social proof — celebrity/influencer images linked to products.
+  Image links to product, name links to Instagram.
+{%- endcomment -%}
+
+{% if section.blocks.size > 0 %}
+  <section class="px-2 pt-6 lg:pt-10 pb-6 lg:pb-10" data-as-seen-on>
+    <div data-component="scroll-section">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-h3 text-fg">{{ section.settings.title | default: 'As seen on' }}</h3>
+
+      {% if section.blocks.size > 4 %}
+        {% render 'scroll-arrows' %}
+      {% endif %}
+    </div>
+
+    <div class="flex gap-1 overflow-x-auto overflow-y-hidden snap-x snap-mandatory no-scrollbar" data-scroll-container>
+      {% for block in section.blocks %}
+        {% if block.settings.image == blank %}{% continue %}{% endif %}
+        <div class="w-[70%] lg:w-[calc(25%-3px)] shrink-0 snap-start" {{ block.shopify_attributes }}>
+
+          {%- comment -%} Image — links to product if set {%- endcomment -%}
+          {% if block.settings.product != blank %}
+            <a href="{{ block.settings.product.url }}" title="{{ block.settings.product.title | escape }}">
+          {% endif %}
+            <div class="aspect-[2/3] overflow-hidden bg-[#E8E5E0]">
+              {{ block.settings.image
+                | image_url: width: 520
+                | image_tag:
+                  loading: 'lazy',
+                  class: 'w-full h-full object-cover',
+                  sizes: '(max-width: 767px) 47vw, 25vw'
+              }}
+            </div>
+          {% if block.settings.product != blank %}
+            </a>
+          {% endif %}
+
+          {%- comment -%} Product info {%- endcomment -%}
+          {% if block.settings.product != blank %}
+            <a href="{{ block.settings.product.url }}" class="block mt-2">
+              <span class="text-[14px] text-fg block">{{ block.settings.product.title }}</span>
+              {% if block.settings.color != blank %}
+                <span class="text-[12px] text-muted block">{{ block.settings.color }}</span>
+              {% endif %}
+            </a>
+          {% endif %}
+
+          {%- comment -%} Name — links to Instagram if handle set {%- endcomment -%}
+          {% if block.settings.name != blank %}
+            {% if block.settings.instagram != blank %}
+              {%- assign ig_username = block.settings.instagram | remove: '@' -%}
+              <a href="https://instagram.com/{{ ig_username }}" target="_blank" rel="noopener" class="text-label text-fg block mt-2">
+                {{ block.settings.name | upcase }}
+              </a>
+            {% else %}
+              <span class="text-label text-fg block mt-2">{{ block.settings.name | upcase }}</span>
+            {% endif %}
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+    </div>
+  </section>
+{% endif %}
+
+{% schema %}
+{
+  "name": "As Seen On",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title",
+      "default": "As seen on"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "entry",
+      "name": "Entry",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "product",
+          "id": "product",
+          "label": "Product"
+        },
+        {
+          "type": "text",
+          "id": "color",
+          "label": "Color / Material",
+          "info": "e.g. Ruby red Shiny lamb"
+        },
+        {
+          "type": "text",
+          "id": "name",
+          "label": "Name",
+          "info": "e.g. Bella Hadid"
+        },
+        {
+          "type": "text",
+          "id": "instagram",
+          "label": "Instagram Handle",
+          "info": "e.g. @bellahadid"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "As Seen On"
+    }
+  ]
+}
+{% endschema %}

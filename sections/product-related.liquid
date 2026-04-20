@@ -1,0 +1,37 @@
+{% assign limit = 6 %}
+
+{%- if recommendations.performed? -%}
+  <div data-content>
+    {% render 'product-scroll',
+      products: recommendations.products,
+      title: section.settings.title,
+      limit: limit
+    %}
+  </div>
+{%- else -%}
+  <section
+    data-section-id="{{ section.id }}"
+    data-section-type="product-related"
+    data-url="{{ routes.product_recommendations_url }}?section_id={{ section.id }}&product_id={{ product.id }}&limit={{ limit }}&intent=related"
+  >
+    <div class="px-2 pt-6 lg:pt-10 pb-6 lg:pb-10">
+      <div data-content-target>
+        <!-- Cards injected by JS -->
+      </div>
+    </div>
+  </section>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Product - Related",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title",
+      "default": "You may also like"
+    }
+  ]
+}
+{% endschema %}

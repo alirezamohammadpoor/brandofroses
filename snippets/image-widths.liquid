@@ -1,0 +1,41 @@
+{% doc %}
+  
+  Image Widths
+  ------------------------------------------------------------------------------
+
+  Returns a comma separated list of widths for usage with image_tag filter.
+
+  @param {number} [min_width] - The minimum width to include in the list
+  @param {number} [max_width] - The maximum width to include in the list
+
+  @example
+    {% render 'image-widths', min_width: 180, max_width: 1600 %}
+{% enddoc %}
+
+
+{%- liquid
+  comment
+    See: https://github.com/Shopify/horizon/blob/2ceba3a06fcac943eca631510e58ec1c96f88a39/blocks/image.liquid#L37C56-L37C75
+  endcomment
+    
+  assign output = ''
+  assign widths = '180, 300, 500, 700, 900, 1100, 1400, 1600, 1800, 2560, 3840' | split: ', '
+
+  if min_width == blank
+    assign min_width = widths | first | plus: 0
+  endif
+
+  if max_width == blank
+    assign max_width = widths | last | plus: 0
+  endif
+
+  for width in widths
+    assign w = width | plus: 0
+
+    if w >= min_width and w <= max_width
+      assign output = output | append: ', ' | append: w
+    endif
+  endfor
+
+  echo output | strip | remove_first: ', '
+-%}

@@ -1,0 +1,34 @@
+{% doc %}
+  Product Detail Gallery Item
+  ====================================
+
+  @param {image} image - The image to display - required
+  @param {string} [loading] - The loading attribute value - optional, defaults to 'lazy'
+
+  @example
+    {% render 'product-detail-gallery-item', image: product.images[0] %}
+{% enddoc %}
+
+
+{% if image != blank %}
+  {%- liquid
+    assign loading = loading | default: 'lazy'
+
+    capture main_image_widths
+      render 'image-widths', max_width: 900
+    endcapture
+  -%}
+
+  <div class="relative aspect-[2/3] lg:aspect-auto lg:h-[calc(100dvh-var(--chrome-height))]">
+    {{
+      image
+      | image_url: width: 1200
+      | image_tag:
+        loading: loading,
+        widths: main_image_widths,
+        sizes: '(max-width: 1024px) 100vw, (max-width: 1920px) 50vw, 900px',
+        alt: image.alt,
+        class: 'h-full w-full object-cover lazy-image'
+    }}
+  </div>     
+{% endif %}

@@ -1,0 +1,100 @@
+{%- liquid
+  capture image_widths
+    render 'image-widths', max_width: 2560
+  endcapture
+
+  assign hero_alt = article.title | escape
+-%}
+
+<article data-section-id="{{ section.id }}" data-section-type="article">
+
+  {%- comment -%} 1. Split hero: image left, title + meta right {%- endcomment -%}
+  <div class="flex flex-col lg:flex-row lg:h-[calc(100dvh-var(--chrome-height))]">
+    {%- comment -%} Image — full width on mobile, 50% on desktop {%- endcomment -%}
+    <div class="w-full h-[70dvh] lg:w-1/2 lg:h-full overflow-hidden">
+      {% if article.image %}
+        {{
+          article.image
+          | image_url: width: 1400
+          | image_tag:
+            widths: image_widths,
+            sizes: '(max-width: 1023px) 100vw, 50vw',
+            loading: 'eager',
+            fetchpriority: 'high',
+            alt: hero_alt,
+            class: 'w-full h-full object-cover'
+        }}
+      {% else %}
+        <div class="w-full h-full bg-[#E8E5E0]"></div>
+      {% endif %}
+    </div>
+
+    {%- comment -%} Text — title, meta, excerpt {%- endcomment -%}
+    <div class="w-full lg:w-1/2 lg:h-full px-2 py-6 lg:py-10 lg:flex lg:items-end">
+      <div class="flex flex-col gap-3 lg:px-8">
+        <h1 class="text-h1 text-fg">{{ article.title }}</h1>
+
+        <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+          {% if section.settings.show_tags and article.tags.size > 0 %}
+            {% for tag in article.tags %}
+              <span class="text-label text-muted">{{ tag }}</span>
+              {% unless forloop.last %}<span class="text-label text-muted">/</span>{% endunless %}
+            {% endfor %}
+            {% if section.settings.show_date %}
+              <span class="text-label text-muted">/</span>
+            {% endif %}
+          {% endif %}
+          {% if section.settings.show_date %}
+            <span class="text-label text-muted">
+              {{- article.published_at | time_tag: format: 'date' -}}
+            </span>
+          {% endif %}
+          {% if section.settings.show_author and article.author != blank %}
+            <span class="text-label text-muted">/ {{ article.author }}</span>
+          {% endif %}
+        </div>
+
+        {% if article.excerpt != blank %}
+          <p class="text-body text-fg mt-3">{{ article.excerpt }}</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  {%- comment -%} 3. Centered article body {%- endcomment -%}
+  <div class="container py-6 lg:py-10">
+    <div class="mx-auto max-w-[700px]">
+      <div class="article-content rte">
+        {{ article.content }}
+      </div>
+    </div>
+  </div>
+
+
+</article>
+
+{% schema %}
+{
+  "name": "Article - Main",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_author",
+      "label": "Show author",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "show_date",
+      "label": "Show date",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_tags",
+      "label": "Show tags",
+      "default": true
+    }
+  ]
+}
+{% endschema %}

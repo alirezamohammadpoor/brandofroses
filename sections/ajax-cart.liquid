@@ -1,0 +1,63 @@
+<div data-section-id="{{ section.id }}" data-section-type="ajax-cart">
+  <div
+    id="ajax-cart"
+    class="ajax-cart overflow-hidden"
+    data-component="ajax-cart"
+    aria-hidden="true"
+    aria-modal="true"
+    role="dialog"
+    aria-labelledby="{{ section.id }}-title"
+    inert
+  >
+    <h3 id="{{ section.id }}-title" class="sr-only">{{ 'layout.cart.title' | t }}</h3>
+
+    <form action="{{ routes.cart_url }}" method="post" novalidate class="flex flex-col h-full">
+      <div class="ajax-cart__header">
+        <span class="text-[12px] text-fg" data-cart-title>{{ 'layout.cart.title' | t }} ({{ cart.item_count }})</span>
+        <button class="text-[12px] text-fg" data-ajax-cart-close type="button">{{ 'general.close' | t }}</button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto">
+        {% render 'cart-body' %}
+      </div>
+
+      {% render 'cart-footer' %}
+    </form> 
+
+    <div class="ajax-cart__empty">
+      <div class="ajax-cart__empty-text">
+        {{ section.settings.empty_text | default: 'Your cart is empty' }}
+      </div>
+    </div>    
+  </div>
+
+  <script type="application/json" data-cart-json>
+    {% render 'cart-json' %}
+  </script>  
+</div>
+
+{% schema %}
+{
+  "name": "Ajax Cart",
+  "settings": [
+    {
+      "id": "checkout_button_text",
+      "type": "text",
+      "label": "Checkout Button Text",
+      "default": "Proceed To Checkout"
+    },
+    {
+      "id": "checkout_message",
+      "type": "text",
+      "label": "Checkout Message",
+      "info": "e.g. 'Taxes will be calculated at checkout'"
+    },
+    {
+      "id": "empty_text",
+      "type": "textarea",
+      "label": "Empty Cart Text",
+      "default": "Looks like you have some shopping to do."
+    }
+  ]
+}
+{% endschema %}

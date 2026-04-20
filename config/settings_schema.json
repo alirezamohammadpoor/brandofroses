@@ -1,0 +1,101 @@
+[
+  {
+    "name": "theme_info",
+    "theme_name": "Sania D'Mina",
+    "theme_version": "1.0.0",
+    "theme_author": "Alireza Mohammadpoor",
+    "theme_support_url": "https://github.com/alirezamohammadpoor/saniadmina/",
+    "theme_documentation_url": "https://github.com/alirezamohammadpoor/saniadmina/"
+  },
+  {
+    "name": "Metadata",
+    "settings": [      
+      {
+        "type": "image_picker",
+        "id": "favicon_image",
+        "label": "Favicon Image",
+        "info": "Should be at least 32px x 32px"
+      },
+      {
+        "type": "image_picker",
+        "id": "touch_icon_image",
+        "label": "Touch Icon Image",
+        "info": "Should be at least 180px x 180px.  If left blank, the favicon image will be used as a fallback."
+      },
+      {
+        "type": "header",
+        "content": "Sharing / Open Graph"
+      },
+      {
+        "type": "video",
+        "id": "share_video",
+        "label": "Video",
+        "info": "Video for use with sharing dialogs."
+      }         
+    ]
+  },
+  {
+    "name": "Social Accounts",
+    "settings": [
+      {
+        "type": "url",
+        "id": "social_link_twitter",
+        "label": "X / Twitter"
+      },
+      {
+        "type": "url",
+        "id": "social_link_facebook",
+        "label": "Facebook"
+      },
+      {
+        "type": "url",
+        "id": "social_link_youtube",
+        "label": "YouTube"
+      },
+      {
+        "type": "url",
+        "id": "social_link_tiktok",
+        "label": "TikTok"
+      },
+      {
+        "type": "url",
+        "id": "social_link_instagram",
+        "label": "Instagram"
+      }
+    ]
+  },  
+  {
+    "name": "Klaviyo",
+    "settings": [
+      {
+        "type": "text",
+        "id": "klaviyo_public_api_key",
+        "label": "Public API Key",
+        "info": "Public API Key for the organization.  [See Here](https://help.klaviyo.com/hc/en-us/articles/115005062267)"
+      },      
+      {
+        "type": "text",
+        "id": "klaviyo_newsletter_list_id",
+        "label": "Newsletter List ID",
+        "info": "ID of the list for newsletter signups.  e.g. 'abc123'"
+      }
+    ]
+  },
+  {
+    "name": "Markets & Currency",
+    "settings": [
+      {
+        "type": "checkbox",
+        "id": "show_currency_selector",
+        "label": "Show currency selector",
+        "default": true
+      },
+      {
+        "type": "text",
+        "id": "currency_options",
+        "label": "Currency options (comma-separated)",
+        "default": "SEK,EUR,USD,GBP"
+      }
+    ]
+  }
+]
