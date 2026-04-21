@@ -80,8 +80,7 @@
       "ajax-cart": {
         "type": "ajax-cart",
         "settings": {
-          "checkout_button_text": "Checkout",
-          "empty_text": "Your cart is empty"
+          "free_shipping_threshold": 1000
         }
       }
     }

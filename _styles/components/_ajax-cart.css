@@ -4,8 +4,11 @@
   --z-empty: 4;
   --z-header: 5;
 
+  --ajax-cart-pad-x: 24px;
+  --ajax-cart-header-h: 56px;
+
   @apply fixed z-(--z-ajax-cart) top-0 right-0 h-[100dvh] w-full bg-bg;
-  @media (min-width: 1024px) { max-width: min(90vw, 500px); }
+  @media (min-width: 1024px) { max-width: 420px; }
   @apply translate-x-full;
   transition: var(--transition-drawer-out);
 
@@ -22,25 +25,36 @@
   @apply relative flex items-center justify-between;
 
   z-index: var(--z-header);
-  height: var(--header-height);
-  padding-inline: var(--spacing-container);
+  height: var(--ajax-cart-header-h);
+  padding-inline: var(--ajax-cart-pad-x);
+}
+
+.ajax-cart__divider {
+  height: 1px;
+  background-color: var(--color-muted);
+  opacity: 0.3;
+  margin-inline: var(--ajax-cart-pad-x);
 }
 
 .ajax-cart__body {
   @apply relative;
 
   z-index: var(--z-body);
-  padding: 0 var(--spacing-container);
+  padding: 0 var(--ajax-cart-pad-x);
 }
 
 .ajax-cart__item {
+  &:not(:last-child) {
+    border-bottom: 1px solid color-mix(in srgb, var(--color-muted) 30%, transparent);
+  }
+
   &.is-being-removed {
     cursor: not-allowed;
-  }  
+  }
 }
 
 .ajax-cart__item-inner {
-  @apply flex items-start gap-x-3;
+  @apply flex items-start gap-x-4;
   padding: 16px 0;
 
   transition: opacity 250ms ease-in-out;
@@ -52,33 +66,31 @@
     cursor: not-allowed;
   }
 
-  /* List of item details */
   ul {
     @apply text-sm
   }
 
   img {
-    @apply w-[120px] aspect-[4/5] object-cover;
+    @apply w-[72px] aspect-[3/4] object-cover;
 
     &.is-cached {
       transition: none;
     }
-  }  
+  }
 }
 
 .ajax-cart__footer {
-  @apply flex flex-col gap-y-3 bg-bg;
+  @apply flex flex-col gap-y-4 bg-bg;
   z-index: var(--z-footer);
-  padding: 16px var(--spacing-container);
-  padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  padding: 16px var(--ajax-cart-pad-x) calc(24px + env(safe-area-inset-bottom, 0px));
 }
 
 
 .ajax-cart__empty {
-  @apply absolute top-0 left-0 h-full w-full flex flex-col justify-center bg-bg;
-  z-index: var(--z-empty);  
-
-  padding: 0 var(--spacing-container);
+  @apply absolute left-0 w-full flex flex-col bg-bg;
+  top: calc(var(--ajax-cart-header-h) + 1px);
+  bottom: 0;
+  z-index: var(--z-empty);
 
   @apply opacity-0 pointer-events-none;
   transition: opacity 100ms ease-out;
@@ -89,7 +101,10 @@
   }
 }
 
-.ajax-cart__empty-text {
+.ajax-cart__empty-inner {
+  @apply flex-1 flex flex-col items-center justify-center gap-4 text-center;
+  padding: 0 32px;
+
   opacity: 0;
   transform: translateY(10px);
   transition-property: opacity, transform;

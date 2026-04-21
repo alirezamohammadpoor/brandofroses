@@ -1,17 +1,21 @@
 # Shopify CLI environments
-# Fill in both entries for a new project. Theme ids come from
-# `shopify theme list` after you create the Live and unpublished
-# Staging themes in the Shopify admin.
+# Theme ids come from `shopify theme list` after creating the Live
+# and unpublished Staging themes in the Shopify admin.
 #
 # Usage:
-#   shopify theme push -e staging     # unpublished staging theme
-#   shopify theme push -e production  # live theme
+#   shopify theme dev -e dev          # personal dev theme (ephemeral, auto-managed)
+#   shopify theme push -e staging     # unpublished staging theme (usually CI-only)
+#   shopify theme push -e production  # live theme (CI-only)
 # Docs: https://shopify.dev/docs/themes/tools/cli/environments
 
-[environments.production]
+[environments.dev]
 store = "brandofroses-2.myshopify.com"
-theme = "200018919755"
+theme = "200059257163"
 
 [environments.staging]
 store = "brandofroses-2.myshopify.com"
 theme = "200020328779"
+
+[environments.production]
+store = "brandofroses-2.myshopify.com"
+theme = "200018919755"

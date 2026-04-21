@@ -1,173 +1,140 @@
 import BaseComponent from '@/components/base'
+import CartAPI, { type CartAPIEvent } from '@/core/cartAPI'
 
 const selectors = {
   toggle: '[data-desktop-menu-toggle]',
-  panel: '[data-desktop-menu-panel]',
-  link: '[data-menu-link]',
-  previewImage: '[data-menu-preview-image]',
-  previewTitle: '[data-menu-preview-title]',
-  previewDesc: '[data-menu-preview-desc]',
-  hiddenImages: '[data-menu-collection-images]',
-  defaultImage: '[data-default-image]',
+  panelKey: '[data-panel-key]',
 }
 
 /**
  * DesktopMenu
  *
- * Manages the desktop mega-menu: toggle open/close, outside click, Escape,
- * and the hover image-swap preview of the currently-hovered collection.
+ * Manages the pill-style dropdown: any pill item with children becomes a
+ * toggle that morphs the whole pill from rounded-full (closed) to
+ * rounded-[18px] (open). Multiple toggles share the same pill container —
+ * each one has its own category list, and only one list shows at a time.
  *
- * Lives as a standalone component (registered in app.ts) so it stays wired
- * up across Taxi.js SPA navigations — previously implemented via an inline
- * <script> in sections/header.liquid which did not re-execute after SPA
- * transitions.
+ * Target element: the pill group (carries data-component="desktop-menu" and
+ * data-desktop-menu-panel).
  *
- * Target element: the panel div (carries data-component="desktop-menu").
- * The toggle is located by matching [aria-controls={panel.id}].
+ * Closes on: outside click, Escape, clicking any anchor in the group,
+ * clicking the active toggle again.
  */
 export default class DesktopMenu extends BaseComponent {
   static TYPE = 'desktop-menu'
 
-  toggle: HTMLElement | null
   panel: HTMLElement
-  links: HTMLElement[]
-  previewImage: HTMLElement | null
-  previewTitle: HTMLElement | null
-  previewDesc: HTMLElement | null
-  hiddenImages: HTMLElement | null
-  defaultSrc: string
-  defaultAlt: string
-  defaultTitle: string
-  defaultDesc: string
-  isOpen: boolean
+  toggles: HTMLButtonElement[]
+  activeKey: string | null
+  cartAddKey: string | null
 
   #onToggleClick: (e: MouseEvent) => void
   #onDocumentKeydown: (e: KeyboardEvent) => void
   #onDocumentClick: (e: MouseEvent) => void
-  #onLinkMouseEnter: (e: MouseEvent) => void
-  #onLinkClick: (e: MouseEvent) => void
   #onPanelAnchorClick: (e: MouseEvent) => void
+  #onCartAdd: (e: CartAPIEvent) => void
 
   constructor(el: HTMLElement) {
     super(el)
 
     this.panel = el
-    this.toggle = this.panel.id ? document.querySelector(`[aria-controls="${this.panel.id}"]`) : null
-    this.links = Array.from(this.panel.querySelectorAll<HTMLElement>(selectors.link))
-    this.previewImage = this.panel.querySelector(selectors.previewImage)
-    this.previewTitle = this.panel.querySelector(selectors.previewTitle)
-    this.previewDesc = this.panel.querySelector(selectors.previewDesc)
-    this.hiddenImages = document.querySelector(selectors.hiddenImages)
-
-    const defaultImgEl = this.previewImage?.querySelector<HTMLImageElement>(selectors.defaultImage)
-    this.defaultSrc = defaultImgEl?.src ?? ''
-    this.defaultAlt = defaultImgEl?.alt ?? ''
-    this.defaultTitle = this.previewTitle?.textContent?.trim() ?? ''
-    this.defaultDesc = this.previewDesc?.textContent?.trim() ?? ''
-
-    this.isOpen = false
+    this.toggles = Array.from(this.panel.querySelectorAll<HTMLButtonElement>(selectors.toggle))
+    this.activeKey = null
+    this.cartAddKey = this.panel.dataset.cartAddKey ?? null
 
     this.#onToggleClick = this.onToggleClick.bind(this)
     this.#onDocumentKeydown = this.onDocumentKeydown.bind(this)
     this.#onDocumentClick = this.onDocumentClick.bind(this)
-    this.#onLinkMouseEnter = this.onLinkMouseEnter.bind(this)
-    this.#onLinkClick = this.onLinkClick.bind(this)
     this.#onPanelAnchorClick = this.onPanelAnchorClick.bind(this)
+    this.#onCartAdd = this.onCartAdd.bind(this)
 
-    this.toggle?.addEventListener('click', this.#onToggleClick)
+    for (const t of this.toggles) {
+      t.addEventListener('click', this.#onToggleClick)
+    }
     document.addEventListener('keydown', this.#onDocumentKeydown)
     document.addEventListener('click', this.#onDocumentClick)
 
-    for (const link of this.links) {
-      link.addEventListener('mouseenter', this.#onLinkMouseEnter)
-      link.addEventListener('click', this.#onLinkClick)
-    }
-
-    // Also close on any <a> click inside the panel (category headings etc)
     for (const a of Array.from(this.panel.querySelectorAll<HTMLAnchorElement>('a'))) {
       a.addEventListener('click', this.#onPanelAnchorClick)
+    }
+
+    // If this pill group opts in via data-cart-add-key, open that panel on cart.ADD
+    if (this.cartAddKey) {
+      window.addEventListener(CartAPI.EVENTS.ADD, this.#onCartAdd)
     }
   }
 
   destroy() {
-    this.toggle?.removeEventListener('click', this.#onToggleClick)
+    for (const t of this.toggles) {
+      t.removeEventListener('click', this.#onToggleClick)
+    }
     document.removeEventListener('keydown', this.#onDocumentKeydown)
     document.removeEventListener('click', this.#onDocumentClick)
 
-    for (const link of this.links) {
-      link.removeEventListener('mouseenter', this.#onLinkMouseEnter)
-      link.removeEventListener('click', this.#onLinkClick)
-    }
     for (const a of Array.from(this.panel.querySelectorAll<HTMLAnchorElement>('a'))) {
       a.removeEventListener('click', this.#onPanelAnchorClick)
+    }
+
+    if (this.cartAddKey) {
+      window.removeEventListener(CartAPI.EVENTS.ADD, this.#onCartAdd)
     }
 
     super.destroy()
   }
 
-  open() {
-    this.panel.classList.remove('opacity-0', 'pointer-events-none')
-    this.panel.classList.add('opacity-100')
-    this.toggle?.setAttribute('aria-expanded', 'true')
-    this.isOpen = true
+  onCartAdd() {
+    if (!this.cartAddKey) return
+    this.open(this.cartAddKey)
+  }
+
+  open(key: string) {
+    this.activeKey = key
+    this.panel.classList.add('is-open')
+    this.panel.dataset.activeKey = key
+
+    for (const t of this.toggles) {
+      t.setAttribute('aria-expanded', t.dataset.panelKey === key ? 'true' : 'false')
+    }
+
+    for (const el of Array.from(this.panel.querySelectorAll<HTMLElement>('[data-panel-key]'))) {
+      el.classList.toggle('is-active', el.dataset.panelKey === key)
+    }
   }
 
   close() {
-    this.panel.classList.add('opacity-0', 'pointer-events-none')
-    this.panel.classList.remove('opacity-100')
-    this.toggle?.setAttribute('aria-expanded', 'false')
-    this.isOpen = false
+    this.activeKey = null
+    this.panel.classList.remove('is-open')
+    delete this.panel.dataset.activeKey
+
+    for (const t of this.toggles) {
+      t.setAttribute('aria-expanded', 'false')
+    }
+
+    for (const el of Array.from(this.panel.querySelectorAll<HTMLElement>('[data-panel-key]'))) {
+      el.classList.remove('is-active')
+    }
   }
 
   onToggleClick(e: MouseEvent) {
     e.preventDefault()
     e.stopPropagation()
-    this.isOpen ? this.close() : this.open()
-  }
-
-  onDocumentKeydown(e: KeyboardEvent) {
-    if (e.key === 'Escape' && this.isOpen) this.close()
-  }
-
-  onDocumentClick(e: MouseEvent) {
-    if (!this.isOpen) return
-    const target = e.target as Node
-    if (this.toggle?.contains(target) || this.panel.contains(target)) return
-    this.close()
-  }
-
-  onLinkMouseEnter(e: MouseEvent) {
-    if (!this.previewImage || !this.hiddenImages) return
-
-    const link = e.currentTarget as HTMLElement
-    const handle = link.dataset.collectionHandle
-    if (!handle) return
-
-    const cached = this.hiddenImages.querySelector<HTMLImageElement>(`[data-collection="${handle}"]`)
-    if (!cached) return
-
-    const img = this.previewImage.querySelector<HTMLImageElement>('img')
-    if (img) {
-      img.style.opacity = '0'
-      if (this.previewTitle) this.previewTitle.style.opacity = '0'
-      if (this.previewDesc) this.previewDesc.style.opacity = '0'
-      setTimeout(() => {
-        img.src = cached.src
-        img.alt = cached.alt
-        if (this.previewTitle) this.previewTitle.textContent = cached.dataset.title ?? ''
-        if (this.previewDesc) this.previewDesc.textContent = cached.dataset.desc ?? ''
-        img.style.opacity = '1'
-        if (this.previewTitle) this.previewTitle.style.opacity = '1'
-        if (this.previewDesc) this.previewDesc.style.opacity = '1'
-      }, 250)
+    const btn = e.currentTarget as HTMLButtonElement
+    const key = btn.dataset.panelKey ?? ''
+    if (this.activeKey === key) {
+      this.close()
     } else {
-      if (this.previewTitle) this.previewTitle.textContent = cached.dataset.title ?? ''
-      if (this.previewDesc) this.previewDesc.textContent = cached.dataset.desc ?? ''
+      this.open(key)
     }
   }
 
-  onLinkClick() {
-    // Close dropdown on link click (Taxi.js SPA navigation keeps it open otherwise)
+  onDocumentKeydown(e: KeyboardEvent) {
+    if (e.key === 'Escape' && this.activeKey !== null) this.close()
+  }
+
+  onDocumentClick(e: MouseEvent) {
+    if (this.activeKey === null) return
+    const target = e.target as Node
+    if (this.panel.contains(target)) return
     this.close()
   }
 

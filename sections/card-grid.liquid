@@ -12,7 +12,7 @@
           <h3 class="text-h3 text-fg">{{ section.settings.title }}</h3>
         {% endif %}
         {% if section.settings.subtitle != blank %}
-          <p class="text-[14px] text-muted">{{ section.settings.subtitle }}</p>
+          <p class="text-[12px] text-muted">{{ section.settings.subtitle }}</p>
         {% endif %}
       </div>
     {% endif %}
@@ -39,7 +39,7 @@
             {% endif %}
 
             {% if block.settings.excerpt != blank %}
-              <p class="text-[14px] text-fg mt-2 line-clamp-2">{{ block.settings.excerpt }}</p>
+              <p class="text-[12px] text-fg mt-2 line-clamp-2">{{ block.settings.excerpt }}</p>
             {% endif %}
 
             {% if block.settings.link != blank %}

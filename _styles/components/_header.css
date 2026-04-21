@@ -1,4 +1,375 @@
 header.header {
   @apply relative z-(--z-header) bg-bg;
-  height: var(--header-height);
+
+  --header-height-mobile: 48px;
+  --header-height-desktop: 56px;
+
+  height: var(--header-height-mobile);
+
+  /* Allow the pill dropdown to overflow downward without clipping */
+  overflow: visible;
+
+  @media (min-width: 1024px) {
+    height: var(--header-height-desktop);
+  }
+}
+
+.header__row {
+  @apply relative flex items-center justify-between h-full;
+  padding-inline: 8px;
+
+  @media (min-width: 1024px) {
+    padding-inline: 16px;
+
+    /* Align to top so the pill group can grow downward without
+       dragging the wordmark or right nav with it. The 10px top-pad
+       keeps closed pill vertically centered in the 56px row. */
+    .header--pill & {
+      align-items: flex-start;
+      padding-top: 10px;
+    }
+  }
+
+  .header--flat & {
+    @media (min-width: 1024px) {
+      padding-inline: 40px;
+    }
+  }
+}
+
+/* --- Wordmark --- */
+.header__wordmark {
+  @apply text-[color:var(--color-fg)] font-bold uppercase whitespace-nowrap leading-[16px];
+  font-size: 10px;
+  letter-spacing: 1px;
+
+  @media (min-width: 1024px) {
+    font-size: 12px;
+    letter-spacing: 1.5px;
+  }
+}
+
+.header__wordmark--center {
+  @apply absolute left-1/2 -translate-x-1/2;
+  top: 20px; /* visually centered in the 56px header when row uses items-start */
+}
+
+.header__wordmark--mobile {
+  @apply absolute left-1/2 -translate-x-1/2;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* --- Pill group (left) — constant 18px radius in both states --- */
+/* No `display` set here. HTML `hidden lg:flex` utilities control visibility.
+   When closed (36h pill), 18px == half the height, so the pill still renders
+   as fully rounded. When open (tall), 18px stays a rounded-rectangle radius.
+   No morph means no mid-transition capping artifacts. */
+.header__pill-group {
+  flex-direction: column;
+  align-items: stretch;
+  background-color: var(--color-bg);
+  border: 1px solid var(--color-muted);
+  border-radius: 18px;
+  align-self: flex-start;
+  position: relative;
+  overflow: hidden;
+  inline-size: max-content;
+  max-inline-size: calc(100vw - 32px);
+}
+
+
+/* --- Pill nav row (36h). Display is controlled by HTML utilities
+   (`hidden lg:flex` on the utility variant; parent pill-group on the inside variant).
+   Add display:flex at lg+ so the nav lays out its children horizontally. --- */
+.header__pill-nav {
+  align-items: center;
+  flex-shrink: 0;
+  height: 36px;
+}
+
+@media (min-width: 1024px) {
+  .header__pill-nav {
+    display: flex;
+  }
+}
+
+/* Right utility pill — same shell as the primary menu, just aligned right. */
+.header__pill-group--utility {
+  margin-left: auto;
+}
+
+.header__pill-item {
+  @apply inline-flex items-center justify-center gap-[2px] text-[color:var(--color-fg)] uppercase leading-[16px] whitespace-nowrap bg-transparent;
+  font-size: 12px;
+  padding-inline: 16px;
+  height: 100%;
+}
+
+.header__pill-item--toggle {
+  @apply cursor-pointer;
+}
+
+.header__caret {
+  font-size: 10px;
+  margin-left: 2px;
+  transition: transform 200ms ease;
+}
+
+.header__pill-item[aria-expanded="true"] .header__caret {
+  transform: rotate(180deg);
+}
+
+.header__pill-divider {
+  @apply self-center bg-[color:var(--color-muted)] shrink-0;
+  width: 1px;
+  height: 20px;
+}
+
+/* Panels use grid-template-rows: 0fr -> 1fr for auto-height animation.
+   Motion duration maps to the real content height, so short and tall panels
+   feel consistent without a guessed max-height target. */
+.header__pill-panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  visibility: hidden;
+  /* Panel must not contribute intrinsic width to the pill-group — pill width
+     is driven by the nav row only. `inline-size: 0; min-inline-size: 100%`
+     gives the panel 0 intrinsic width but renders it at parent's full width. */
+  inline-size: 0;
+  min-inline-size: 100%;
+  transition:
+    grid-template-rows 350ms ease-in-out,
+    opacity 200ms ease-out,
+    visibility 0s linear 350ms;
+}
+
+.header__pill-panel.is-active {
+  grid-template-rows: 1fr;
+  opacity: 1;
+  visibility: visible;
+  transition:
+    grid-template-rows 350ms ease-in-out,
+    opacity 200ms ease-out 50ms,
+    visibility 0s linear 0s;
+}
+
+.header__pill-panel-list,
+.header__pill-panel-inner {
+  min-height: 0;
+  overflow: hidden;
+  list-style: none;
+}
+
+/* Padding lives on the content, not on .header__pill-panel-inner: padding on
+   the grid item adds to its min-size (content-box), so the track won't
+   collapse to 0 when closed and a blank strip would show under the nav row. */
+.header__pill-panel-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 8px 12px;
+}
+
+/* Padding on each panel's content root (not on .header__pill-panel-inner) so
+   the grid track can collapse cleanly when closed. Targets snippet roots
+   directly to keep the pattern declarative — if a snippet's root changes,
+   the relevant selector here is the single point of contact. */
+.header__pill-panel--search .form-group,
+.header__pill-panel--account .customer-login-inline,
+.header__pill-panel--bag .ajax-cart__body,
+.header__pill-panel--bag .ajax-cart__footer {
+  margin: 0;
+  padding: 8px 8px 12px;
+}
+
+.header__pill-panel--search .form-control {
+  border: 0;
+  border-bottom: 1px solid var(--color-muted);
+  overflow: visible;
+  gap: 0;
+}
+
+.header__pill-panel--search .form-control__affix:last-child {
+  padding-right: 0;
+}
+
+.header__pill-panel--search input[type="search"] {
+  width: 100%;
+  background: transparent;
+  border: 0;
+  outline: none;
+  padding: 8px 0;
+  font-size: 14px;
+  color: var(--color-fg);
+}
+
+.header__pill-panel--search input[type="search"]::placeholder {
+  color: var(--color-muted);
+}
+
+.header__pill-panel--search [data-icon] {
+  background: transparent;
+  border: 0;
+  color: var(--color-fg);
+  padding: 4px;
+}
+
+/* Account panel (login / register / logged-in) */
+.customer-login-inline__view[hidden] {
+  display: none;
+}
+
+.customer-login-inline__greeting {
+  font-size: 12px;
+  color: var(--color-fg);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 12px;
+}
+
+.customer-login-inline__account-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.customer-login-inline__account-link {
+  font-size: 12px;
+  color: var(--color-fg);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  line-height: 24px;
+}
+
+.customer-login-inline__account-link:hover {
+  color: var(--color-muted);
+}
+
+.customer-login-inline__meta--center {
+  justify-content: center;
+}
+
+.customer-login-inline__toggle {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+}
+
+.customer-login-inline__form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.customer-login-inline__field input {
+  width: 100%;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--color-muted);
+  outline: none;
+  padding: 10px 0;
+  font-size: 12px;
+  color: var(--color-fg);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.customer-login-inline__field input::placeholder {
+  color: var(--color-muted);
+}
+
+.customer-login-inline__submit {
+  width: 100%;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-fg-dark);
+  color: var(--color-bg);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 4px;
+}
+
+.customer-login-inline__meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.customer-login-inline__link {
+  font-size: 11px;
+  color: var(--color-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.customer-login-inline__link:hover {
+  color: var(--color-fg);
+}
+
+.customer-login-inline__errors {
+  padding: 8px 12px;
+  border-left: 2px solid var(--color-accent);
+  background-color: color-mix(in srgb, var(--color-accent) 8%, transparent);
+}
+
+.customer-login-inline__error {
+  font-size: 11px;
+  color: var(--color-accent);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* Bag panel — cart-body / cart-footer bring their own padding, so strip the
+   inner wrapper's default padding. */
+.header__pill-panel--bag .header__pill-panel-inner {
+  padding: 0;
+}
+
+.header__pill-category {
+  @apply text-[color:var(--color-fg)] uppercase whitespace-nowrap block;
+  font-size: 12px;
+  line-height: 24px;
+}
+
+.header__pill-category:hover {
+  @apply text-[color:var(--color-muted)];
+}
+
+/* --- Mobile pill buttons --- */
+.header__pill-btn {
+  @apply inline-flex items-center border border-[color:var(--color-muted)] rounded-full overflow-hidden;
+  height: 32px;
+}
+
+.header__pill-btn .header__pill-item {
+  font-size: 10px;
+  padding-inline: 12px;
+}
+
+/* --- Flat nav (desktop) --- */
+.header__flat-nav {
+  @apply items-center;
+  gap: 24px;
+}
+
+.header__flat-nav--utility {
+  gap: 20px;
+}
+
+.header__flat-item {
+  @apply text-[color:var(--color-fg)] uppercase leading-[16px] whitespace-nowrap bg-transparent;
+  font-size: 12px;
 }
