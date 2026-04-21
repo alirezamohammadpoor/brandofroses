@@ -3,6 +3,7 @@
     id="ajax-cart"
     class="ajax-cart overflow-hidden"
     data-component="ajax-cart"
+    data-free-shipping-threshold="{{ section.settings.free_shipping_threshold | times: 100 }}"
     aria-hidden="true"
     aria-modal="true"
     role="dialog"
@@ -13,27 +14,42 @@
 
     <form action="{{ routes.cart_url }}" method="post" novalidate class="flex flex-col h-full">
       <div class="ajax-cart__header">
-        <span class="text-[12px] text-fg" data-cart-title>{{ 'layout.cart.title' | t }} ({{ cart.item_count }})</span>
-        <button class="text-[12px] text-fg" data-ajax-cart-close type="button">{{ 'general.close' | t }}</button>
+        <span class="text-label text-fg uppercase" data-cart-title>
+          {{ 'layout.cart.title' | t | upcase }} ({{ cart.item_count }})
+        </span>
+        <button
+          class="text-fg text-[16px] leading-none"
+          data-ajax-cart-close
+          type="button"
+          aria-label="{{ 'general.close' | t }}"
+        >
+          &times;
+        </button>
       </div>
+
+      <div class="ajax-cart__divider"></div>
 
       <div class="flex-1 overflow-y-auto">
         {% render 'cart-body' %}
       </div>
 
-      {% render 'cart-footer' %}
-    </form> 
+      {% render 'cart-footer', threshold: settings.free_shipping_threshold %}
+    </form>
 
     <div class="ajax-cart__empty">
-      <div class="ajax-cart__empty-text">
-        {{ section.settings.empty_text | default: 'Your cart is empty' }}
+      <div class="ajax-cart__empty-inner">
+        <p class="text-body-medium text-fg">{{ 'ajax_cart.general.empty_title' | t }}</p>
+        <a
+          href="{{ routes.all_products_collection_url }}"
+          class="text-caption text-fg"
+        >{{ 'ajax_cart.general.empty_cta' | t }} &rarr;</a>
       </div>
-    </div>    
+    </div>
   </div>
 
   <script type="application/json" data-cart-json>
     {% render 'cart-json' %}
-  </script>  
+  </script>
 </div>
 
 {% schema %}
@@ -41,22 +57,8 @@
   "name": "Ajax Cart",
   "settings": [
     {
-      "id": "checkout_button_text",
-      "type": "text",
-      "label": "Checkout Button Text",
-      "default": "Proceed To Checkout"
-    },
-    {
-      "id": "checkout_message",
-      "type": "text",
-      "label": "Checkout Message",
-      "info": "e.g. 'Taxes will be calculated at checkout'"
-    },
-    {
-      "id": "empty_text",
-      "type": "textarea",
-      "label": "Empty Cart Text",
-      "default": "Looks like you have some shopping to do."
+      "type": "paragraph",
+      "content": "The free shipping threshold lives in Theme Settings \u2192 Cart so the same value applies to both the mobile drawer and the desktop bag panel."
     }
   ]
 }

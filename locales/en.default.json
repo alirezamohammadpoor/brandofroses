@@ -338,10 +338,12 @@
       "title": "Bag",
       "remove": "Remove",
       "subtotal": "Subtotal",
-      "shipping": "Shipping",
-      "calculated_in_checkout": "Calculated in checkout",
-      "total_value": "Total value",
-      "checkout": "Go to checkout"
+      "checkout": "Checkout",
+      "empty_title": "Your cart is empty",
+      "empty_cta": "Explore our products",
+      "view_cart": "View cart",
+      "free_shipping_progress_html": "You're {{ amount }} away from free shipping",
+      "free_shipping_unlocked": "Free shipping unlocked"
     }
   },
   "announcement_bar": {

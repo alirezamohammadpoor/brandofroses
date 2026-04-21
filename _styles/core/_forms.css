@@ -241,7 +241,7 @@ input[type="number"] {
   }
 
   input[type="number"] {
-    @apply w-5 text-center appearance-none font-sans text-[14px] text-fg;
+    @apply w-5 text-center appearance-none font-sans text-[12px] text-fg;
   }
 }
 

@@ -3,32 +3,56 @@
   Cart Footer
   ------------------------------------------------------------------------------
 
-  Renders the sticky footer of the ajax cart (subtotal and checkout button).
-  Reads strings from locale; takes no params.
+  Renders the sticky footer of the ajax cart:
+  - free shipping progress (hidden when threshold is 0 or unlocked)
+  - subtotal
+  - checkout button
+
+  @param {number} threshold - Free shipping threshold in store currency (0 = hide)
 
   @example
-    {% render 'cart-footer' %}
+    {% render 'cart-footer', threshold: section.settings.free_shipping_threshold %}
 {% enddoc %}
+
+{%- liquid
+  assign threshold_cents = threshold | default: 0 | times: 100
+  assign remaining_cents = threshold_cents | minus: cart.items_subtotal_price
+-%}
 
 <div
   class="ajax-cart__footer"
   data-component="cart-footer"
 >
-  <div class="flex justify-between items-center text-[12px] text-muted">
-    <span>{{ 'ajax_cart.general.shipping' | t }}</span>
-    <span>{{ 'ajax_cart.general.calculated_in_checkout' | t }}</span>
-  </div>
+  {% if threshold_cents > 0 %}
+    <p
+      class="text-[11px] text-muted uppercase text-center leading-[16px]"
+      data-free-shipping
+    >
+      {%- if remaining_cents > 0 -%}
+        {{ 'ajax_cart.general.free_shipping_progress_html' | t: amount: remaining_cents | money_without_trailing_zeros }}
+      {%- else -%}
+        {{ 'ajax_cart.general.free_shipping_unlocked' | t }}
+      {%- endif -%}
+    </p>
+  {% endif %}
 
-  <div class="flex justify-between items-center text-[12px] text-fg">
-    <span>{{ 'ajax_cart.general.total_value' | t }}</span>
+  <div class="flex justify-between items-center text-label text-fg uppercase">
+    <span>{{ 'ajax_cart.general.subtotal' | t }}</span>
     <span data-subtotal-price>{{ cart.items_subtotal_price | money_without_trailing_zeros }}</span>
   </div>
 
   <button
     type="submit"
     name="checkout"
-    class="w-full h-12 bg-fg text-bg text-[12px] font-medium flex items-center justify-center mt-1"
+    class="w-full h-[52px] rounded-md bg-fg-dark text-bg text-[12px] font-medium uppercase tracking-[0.04em] flex items-center justify-center"
   >
-    {{ 'ajax_cart.general.checkout' | t }}
+    {{ 'ajax_cart.general.checkout' | t | upcase }}
   </button>
+
+  <a
+    href="{{ routes.cart_url }}"
+    class="text-[11px] text-muted uppercase tracking-[0.04em] text-center block mt-2"
+  >
+    {{ 'ajax_cart.general.view_cart' | t }}
+  </a>
 </div>

@@ -28,7 +28,7 @@
 }
 
 /* Typography — mirrors Figma text styles. */
-@utility text-display { font-size: 72px; font-weight: 700; line-height: 110%; letter-spacing: -0.01em; }
+@utility text-display { font-size: 48px; font-weight: 700; line-height: 110%; letter-spacing: -0.01em; }
 @utility text-h1 { font-size: 40px; font-weight: 700; line-height: 110%; letter-spacing: -0.005em; }
 @utility text-h2 { font-size: 32px; font-weight: 700; line-height: 120%; }
 @utility text-h3 { font-size: 24px; font-weight: 700; line-height: 125%; }
@@ -61,9 +61,13 @@
     --backdrop-color: #000;
     --backdrop-opacity: 0.6;      
 
-    --header-height: 40px;
+    --header-height: 48px;
     --announcement-height: 32px;
     --chrome-height: calc(var(--header-height) + var(--announcement-height));
+
+    @media (min-width: 1024px) {
+      --header-height: 56px;
+    }
 
     --layout-padding-top: 24px;
     --layout-padding-bottom: 24px;

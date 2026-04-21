@@ -2,6 +2,7 @@ import { toAriaBoolean } from '@/core/utils/a11y'
 import FocusTrap from '@/core/focusTrap'
 import type { LiteCart } from '@/types/shopify'
 import type { CartAPIEvent } from '@/core/cartAPI'
+import { BREAKPOINTS } from '@/core/breakpointsController'
 
 import BaseComponent from '@/components/base'
 import Backdrop from '@/components/backdrop'
@@ -124,7 +125,11 @@ export default class AJAXCart extends BaseComponent {
     const { cart } = e.detail
 
     this.setEmpty(cart.item_count === 0)
-    
+
+    // On desktop the header's Bag pill panel handles the "cart opened" UX;
+    // don't auto-open the drawer there. Mobile still gets the drawer.
+    if (window.innerWidth >= BREAKPOINTS.lg) return
+
     this.open()
   }
 
