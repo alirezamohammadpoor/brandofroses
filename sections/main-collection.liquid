@@ -63,16 +63,38 @@
     </div>
   {% endif %}
 
+  {%- comment -%} ===== FILTERABLE RESULTS =====
+    Wrap everything that should refresh on filter/sort in a single container.
+    CollectionSection's AJAX handler swaps this element's innerHTML with the
+    freshly-rendered server response — keeps the hero in place and avoids a
+    full page navigation.
+
+    A11y: `role="region"` + `aria-label` gives screen readers a named
+    landmark. `aria-live="polite"` announces updates without stealing focus.
+    `aria-busy` is flipped to "true" during an in-flight fetch in
+    CollectionSection.
+  {%- endcomment -%}
+  <div
+    data-collection-results
+    role="region"
+    aria-label="{{ collection.title | escape }}"
+    aria-live="polite"
+    aria-busy="false"
+  >
+
   {%- comment -%} ===== TOOLBAR (filter + sort, page 1 only) ===== {%- endcomment -%}
   {% if current_page == 1 %}
     {% render 'collection-toolbar' %}
   {% endif %}
 
-  {%- comment -%} ===== PRODUCT COUNT (page 1 only) ===== {%- endcomment -%}
+  {%- comment -%} ===== PRODUCT COUNT (page 1 only) =====
+    The span already lives inside the `aria-live="polite"` results region, so
+    SR users hear the new count when filters change.
+  {%- endcomment -%}
   {% if current_page == 1 %}
     <div class="flex justify-end items-center px-2 py-6 lg:py-8">
       <span class="text-[12px] text-fg lg:text-muted">
-        {{ collection.products_count }} {{ 'collections.general.products' | t | default: 'products' }}
+        {{ collection.products_count }} {{ 'collections.general.products' | t }}
       </span>
     </div>
   {% endif %}
@@ -198,6 +220,8 @@
       </a>
     {% endif %}
   </div>
+
+  </div>{%- comment -%} /data-collection-results {%- endcomment -%}
 
 </div>
 

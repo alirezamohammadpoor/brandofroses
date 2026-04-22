@@ -76,6 +76,14 @@ export default class Drawer extends BaseComponent {
 
     this.ariaControlElements.forEach(el => el.removeAttribute('aria-haspopup'))
 
+    // Destroy the backdrop we generated in the constructor. Without this the
+    // button stays attached to <body> forever, and a new instance of the same
+    // drawer creates a second backdrop — both listen for clicks, open/close
+    // state falls out of sync between them, and clicks into the orphan loop
+    // the drawer back open. (Hit this during collection AJAX swaps.)
+    this.backdrop?.destroy()
+    this.backdrop = null
+
     super.destroy()
   }
 

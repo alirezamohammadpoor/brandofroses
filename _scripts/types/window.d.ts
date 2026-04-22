@@ -32,6 +32,14 @@ declare global {
         listId: string
       };
       breakpointsController?: BreakpointsController;
+      /**
+       * Re-runs the view-container standalone component lifecycle. Call with
+       * `'destroy'` before a manual DOM swap inside the view container, then
+       * `'mount'` after, or pass `'remount'` to do both in one call.
+       * Used by section-level AJAX swaps (e.g. CollectionSection filter fetch)
+       * so components inside the swapped region rebind to the fresh DOM.
+       */
+      remountViewStandalones?: (action?: 'destroy' | 'mount' | 'remount') => void;
     };
   }
 }
