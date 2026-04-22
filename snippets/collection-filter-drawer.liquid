@@ -1,0 +1,152 @@
+{% doc %}
+
+  Collection filter drawer (mobile)
+  ------------------------------------------------------------------------------
+
+  Full-screen slide-in drawer that contains all `collection.filters`, stacked
+  as `<details>` accordion sections. Uses the shared `.drawer` primitive.
+
+  Must be rendered INSIDE the collection toolbar `<form>` so its inputs are
+  included on submit alongside the desktop pill inputs.
+
+  On desktop the drawer is never opened (the desktop pill row is the UI), so
+  we render the drawer markup only on mobile breakpoints via CSS.
+
+  @example
+    {% render 'collection-filter-drawer' %}
+
+{% enddoc %}
+
+<div
+  id="collection-filter-drawer"
+  class="drawer collection-filter-drawer lg:hidden"
+  data-component="collection-filter-drawer"
+  aria-hidden="true"
+  role="dialog"
+  aria-label="{{ 'collections.filters.title' | t | default: 'Filter' }}"
+  inert
+>
+  <div class="collection-filter-drawer__inner" data-scroller>
+    <header class="collection-filter-drawer__header">
+      <span class="collection-filter-drawer__title">{{ 'collections.filters.title' | t | default: 'Filter' }}</span>
+      <button
+        type="button"
+        class="collection-filter-drawer__close"
+        data-close
+        aria-label="{{ 'general.close' | t }}"
+      >&times;</button>
+    </header>
+
+    <div class="collection-filter-drawer__body">
+      {% for f in collection.filters %}
+        {%- liquid
+          assign has_active = false
+          if f.active_values.size > 0
+            assign has_active = true
+          endif
+          if f.type == 'price_range'
+            if f.min_value.value or f.max_value.value
+              assign has_active = true
+            endif
+          endif
+        -%}
+        <details class="collection-filter-drawer__group" {% if has_active %}open{% endif %}>
+          <summary class="collection-filter-drawer__group-title">
+            <span>{{ f.label }}</span>
+            <span class="collection-filter-drawer__group-caret" aria-hidden="true">▾</span>
+          </summary>
+
+          <div class="collection-filter-drawer__group-body">
+            {% case f.type %}
+              {% when 'list' %}
+                <ul class="collection-filter-drawer__values">
+                  {% for value in f.values %}
+                    {%- liquid
+                      assign is_disabled = false
+                      if value.count == 0 and value.active == false
+                        assign is_disabled = true
+                      endif
+                    -%}
+                    <li>
+                      <label class="filter-value{% if value.active %} filter-value--active{% endif %}{% if is_disabled %} filter-value--disabled{% endif %}">
+                        <input
+                          type="checkbox"
+                          name="{{ value.param_name }}"
+                          value="{{ value.value | escape }}"
+                          class="sr-only"
+                          data-filter-input
+                          {% if value.active %}checked{% endif %}
+                          {% if is_disabled %}disabled{% endif %}
+                        >
+                        <span class="filter-value__label">{{ value.label }}</span>
+                      </label>
+                    </li>
+                  {% endfor %}
+                </ul>
+
+              {% when 'price_range' %}
+                <div class="filter-price">
+                  <label class="filter-price__field">
+                    <span class="sr-only">{{ 'collections.filters.min_price' | t | default: 'Min price' }}</span>
+                    <input
+                      type="number"
+                      name="{{ f.min_value.param_name }}"
+                      value="{{ f.min_value.value }}"
+                      placeholder="{{ 'collections.filters.min' | t | default: 'Min' }}"
+                      min="0"
+                      inputmode="numeric"
+                      data-filter-input
+                    >
+                  </label>
+                  <span class="filter-price__sep" aria-hidden="true">–</span>
+                  <label class="filter-price__field">
+                    <span class="sr-only">{{ 'collections.filters.max_price' | t | default: 'Max price' }}</span>
+                    <input
+                      type="number"
+                      name="{{ f.max_value.param_name }}"
+                      value="{{ f.max_value.value }}"
+                      placeholder="{{ 'collections.filters.max' | t | default: 'Max' }}"
+                      min="0"
+                      inputmode="numeric"
+                      data-filter-input
+                    >
+                  </label>
+                </div>
+
+              {% when 'boolean' %}
+                <ul class="collection-filter-drawer__values">
+                  <li>
+                    <label class="filter-value{% if f.active_values.first %} filter-value--active{% endif %}">
+                      <input
+                        type="checkbox"
+                        name="{{ f.true_value.param_name }}"
+                        value="1"
+                        class="sr-only"
+                        data-filter-input
+                        {% if f.active_values.first %}checked{% endif %}
+                      >
+                      <span class="filter-value__label">{{ f.label }}</span>
+                    </label>
+                  </li>
+                </ul>
+            {% endcase %}
+          </div>
+        </details>
+      {% endfor %}
+    </div>
+
+    <footer class="collection-filter-drawer__footer">
+      {%- assign apply_label = 'collections.filters.apply' | t | default: 'Apply' -%}
+      {% render 'button',
+                label: apply_label,
+                type: 'submit',
+                variant: 'primary',
+                size: 'lg',
+                block: true
+      %}
+      <a href="{{ collection.url }}" class="collection-filter-drawer__clear" rel="nofollow">
+        {{ 'collections.filters.clear_all' | t | default: 'Clear all' }}
+      </a>
+    </footer>
+  </div>
+</div>

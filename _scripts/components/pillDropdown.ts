@@ -2,26 +2,32 @@ import BaseComponent from '@/components/base'
 import CartAPI, { type CartAPIEvent } from '@/core/cartAPI'
 
 const selectors = {
-  toggle: '[data-desktop-menu-toggle]',
+  toggle: '[data-pill-toggle]',
   panelKey: '[data-panel-key]',
 }
 
 /**
- * DesktopMenu
+ * PillDropdown
  *
- * Manages the pill-style dropdown: any pill item with children becomes a
- * toggle that morphs the whole pill from rounded-full (closed) to
- * rounded-[18px] (open). Multiple toggles share the same pill container —
- * each one has its own category list, and only one list shows at a time.
+ * Generic pill-dropdown primitive. A rounded pill container with one or more
+ * toggle items; each toggle expands a panel in-flow below the pill. Multiple
+ * toggles share the same pill — only one panel is visible at a time.
  *
- * Target element: the pill group (carries data-component="desktop-menu" and
- * data-desktop-menu-panel).
+ * Target element: `.pill-dropdown[data-component="pill-dropdown"]`.
  *
- * Closes on: outside click, Escape, clicking any anchor in the group,
+ * Used by:
+ *   - Header utility pill (Search / Account / Bag)
+ *   - Header primary nav pill (Shop All / Collections / Lookbooks)
+ *   - Collection toolbar (filter pills + sort pill)
+ *
+ * Closes on: outside click, Escape, clicking any anchor inside the pill,
  * clicking the active toggle again.
+ *
+ * Optional feature: a pill group can opt in to auto-open a specific panel
+ * when a cart item is added by setting `data-cart-add-key="<panel-key>"`.
  */
-export default class DesktopMenu extends BaseComponent {
-  static TYPE = 'desktop-menu'
+export default class PillDropdown extends BaseComponent {
+  static TYPE = 'pill-dropdown'
 
   panel: HTMLElement
   toggles: HTMLButtonElement[]
@@ -58,7 +64,6 @@ export default class DesktopMenu extends BaseComponent {
       a.addEventListener('click', this.#onPanelAnchorClick)
     }
 
-    // If this pill group opts in via data-cart-add-key, open that panel on cart.ADD
     if (this.cartAddKey) {
       window.addEventListener(CartAPI.EVENTS.ADD, this.#onCartAdd)
     }

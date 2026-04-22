@@ -128,6 +128,20 @@
       "no_products_found": "No products found",
       "link_title": "Browse our {{ title }} collection",
       "products": "products"
+    },
+    "filters": {
+      "title": "Filter",
+      "toolbar_label": "Filter and sort",
+      "reset": "Reset",
+      "apply": "Apply",
+      "clear_all": "Clear all",
+      "min": "Min",
+      "max": "Max",
+      "min_price": "Min price",
+      "max_price": "Max price"
+    },
+    "sort": {
+      "label": "Sort"
     }
   },
   "contact": {
