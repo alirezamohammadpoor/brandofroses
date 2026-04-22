@@ -14,8 +14,8 @@ theme = "200059257163"
 
 [environments.staging]
 store = "brandofroses-2.myshopify.com"
-theme = "200020328779"
+theme = "200110473547"
 
 [environments.production]
 store = "brandofroses-2.myshopify.com"
-theme = "200018919755"
+theme = "200110440779"
