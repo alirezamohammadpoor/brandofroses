@@ -66,6 +66,27 @@
   color: var(--color-bg);
 }
 
+/* Hide the dividers adjacent to a filled tab — the solid fill is its own
+   visual boundary, and the thin muted divider next to a dark rectangle reads
+   as a defect. `visibility: hidden` (not `display: none`) preserves the
+   divider's layout space so tab positions don't shift between states. */
+.pill-dropdown__item--filled + .pill-dropdown__divider,
+.pill-dropdown__divider:has(+ .pill-dropdown__item--filled) {
+  visibility: hidden;
+}
+
+/* Exception: two filled tabs side-by-side. Hiding the divider lets the two
+   dark backgrounds merge into a single ambiguous blob. Show a lighter
+   divider instead so the tabs stay distinct. The compound selector
+   (:has inside an adjacent-sibling combinator) has higher specificity than
+   the hide rule above, so this override wins naturally. */
+.pill-dropdown__item--filled
+  + .pill-dropdown__divider:has(+ .pill-dropdown__item--filled) {
+  visibility: visible;
+  background-color: var(--color-bg);
+  opacity: 0.4;
+}
+
 .pill-dropdown__caret {
   font-size: 10px;
   margin-left: 2px;

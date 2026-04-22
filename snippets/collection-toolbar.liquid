@@ -5,10 +5,11 @@
 
   Renders the filter + sort toolbar above the product grid on collection pages.
 
-  Desktop: `Filter` label + one pill-dropdown per filter + sort pill (right).
-           Active filter chips sit inline between the filter pills and the sort
-           pill, left of the RESET link.
-  Mobile:  A single `Filter (n)` button that opens the mobile filter drawer,
+  Desktop: one pill-dropdown with a tab per entry in `collection.filters`.
+           Clicking a tab opens its panel inside the shared pill container —
+           only one panel open at a time. Separate sort pill on the right.
+           Active filter chips below the pill row.
+  Mobile:  A single `FILTER (n)` button that opens the mobile filter drawer,
            sort pill next to it, and the active filter chips row below.
 
   Wrapped in a single `<form method="get">` so filter inputs serialize to URL
@@ -37,18 +38,55 @@
   method="get"
   class="collection-toolbar"
   data-component="collection-toolbar"
-  aria-label="{{ 'collections.filters.toolbar_label' | t | default: 'Filter and sort' }}"
+  aria-label="{{ 'collections.filters.toolbar_label' | t }}"
 >
   {% if filters.size > 0 %}
-    {%- comment -%} Desktop filter row — pill per filter {%- endcomment -%}
-    <div class="collection-toolbar__filters hidden lg:flex">
-      <span class="collection-toolbar__label">{{ 'collections.filters.title' | t | default: 'Filter' }}</span>
+    {%- comment -%} Desktop: one pill with a tab per filter {%- endcomment -%}
+    <div
+      class="pill-dropdown collection-toolbar__filter-pill hidden lg:flex"
+      data-component="pill-dropdown"
+    >
+      <nav class="pill-dropdown__nav" aria-label="{{ 'collections.filters.title' | t }}">
+        {% for f in filters %}
+          {%- liquid
+            assign has_active = false
+            if f.active_values.size > 0
+              assign has_active = true
+            endif
+            if f.type == 'price_range'
+              if f.min_value.value or f.max_value.value
+                assign has_active = true
+              endif
+            endif
+          -%}
+          <button
+            type="button"
+            class="pill-dropdown__item pill-dropdown__item--toggle{% if has_active %} pill-dropdown__item--filled{% endif %}"
+            data-pill-toggle
+            data-panel-key="filter-{{ forloop.index }}"
+            aria-controls="collection-filter-panel-{{ forloop.index }}"
+            aria-expanded="false"
+          >{{ f.label }}</button>
+          {% unless forloop.last %}
+            <span class="pill-dropdown__divider" aria-hidden="true"></span>
+          {% endunless %}
+        {% endfor %}
+      </nav>
+
       {% for f in filters %}
-        {% render 'filter-pill', filter: f, index: forloop.index %}
+        <div
+          id="collection-filter-panel-{{ forloop.index }}"
+          class="pill-dropdown__panel pill-dropdown__panel--filter"
+          data-panel-key="filter-{{ forloop.index }}"
+        >
+          <div class="pill-dropdown__panel-inner">
+            {% render 'filter-values', filter: f %}
+          </div>
+        </div>
       {% endfor %}
     </div>
 
-    {%- comment -%} Mobile filter button — opens the drawer {%- endcomment -%}
+    {%- comment -%} Mobile: single Filter button that opens the drawer {%- endcomment -%}
     <div class="collection-toolbar__mobile-filter lg:hidden">
       <button
         type="button"
@@ -57,14 +95,14 @@
         aria-controls="collection-filter-drawer"
         aria-expanded="false"
       >
-        <span>
-          {% if active_count > 0 %}
-            {{ 'collections.filters.title' | t | default: 'Filters' | upcase }} ({{ active_count }})
-          {% else %}
-            {{ 'collections.filters.title' | t | default: 'Filter' }}
-          {% endif %}
-        </span>
-        <span class="pill-dropdown__caret" aria-hidden="true">▾</span>
+        {%- liquid
+          assign label = 'collections.filters.title' | t | upcase
+        -%}
+        {% if active_count > 0 %}
+          {{ label }} ({{ active_count }})
+        {% else %}
+          {{ label }}
+        {% endif %}
       </button>
     </div>
   {% endif %}
@@ -86,7 +124,7 @@
   </div>
 
   {%- comment -%} Mobile filter drawer — rendered inside the form so its inputs
-  are included when the user taps Apply. Only needed if there are filters. {%- endcomment -%}
+  are included when the user taps Apply. {%- endcomment -%}
   {% if filters.size > 0 %}
     {% render 'collection-filter-drawer' %}
   {% endif %}

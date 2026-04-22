@@ -23,12 +23,12 @@
   data-component="collection-filter-drawer"
   aria-hidden="true"
   role="dialog"
-  aria-label="{{ 'collections.filters.title' | t | default: 'Filter' }}"
+  aria-labelledby="collection-filter-drawer-title"
   inert
 >
   <div class="collection-filter-drawer__inner" data-scroller>
     <header class="collection-filter-drawer__header">
-      <span class="collection-filter-drawer__title">{{ 'collections.filters.title' | t | default: 'Filter' }}</span>
+      <span id="collection-filter-drawer-title" class="collection-filter-drawer__title">{{ 'collections.filters.title' | t }}</span>
       <button
         type="button"
         class="collection-filter-drawer__close"
@@ -57,95 +57,28 @@
           </summary>
 
           <div class="collection-filter-drawer__group-body">
-            {% case f.type %}
-              {% when 'list' %}
-                <ul class="collection-filter-drawer__values">
-                  {% for value in f.values %}
-                    {%- liquid
-                      assign is_disabled = false
-                      if value.count == 0 and value.active == false
-                        assign is_disabled = true
-                      endif
-                    -%}
-                    <li>
-                      <label class="filter-value{% if value.active %} filter-value--active{% endif %}{% if is_disabled %} filter-value--disabled{% endif %}">
-                        <input
-                          type="checkbox"
-                          name="{{ value.param_name }}"
-                          value="{{ value.value | escape }}"
-                          class="sr-only"
-                          data-filter-input
-                          {% if value.active %}checked{% endif %}
-                          {% if is_disabled %}disabled{% endif %}
-                        >
-                        <span class="filter-value__label">{{ value.label }}</span>
-                      </label>
-                    </li>
-                  {% endfor %}
-                </ul>
-
-              {% when 'price_range' %}
-                <div class="filter-price">
-                  <label class="filter-price__field">
-                    <span class="sr-only">{{ 'collections.filters.min_price' | t | default: 'Min price' }}</span>
-                    <input
-                      type="number"
-                      name="{{ f.min_value.param_name }}"
-                      value="{{ f.min_value.value }}"
-                      placeholder="{{ 'collections.filters.min' | t | default: 'Min' }}"
-                      min="0"
-                      inputmode="numeric"
-                      data-filter-input
-                    >
-                  </label>
-                  <span class="filter-price__sep" aria-hidden="true">–</span>
-                  <label class="filter-price__field">
-                    <span class="sr-only">{{ 'collections.filters.max_price' | t | default: 'Max price' }}</span>
-                    <input
-                      type="number"
-                      name="{{ f.max_value.param_name }}"
-                      value="{{ f.max_value.value }}"
-                      placeholder="{{ 'collections.filters.max' | t | default: 'Max' }}"
-                      min="0"
-                      inputmode="numeric"
-                      data-filter-input
-                    >
-                  </label>
-                </div>
-
-              {% when 'boolean' %}
-                <ul class="collection-filter-drawer__values">
-                  <li>
-                    <label class="filter-value{% if f.active_values.first %} filter-value--active{% endif %}">
-                      <input
-                        type="checkbox"
-                        name="{{ f.true_value.param_name }}"
-                        value="1"
-                        class="sr-only"
-                        data-filter-input
-                        {% if f.active_values.first %}checked{% endif %}
-                      >
-                      <span class="filter-value__label">{{ f.label }}</span>
-                    </label>
-                  </li>
-                </ul>
-            {% endcase %}
+            {% render 'filter-values', filter: f %}
           </div>
         </details>
       {% endfor %}
     </div>
 
     <footer class="collection-filter-drawer__footer">
-      {%- assign apply_label = 'collections.filters.apply' | t | default: 'Apply' -%}
+      {%- comment -%}
+        Apply submits the form as a full navigation — the drawer can't stay
+        open across a DOM swap, and the AJAX path is only wired for desktop
+        change-events. `CollectionToolbar.onSubmit` detects this submitter
+        and lets the native GET through (see collectionToolbar.ts).
+      {%- endcomment -%}
       {% render 'button',
-                label: apply_label,
+                label: 'collections.filters.apply' | t,
                 type: 'submit',
                 variant: 'primary',
                 size: 'lg',
                 block: true
       %}
       <a href="{{ collection.url }}" class="collection-filter-drawer__clear" rel="nofollow">
-        {{ 'collections.filters.clear_all' | t | default: 'Clear all' }}
+        {{ 'collections.filters.clear_all' | t }}
       </a>
     </footer>
   </div>
