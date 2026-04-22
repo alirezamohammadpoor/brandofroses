@@ -7,7 +7,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "vite build --watch --mode development",
-    "build": "vite build"
+    "build": "vite build",
+    "sync:dev-from-prod": "./scripts/sync-merchant-content.sh production dev",
+    "sync:dev-from-staging": "./scripts/sync-merchant-content.sh staging dev"
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.21.3",

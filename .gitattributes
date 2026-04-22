@@ -1,3 +1,10 @@
 assets/app.bundle.js linguist-generated=true
 assets/app.bundle.css linguist-generated=true
 assets/shopify_common.js linguist-vendored=true
+
+# Merchant-managed files (edited via Shopify Theme Editor and auto-committed
+# by Shopify's GitHub integration). Marking them as generated collapses them
+# in PR review so code diffs stay readable.
+config/settings_data.json linguist-generated=true
+templates/*.json linguist-generated=true
+templates/**/*.json linguist-generated=true
