@@ -23,5 +23,8 @@ export default defineConfig({
     environment: 'happy-dom',
     globals: true,
     include: ['_scripts/**/*.{test,spec}.ts'],
+    // Stubs `window.app` before component imports so cartAPI (read at
+    // module-init time from base.ts) doesn't throw in tests.
+    setupFiles: ['_scripts/__tests__/setup.ts'],
   },
 })
