@@ -16,11 +16,9 @@ header.header {
 
 .header__row {
   @apply relative flex items-center justify-between h-full;
-  padding-inline: 8px;
+  padding-inline: var(--layout-padding-x);
 
   @media (min-width: 1024px) {
-    padding-inline: 16px;
-
     /* Align to top so the pill group can grow downward without
        dragging the wordmark or right nav with it. The 10px top-pad
        keeps closed pill vertically centered in the 56px row. */
@@ -32,6 +30,7 @@ header.header {
 
   .header--flat & {
     @media (min-width: 1024px) {
+      /* Flat style uses a wider gutter for the logo-left layout. */
       padding-inline: 40px;
     }
   }

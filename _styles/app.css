@@ -16,6 +16,11 @@
 
   --spacing-container: 8px;
 
+  /* Vertical gap between sections on a page. Mobile default lives here;
+     desktop override is set in :root below (Tailwind v4's @theme block only
+     accepts custom properties or @keyframes — no @media). */
+  --section-spacing-y: 24px;
+
   --font-sans: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 
   --z-1: 1;
@@ -72,10 +77,16 @@
     --layout-padding-top: 24px;
     --layout-padding-bottom: 24px;
 
+    /* Horizontal page gutter — shared between the header, footer, and any
+       full-bleed section that should align to the site edges. */
+    --layout-padding-x: 8px;
+
     @media (min-width: 1024px) {
       --layout-padding-top: 40px;
       --layout-padding-bottom: 40px;
-    }      
+      --layout-padding-x: 16px;
+      --section-spacing-y: 40px;
+    }
 
     /* Uncomment as needed */
     /*
