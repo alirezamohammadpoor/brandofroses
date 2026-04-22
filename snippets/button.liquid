@@ -1,0 +1,92 @@
+{% doc %}
+
+  Button
+  ------------------------------------------------------------------------------
+
+  Reusable CTA. Renders <button> unless `href` is provided, then renders <a>.
+  Backed by `.btn` + variant modifiers in `_styles/core/_buttons.css`.
+
+  Use this for every CTA: add-to-bag, checkout, submit, "shop all", etc. If
+  you find yourself writing inline `h-12 bg-fg text-bg ...`, stop and use
+  this snippet instead.
+
+  @param {string} label - Button text (required unless children are passed via
+                          the `body_block` capture pattern — see below).
+  @param {string} [type] - `button` | `submit` | `reset`. Default: `button`.
+                          Ignored when `href` is set.
+  @param {string} [href] - If provided, renders as `<a>` instead of `<button>`.
+  @param {string} [variant] - `primary` | `secondary` | `ghost`.
+                              Default: `primary`.
+  @param {string} [size] - `sm` | `md` | `lg`. Default: `md`.
+  @param {boolean} [block] - Full-width. Default: `false`.
+  @param {boolean} [disabled] - Disabled state. Default: `false`.
+  @param {string} [name] - `name` attribute (for form submit targeting, e.g. `add`,
+                          `checkout`). Only applies to <button>.
+  @param {string} [class] - Extra classes appended to the rendered element.
+  @param {string} [aria_label] - Accessible label.
+  @param {string} [aria_controls] - Accessible controls target.
+  @param {string} [target] - Anchor target (e.g. `_blank`). Only applies to <a>.
+  @param {string} [rel] - Anchor rel. Only applies to <a>.
+  @param {string} [data_component] - data-component attribute for JS wiring.
+
+  @example Primary submit
+    {% render 'button',
+              label: 'Subscribe',
+              type: 'submit',
+              block: true
+    %}
+
+  @example Large add-to-bag with name (so the form submit reads `add`)
+    {% render 'button',
+              label: 'Add to bag',
+              type: 'submit',
+              name: 'add',
+              size: 'lg',
+              block: true,
+              data_component: 'atc-button'
+    %}
+
+  @example Secondary link
+    {% render 'button',
+              label: 'Shop all',
+              href: routes.all_products_collection_url,
+              variant: 'secondary'
+    %}
+
+{% enddoc %}
+
+{%- liquid
+  assign resolved_variant = variant | default: 'primary'
+  assign resolved_size = size | default: 'md'
+  assign resolved_type = type | default: 'button'
+
+  assign class_list = 'btn btn--' | append: resolved_variant | append: ' btn--' | append: resolved_size
+  if block
+    assign class_list = class_list | append: ' btn--block'
+  endif
+  if class != blank
+    assign class_list = class_list | append: ' ' | append: class
+  endif
+-%}
+
+{%- if href != blank -%}
+  <a
+    href="{{ href }}"
+    class="{{ class_list }}"
+    {% if aria_label != blank %}aria-label="{{ aria_label | escape }}"{% endif %}
+    {% if aria_controls != blank %}aria-controls="{{ aria_controls }}"{% endif %}
+    {% if target != blank %}target="{{ target }}"{% endif %}
+    {% if rel != blank %}rel="{{ rel }}"{% endif %}
+    {% if data_component != blank %}data-component="{{ data_component }}"{% endif %}
+  >{{ label }}</a>
+{%- else -%}
+  <button
+    type="{{ resolved_type }}"
+    class="{{ class_list }}"
+    {% if name != blank %}name="{{ name }}"{% endif %}
+    {% if disabled %}disabled{% endif %}
+    {% if aria_label != blank %}aria-label="{{ aria_label | escape }}"{% endif %}
+    {% if aria_controls != blank %}aria-controls="{{ aria_controls }}"{% endif %}
+    {% if data_component != blank %}data-component="{{ data_component }}"{% endif %}
+  >{{ label }}</button>
+{%- endif -%}
