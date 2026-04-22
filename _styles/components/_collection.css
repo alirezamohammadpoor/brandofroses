@@ -3,6 +3,15 @@
   @apply grid grid-cols-2 lg:grid-cols-4 gap-1;
 }
 
+/* AJAX loading state — applied by CollectionSection during an in-flight
+   filter/sort fetch. Dim the grid slightly so the user sees the request was
+   received, without full opacity (which would hide the current products). */
+[data-collection-results].is-fetching {
+  opacity: 0.6;
+  transition: opacity 150ms ease;
+  pointer-events: none;
+}
+
 /* --- Collection toolbar (filter + sort bar above the grid) --- */
 .collection-toolbar {
   display: flex;
@@ -19,25 +28,15 @@
   }
 }
 
-.collection-toolbar__filters {
-  align-items: center;
-  gap: 8px;
-}
-
-.collection-toolbar__label {
-  font-size: 12px;
-  color: var(--color-fg);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  margin-right: 4px;
-}
-
-.collection-toolbar__mobile-filter {
-  display: flex;
-  align-items: center;
-}
-
+/* Do NOT set `display` on .collection-toolbar__mobile-filter — it carries
+   `lg:hidden` in the HTML, and a custom display rule at equal specificity
+   would override the utility and leak the mobile button into the desktop
+   toolbar. Leave it as the block default. (Same trap documented in
+   CLAUDE.md.) */
 .collection-toolbar__mobile-filter-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
   border: 1px solid var(--color-muted);
   border-radius: 18px;
   height: 36px;
@@ -58,6 +57,21 @@
   padding-top: 4px;
 }
 
+/* 2-column layout for long value lists (Color, Sort). Scoped to the desktop
+   pill panel so the mobile drawer stays single-column (narrow viewport). */
+.pill-dropdown__panel .filter-values--grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 2px 12px;
+}
+
+/* Give the sort pill a minimum width so long sort labels
+   ("Price, Low to High", etc.) don't wrap inside the panel. The pill's own
+   nav row + dropdown panel both respect min-width here. */
+.pill-dropdown--sort {
+  min-inline-size: 240px;
+}
+
 /* --- Filter value (checkbox / radio list item inside a filter pill panel) --- */
 .filter-value {
   display: block;
@@ -74,11 +88,24 @@
 }
 
 .filter-value:hover {
-  background-color: color-mix(in srgb, var(--color-fg) 5%, transparent);
+  background-color: color-mix(in srgb, var(--color-fg) 12%, transparent);
 }
 
-/* Active filter value — solid dark pill to match the Figma "selected" style */
-.filter-value--active {
+/* Keyboard focus — the real input is .sr-only (visually hidden but
+   focusable), so without an :has() rule on the label there's no focus ring
+   on tab-through. Mirrors the focus style on the header pill items. */
+.filter-value:has(input:focus-visible) {
+  outline: 2px solid var(--color-fg);
+  outline-offset: 2px;
+}
+
+/* Active filter value — solid dark pill to match the Figma "selected" style.
+   Applies both when the server rendered the class (after the filter URL is
+   committed) AND live while the user is clicking, so the drawer / pill panel
+   shows immediate selection feedback instead of waiting for the round-trip. */
+.filter-value--active,
+.filter-value:has(input[type="checkbox"]:checked),
+.filter-value:has(input[type="radio"]:checked) {
   background-color: var(--color-fg);
   color: var(--color-bg);
   border-radius: 9999px;
