@@ -4,6 +4,7 @@ name: PR Check
 # Fails the PR if:
 # - Dependencies can't install from the lockfile
 # - Vite build has a TypeScript or ESLint error (vite-plugin-eslint is wired in)
+# - Vitest suite has a failing test
 # - Shopify theme check reports any offense
 
 on:
@@ -37,6 +38,10 @@ jobs:
         # Vite runs with vite-plugin-eslint; any ESLint error fails the build.
         # TypeScript source is transpiled by Vite — syntactic/module errors fail here.
         run: bun run build
+
+      - name: Test (Vitest)
+        # Unit tests live in `_scripts/**/*.test.ts`. Happy-dom environment.
+        run: bun run test
 
       - name: Setup Node (for Shopify CLI)
         uses: actions/setup-node@v4
