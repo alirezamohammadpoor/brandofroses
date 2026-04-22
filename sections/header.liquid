@@ -20,30 +20,25 @@
         aria-controls="mobile-menu"
         aria-expanded="false"
       >
-        <span class="header__pill-item">Menu</span>
+        <span class="pill-dropdown__item">Menu</span>
       </button>
     </div>
 
     {%- comment -%} --- Desktop: Left navigation --- {%- endcomment -%}
     {% if style == 'pill' %}
-      {%- comment -%}
-        Pill group: morphs from rounded-full (closed, nav row only) to
-        rounded-[18px] (open, nav row + divider + categories).
-      {%- endcomment -%}
       <div
         id="desktop-menu-panel"
-        class="header__pill-group hidden lg:flex"
-        data-desktop-menu-panel
-        data-component="desktop-menu"
+        class="pill-dropdown hidden lg:flex"
+        data-component="pill-dropdown"
       >
-        <nav class="header__pill-nav" aria-label="Primary">
+        <nav class="pill-dropdown__nav" aria-label="Primary">
           {% if menu != blank %}
             {% for link in menu.links %}
               {% if link.links.size > 0 %}
                 <button
                   type="button"
-                  class="header__pill-item header__pill-item--toggle"
-                  data-desktop-menu-toggle
+                  class="pill-dropdown__item pill-dropdown__item--toggle"
+                  data-pill-toggle
                   data-panel-key="{{ forloop.index0 }}"
                   aria-controls="desktop-menu-panel-{{ forloop.index0 }}"
                   aria-expanded="false"
@@ -51,34 +46,33 @@
                   <span>{{ link.title }}</span>
                 </button>
               {% else %}
-                <a href="{{ link.url }}" class="header__pill-item"{% if link.current %} aria-current="page"{% endif %}>
+                <a href="{{ link.url }}" class="pill-dropdown__item"{% if link.current %} aria-current="page"{% endif %}>
                   {{ link.title }}
                 </a>
               {% endif %}
-              {% unless forloop.last %}<span class="header__pill-divider" aria-hidden="true"></span>{% endunless %}
+              {% unless forloop.last %}<span class="pill-dropdown__divider" aria-hidden="true"></span>{% endunless %}
             {% endfor %}
           {% endif %}
         </nav>
 
-        {% comment %} One panel per pill tab that has nested children. {% endcomment %}
         {% if menu != blank %}
           {% for link in menu.links %}
             {% if link.links.size > 0 %}
               <div
-                class="header__pill-panel header__pill-panel--menu"
+                class="pill-dropdown__panel pill-dropdown__panel--menu"
                 data-panel-key="{{ forloop.index0 }}"
               >
-                <div class="header__pill-panel-inner">
+                <div class="pill-dropdown__panel-inner">
                   <ul
                     id="desktop-menu-panel-{{ forloop.index0 }}"
-                    class="header__pill-panel-list"
+                    class="pill-dropdown__panel-list"
                     role="menu"
                   >
                     {% for sublink in link.links %}
                       <li role="none">
                         <a
                           href="{{ sublink.url }}"
-                          class="header__pill-category"
+                          class="pill-dropdown__category"
                           role="menuitem"
                           {% if sublink.current %}aria-current="page"{% endif %}
                         >{{ sublink.title }}</a>
@@ -122,38 +116,37 @@
       </a>
     {% endif %}
 
-    {%- comment -%} --- Right: utility pill group (Search / Login / Bag) --- {%- endcomment -%}
+    {%- comment -%} --- Right: utility pill group (Search / Account / Bag) --- {%- endcomment -%}
     {% if style == 'pill' %}
       <div
         id="utility-menu-panel"
-        class="header__pill-group header__pill-group--utility hidden lg:flex"
-        data-desktop-menu-panel
-        data-component="desktop-menu"
+        class="pill-dropdown pill-dropdown--utility hidden lg:flex"
+        data-component="pill-dropdown"
         data-cart-add-key="bag"
       >
-        <nav class="header__pill-nav" aria-label="Utility">
+        <nav class="pill-dropdown__nav" aria-label="Utility">
           <button
             type="button"
-            class="header__pill-item header__pill-item--toggle"
-            data-desktop-menu-toggle
+            class="pill-dropdown__item pill-dropdown__item--toggle"
+            data-pill-toggle
             data-panel-key="search"
             aria-controls="utility-menu-panel-search"
             aria-expanded="false"
           >Search</button>
-          <span class="header__pill-divider" aria-hidden="true"></span>
+          <span class="pill-dropdown__divider" aria-hidden="true"></span>
           <button
             type="button"
-            class="header__pill-item header__pill-item--toggle"
-            data-desktop-menu-toggle
+            class="pill-dropdown__item pill-dropdown__item--toggle"
+            data-pill-toggle
             data-panel-key="account"
             aria-controls="utility-menu-panel-account"
             aria-expanded="false"
           >{{ 'layout.customer.account' | t }}</button>
-          <span class="header__pill-divider" aria-hidden="true"></span>
+          <span class="pill-dropdown__divider" aria-hidden="true"></span>
           <button
             type="button"
-            class="header__pill-item header__pill-item--toggle"
-            data-desktop-menu-toggle
+            class="pill-dropdown__item pill-dropdown__item--toggle"
+            data-pill-toggle
             data-panel-key="bag"
             aria-controls="utility-menu-panel-bag"
             aria-expanded="false"
@@ -166,31 +159,31 @@
 
         <div
           id="utility-menu-panel-search"
-          class="header__pill-panel header__pill-panel--search"
+          class="pill-dropdown__panel pill-dropdown__panel--search"
           data-panel-key="search"
         >
-          <div class="header__pill-panel-inner">
+          <div class="pill-dropdown__panel-inner">
             {% render 'search-inline', id: section.id | append: '-search' %}
           </div>
         </div>
 
         <div
           id="utility-menu-panel-account"
-          class="header__pill-panel header__pill-panel--account"
+          class="pill-dropdown__panel pill-dropdown__panel--account"
           data-panel-key="account"
         >
-          <div class="header__pill-panel-inner">
+          <div class="pill-dropdown__panel-inner">
             {% render 'customer-login-inline' %}
           </div>
         </div>
 
         <div
           id="utility-menu-panel-bag"
-          class="header__pill-panel header__pill-panel--bag"
+          class="pill-dropdown__panel pill-dropdown__panel--bag"
           data-panel-key="bag"
           data-header-cart-panel
         >
-          <div class="header__pill-panel-inner">
+          <div class="pill-dropdown__panel-inner">
             {% render 'cart-body' %}
             {% render 'cart-footer', threshold: settings.free_shipping_threshold %}
             <script type="application/json" data-cart-json>
@@ -227,7 +220,7 @@
         aria-controls="ajax-cart"
         aria-expanded="false"
       >
-        <span class="header__pill-item" data-component="header-cart-control">
+        <span class="pill-dropdown__item" data-component="header-cart-control">
           Bag (<span data-count>{{ cart.item_count }}</span>)
         </span>
       </button>

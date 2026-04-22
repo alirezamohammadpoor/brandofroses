@@ -1,0 +1,93 @@
+{% doc %}
+
+  Collection toolbar
+  ------------------------------------------------------------------------------
+
+  Renders the filter + sort toolbar above the product grid on collection pages.
+
+  Desktop: `Filter` label + one pill-dropdown per filter + sort pill (right).
+           Active filter chips sit inline between the filter pills and the sort
+           pill, left of the RESET link.
+  Mobile:  A single `Filter (n)` button that opens the mobile filter drawer,
+           sort pill next to it, and the active filter chips row below.
+
+  Wrapped in a single `<form method="get">` so filter inputs serialize to URL
+  params on submit. Auto-submits on change via the `collection-toolbar`
+  component.
+
+  @example
+    {% render 'collection-toolbar' %}
+
+{% enddoc %}
+
+{%- liquid
+  assign filters = collection.filters
+  assign active_count = 0
+  for f in filters
+    assign active_count = active_count | plus: f.active_values.size
+    if f.type == 'price_range'
+      if f.min_value.value or f.max_value.value
+        assign active_count = active_count | plus: 1
+      endif
+    endif
+  endfor
+-%}
+
+<form
+  method="get"
+  class="collection-toolbar"
+  data-component="collection-toolbar"
+  aria-label="{{ 'collections.filters.toolbar_label' | t | default: 'Filter and sort' }}"
+>
+  {% if filters.size > 0 %}
+    {%- comment -%} Desktop filter row — pill per filter {%- endcomment -%}
+    <div class="collection-toolbar__filters hidden lg:flex">
+      <span class="collection-toolbar__label">{{ 'collections.filters.title' | t | default: 'Filter' }}</span>
+      {% for f in filters %}
+        {% render 'filter-pill', filter: f, index: forloop.index %}
+      {% endfor %}
+    </div>
+
+    {%- comment -%} Mobile filter button — opens the drawer {%- endcomment -%}
+    <div class="collection-toolbar__mobile-filter lg:hidden">
+      <button
+        type="button"
+        class="pill-dropdown__item pill-dropdown__item--toggle collection-toolbar__mobile-filter-btn{% if active_count > 0 %} pill-dropdown__item--filled{% endif %}"
+        data-drawer-toggle="collection-filter-drawer"
+        aria-controls="collection-filter-drawer"
+        aria-expanded="false"
+      >
+        <span>
+          {% if active_count > 0 %}
+            {{ 'collections.filters.title' | t | default: 'Filters' | upcase }} ({{ active_count }})
+          {% else %}
+            {{ 'collections.filters.title' | t | default: 'Filter' }}
+          {% endif %}
+        </span>
+        <span class="pill-dropdown__caret" aria-hidden="true">▾</span>
+      </button>
+    </div>
+  {% endif %}
+
+  <div class="collection-toolbar__right">
+    <div class="collection-toolbar__chips hidden lg:flex">
+      {% render 'filter-chips', filters: filters %}
+    </div>
+
+    {% render 'sort-dropdown',
+              sort_options: collection.sort_options,
+              current_sort: collection.sort_by | default: collection.default_sort_by
+    %}
+  </div>
+
+  {%- comment -%} Mobile: chips sit on their own row below the pills {%- endcomment -%}
+  <div class="collection-toolbar__chips-mobile lg:hidden">
+    {% render 'filter-chips', filters: filters %}
+  </div>
+
+  {%- comment -%} Mobile filter drawer — rendered inside the form so its inputs
+  are included when the user taps Apply. Only needed if there are filters. {%- endcomment -%}
+  {% if filters.size > 0 %}
+    {% render 'collection-filter-drawer' %}
+  {% endif %}
+</form>

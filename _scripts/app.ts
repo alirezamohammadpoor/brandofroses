@@ -32,8 +32,9 @@ import AJAXCartSection from '@/sections/ajaxCart'
 import AnnouncementRotator from '@/components/announcementRotator'
 import CurrencySelector from '@/components/currencySelector'
 import ScrollSection from '@/components/scrollSection'
-import DesktopMenu from '@/components/desktopMenu'
+import PillDropdown from '@/components/pillDropdown'
 import CustomerLoginInline from '@/components/customerLoginInline'
+import CollectionToolbar from '@/components/collectionToolbar'
 
 // Use this to expose anything needed throughout the rest of the app
 window.app = window.app || {};
@@ -63,11 +64,14 @@ function init() {
   for (const el of document.querySelectorAll<HTMLElement>(ScrollSection.SELECTOR)) {
     new ScrollSection(el)
   }
-  for (const el of document.querySelectorAll<HTMLElement>(DesktopMenu.SELECTOR)) {
-    new DesktopMenu(el)
+  for (const el of document.querySelectorAll<HTMLElement>(PillDropdown.SELECTOR)) {
+    new PillDropdown(el)
   }
   for (const el of document.querySelectorAll<HTMLElement>(CustomerLoginInline.SELECTOR)) {
     new CustomerLoginInline(el)
+  }
+  for (const el of document.querySelectorAll<HTMLElement>(CollectionToolbar.SELECTOR)) {
+    new CollectionToolbar(el)
   }
 
   // START Taxi
