@@ -67,11 +67,18 @@
       {%- comment -%}
         Apply submits the form as a full navigation — the drawer can't stay
         open across a DOM swap, and the AJAX path is only wired for desktop
-        change-events. `CollectionToolbar.onSubmit` detects this submitter
-        and lets the native GET through (see collectionToolbar.ts).
+        change-events. `CollectionToolbar.onSubmit` intercepts this
+        submitter to build a deduped URL (native serialization would emit
+        duplicate name+value pairs since filter inputs are rendered twice)
+        and then navigates via `window.location.href`.
+
+        Label is pre-assigned: Shopify's `render` tag doesn't evaluate
+        filter chains on inline args, so `label: '...' | t` leaks the raw
+        key through — the translation has to happen before the render call.
       {%- endcomment -%}
+      {%- assign apply_label = 'collections.filters.apply' | t -%}
       {% render 'button',
-                label: 'collections.filters.apply' | t,
+                label: apply_label,
                 type: 'submit',
                 variant: 'primary',
                 size: 'lg',
