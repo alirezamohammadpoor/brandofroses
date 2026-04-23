@@ -1,6 +1,16 @@
-/* Results display grid — matches collection product grid for infinite scroll */
-.results-display ul {
-  @apply grid grid-cols-2 lg:grid-cols-4 gap-1;
+/* Results display grid — matches collection product grid for infinite scroll.
+   gap-x-1 (4px) horizontal; vertical gap uses the `--section-spacing-y`
+   token (24px mobile / 40px desktop) so card rows breathe the same amount
+   as the major section blocks above the grid.
+
+   Direct-child selector (`>`) is load-bearing: a plain descendant selector
+   would also match the swatch `<ul>` nested inside every product-card,
+   forcing the 3 color dots into a 4-column grid and spreading them across
+   the full card width. (Hit this the first pass — dots appeared at the
+   far edges of the card with a huge gap between them.) */
+.results-display > ul {
+  @apply grid grid-cols-2 lg:grid-cols-4 gap-x-1;
+  row-gap: var(--section-spacing-y);
 }
 
 /* AJAX loading state — applied by CollectionSection during an in-flight

@@ -219,10 +219,15 @@ describe('CollectionToolbar', () => {
       expect(changeSpy.mock.calls[0][0].detail.url).toContain('filter.v.option.size=M')
     })
 
-    it('lets drawer Apply submits through (native GET navigation by design)', () => {
+    it('drawer Apply navigates to a deduped URL (no AJAX dispatch, no native submit)', () => {
+      // Native form submission would serialize every input — and filter
+      // inputs are rendered twice (desktop pill + drawer) with identical
+      // name+value pairs, producing `?size=M&size=M` in the URL. We
+      // intercept and route through `buildUrl()` instead.
       const form = makeForm(`
         <input type="checkbox" data-filter-input name="filter.v.option.size" value="M" checked>
         <div class="collection-filter-drawer">
+          <input type="checkbox" data-filter-input name="filter.v.option.size" value="M" checked>
           <button id="apply" type="submit">Apply</button>
         </div>
       `)
@@ -231,9 +236,8 @@ describe('CollectionToolbar', () => {
       const changeSpy = vi.fn()
       form.addEventListener(TOOLBAR_CHANGE_EVENT, changeSpy)
 
+      const originalHref = window.location.href
       const apply = form.querySelector<HTMLButtonElement>('#apply')!
-      // Synthesize a SubmitEvent with `submitter` set — that's the branch
-      // onSubmit checks via `submitter?.closest('.collection-filter-drawer')`.
       const submit = new SubmitEvent('submit', {
         bubbles: true,
         cancelable: true,
@@ -241,8 +245,14 @@ describe('CollectionToolbar', () => {
       })
       form.dispatchEvent(submit)
 
-      expect(submit.defaultPrevented).toBe(false)
+      expect(submit.defaultPrevented).toBe(true)
       expect(changeSpy).not.toHaveBeenCalled()
+      expect(window.location.href).not.toBe(originalHref)
+      // URL carries the filter param exactly once, not twice.
+      expect(window.location.search).toContain('filter.v.option.size=M')
+      expect(
+        (window.location.search.match(/filter\.v\.option\.size=M/g) || []).length,
+      ).toBe(1)
     })
   })
 })
