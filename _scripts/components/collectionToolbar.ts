@@ -54,18 +54,25 @@ export default class CollectionToolbar extends BaseComponent {
   /**
    * Prevent the form's native GET submission (e.g. from Enter-in-a-price-
    * input or future submit buttons on desktop). We route everything through
-   * the AJAX path via `onChange`. The mobile drawer Apply button still
-   * submits the form traditionally — that path is a full navigation by
-   * design since the drawer can't stay open across a DOM swap.
+   * the AJAX path via `onChange`. The mobile drawer Apply button does a
+   * full navigation by design (the drawer can't stay open across a DOM
+   * swap), BUT we still intercept so we can route through `buildUrl()` —
+   * native form serialization would emit duplicate `name=value` pairs
+   * because every filter input is rendered twice (desktop pill + drawer),
+   * corrupting the URL + breaking shareable links.
    */
   onSubmit(e: Event) {
-    // The drawer Apply button has no special class of its own, but it lives
-    // inside .collection-filter-drawer. Its click fires submit from inside
-    // the drawer; let it through.
-    const submitter = (e as SubmitEvent).submitter as HTMLElement | null
-    if (submitter?.closest('.collection-filter-drawer')) return
-
     e.preventDefault()
+
+    const submitter = (e as SubmitEvent).submitter as HTMLElement | null
+    if (submitter?.closest('.collection-filter-drawer')) {
+      // Drawer Apply — full navigation to a clean, deduped URL.
+      window.location.href = this.buildUrl()
+      return
+    }
+
+    // Any other submit path (desktop Enter-in-price, etc.) routes through
+    // the AJAX swap.
     this.dispatchChange()
   }
 
