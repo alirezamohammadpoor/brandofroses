@@ -84,3 +84,6 @@ stats.html
 
 # Claude Code
 .claude/
+
+# Scraped catalog data (ephemeral)
+scripts/scrape-brandofroses/output/

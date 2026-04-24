@@ -21,13 +21,16 @@ import BaseRenderer from '@/renderers/base'
 // Transitions
 import PageTransition from '@/transitions/page'
 
-// Sections
+// Sections — globals only (header/footer/mobile-menu/ajax-cart live outside
+// the Taxi view and persist across navigations). Per-page sections
+// (Collection, Product, Blog, etc.) are registered by the Taxi renderer
+// in `_scripts/renderers/base.ts::onEnter()` so each navigation gets a
+// fresh instance scoped to the freshly-swapped view DOM.
 import SectionManager from '@/core/sectionManager'
 import HeaderSection from '@/sections/header'
 import FooterSection from '@/sections/footer'
 import MobileMenuSection from '@/sections/mobileMenu'
 import AJAXCartSection from '@/sections/ajaxCart'
-import CollectionSection from '@/sections/collection'
 
 // Standalone components (not tied to sections)
 import AnnouncementRotator from '@/components/announcementRotator'
@@ -36,6 +39,8 @@ import ScrollSection from '@/components/scrollSection'
 import PillDropdown from '@/components/pillDropdown'
 import CustomerLoginInline from '@/components/customerLoginInline'
 import CollectionToolbar from '@/components/collectionToolbar'
+import ProductRecommendations from '@/components/productRecommendations'
+import CollapsibleToggle from '@/components/collapsibleToggle'
 
 // Use this to expose anything needed throughout the rest of the app
 window.app = window.app || {};
@@ -54,7 +59,6 @@ function init() {
   sectionManager.register(FooterSection)
   sectionManager.register(MobileMenuSection)
   sectionManager.register(AJAXCartSection)
-  sectionManager.register(CollectionSection)
 
   // --- Standalone components lifecycle ---
   //
@@ -85,6 +89,8 @@ function init() {
     PillDropdown,
     CustomerLoginInline,
     CollectionToolbar,
+    ProductRecommendations,
+    CollapsibleToggle,
   ]
 
   const mountInRoot = (

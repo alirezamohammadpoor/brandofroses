@@ -104,72 +104,75 @@ export default class CollectionSection extends ResultsSection {
     if (!resultsEl) return
 
     const url = window.location.pathname + window.location.search
-
-    this.#inFlight?.abort()
-    this.#inFlight = new AbortController()
-
-    resultsEl.classList.add(CLASSES.isFetching)
-    resultsEl.setAttribute('aria-busy', 'true')
-    try {
-      const newInner = await this.fetchResultsDom(url)
-      if (newInner) this.swapResults(resultsEl, newInner)
-    }
-    catch (err) {
-      if ((err as DOMException)?.name === 'AbortError') return
-      console.warn('[collection] popstate fetch failed', err)
-    }
-    finally {
-      resultsEl.classList.remove(CLASSES.isFetching)
-      resultsEl.setAttribute('aria-busy', 'false')
-      this.#inFlight = null
-    }
+    await this.#runFetch(resultsEl, url, 'popstate')
   }
 
   async onToolbarChange(e: Event) {
     const detail = (e as CustomEvent<ToolbarChangeDetail>).detail
     if (!detail?.url) return
 
-    // If a previous fetch is still in flight, cancel it — only the latest
-    // filter state matters.
-    this.#inFlight?.abort()
-    this.#inFlight = new AbortController()
-
     const resultsEl = this.qs(SELECTORS.results)
     if (!resultsEl) return
+
+    // Push the URL first so the back button works even if fetch fails.
+    window.history.pushState({}, '', detail.url)
+
+    await this.#runFetch(resultsEl, detail.url, 'filter')
+  }
+
+  /**
+   * Shared fetch/swap pipeline for popstate + toolbar changes. Handles the
+   * cancellation dance: a fresher call aborts ours via the shared
+   * `#inFlight` slot, our awaited fetch rejects with AbortError, and we
+   * bail out without touching UI state the newer call now owns. The
+   * `localAborter === this.#inFlight` guard on the cleanup path prevents
+   * a superseded call's `finally` from clobbering the newer controller's
+   * slot or clearing its `is-fetching` class mid-flight.
+   */
+  async #runFetch(resultsEl: HTMLElement, url: string, label: string) {
+    this.#inFlight?.abort()
+    const localAborter = new AbortController()
+    this.#inFlight = localAborter
 
     resultsEl.classList.add(CLASSES.isFetching)
     resultsEl.setAttribute('aria-busy', 'true')
 
     try {
-      // Push the URL first so the back button works even if fetch fails.
-      window.history.pushState({}, '', detail.url)
-
-      const newInner = await this.fetchResultsDom(detail.url)
-      if (!newInner) return
-
-      this.swapResults(resultsEl, newInner)
+      const newInner = await this.fetchResultsDom(url, localAborter.signal)
+      // Between the `await` above and here, a newer filter change may have
+      // aborted us; bail out before swapping stale DOM over newer state.
+      if (localAborter.signal.aborted) return
+      if (newInner) this.swapResults(resultsEl, newInner)
     }
     catch (err) {
       if ((err as DOMException)?.name === 'AbortError') return
-      console.warn('[collection] filter fetch failed', err)
+      console.warn(`[collection] ${label} fetch failed`, err)
     }
     finally {
-      resultsEl.classList.remove(CLASSES.isFetching)
-      resultsEl.setAttribute('aria-busy', 'false')
-      this.#inFlight = null
+      // Only clear shared state if we're still the active fetch — a
+      // superseding call may have already taken over `#inFlight` and we
+      // don't want to yank its `is-fetching` class or null its aborter.
+      if (this.#inFlight === localAborter) {
+        resultsEl.classList.remove(CLASSES.isFetching)
+        resultsEl.setAttribute('aria-busy', 'false')
+        this.#inFlight = null
+      }
     }
   }
 
   /**
    * Fetch the section at the given URL and extract the matching
-   * `[data-collection-results]` element from it.
+   * `[data-collection-results]` element from it. Threads the caller's
+   * abort signal through to the underlying `fetchDom` so superseded
+   * requests actually cancel at the network layer.
    */
-  async fetchResultsDom(url: string): Promise<HTMLElement | null> {
+  async fetchResultsDom(url: string, signal?: AbortSignal): Promise<HTMLElement | null> {
     const fetchUrl = new URL(url, window.location.origin)
     fetchUrl.searchParams.set('section_id', this.id)
     fetchUrl.searchParams.set('t', Date.now().toString())
 
-    const dom = await fetchDom(fetchUrl)
+    const dom = await fetchDom(fetchUrl, signal)
+    if (!dom) return null
     const section = dom.getElementById(this.parentId)
     return (section?.querySelector(SELECTORS.results) as HTMLElement | null) ?? null
   }

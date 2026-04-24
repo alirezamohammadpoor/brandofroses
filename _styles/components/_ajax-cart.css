@@ -9,13 +9,21 @@
 
   @apply fixed z-(--z-ajax-cart) top-0 right-0 h-[100dvh] w-full bg-bg;
   @media (min-width: 1024px) { max-width: 420px; }
-  @apply translate-x-full;
+
+  /* Off-screen state — intentionally uses `translate: 100vw` rather than
+     `translate-x-full` (= translate-x: 100%). On mobile the cart is
+     `width: 100%` = `100vw`, so `translate: 100%` would shift its right
+     edge to 200vw, forcing a document-wide horizontal scroll. Using
+     `100vw` anchors the off-screen distance to the viewport, capped by
+     the element's own width — so no matter how wide the cart is, its
+     translated position stays at most one viewport width away. */
+  translate: 100vw 0;
   transition: var(--transition-drawer-out);
 
   pointer-events: none;
 
   &.is-open {
-    @apply translate-x-0;
+    translate: 0 0;
     transition: var(--transition-drawer-in);
     pointer-events: auto;
   }

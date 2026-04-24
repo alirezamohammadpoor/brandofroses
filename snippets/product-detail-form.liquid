@@ -28,7 +28,21 @@
   >
     {% form 'product', product, style: 'height: 100%' %}
       <div class="lg:sticky lg:top-[var(--chrome-height)] lg:min-h-[calc(100dvh-var(--chrome-height))] lg:flex lg:items-center lg:justify-center">
-        <div class="px-2 py-6 lg:py-10 lg:px-0 lg:w-[80%] lg:max-w-[480px]">
+        {%- comment -%}
+          Info-column inner width — Figma 6:2 spec is a 650px column with
+          48px horizontal padding (554px content). Using `lg:w-[560px]`
+          as a FIXED width so the column renders identically across
+          products regardless of inner content length. Earlier
+          `lg:w-full lg:max-w-[560px]` let the flex algorithm size the
+          item to content in some cases (e.g. Beanie product with no
+          size picker → narrower column than products with a size row),
+          which made the ATC button width + inner content jump between
+          PDPs. `lg:max-w-full` on top caps if the parent column is
+          ever narrower than 560px (rare — only at the exact lg
+          breakpoint 1024px where each half-column = 512px).
+          `lg:px-12` echoes Figma's 48px gutter.
+        {%- endcomment -%}
+        <div class="px-2 py-6 lg:py-10 lg:px-12 lg:w-[560px] lg:max-w-full lg:shrink-0">
 
           {%- comment -%}
             Breadcrumb parent collection, fallback chain:
@@ -57,7 +71,7 @@
           -%}
           {% if breadcrumb_col %}
             <nav class="mb-3" aria-label="Breadcrumb">
-              <ol class="flex items-center gap-1 text-[12px] text-fg">
+              <ol class="flex items-center gap-1 text-[12px] text-muted uppercase">
                 {% if breadcrumb_parent and breadcrumb_parent.title != breadcrumb_col.title %}
                   <li><a href="{{ breadcrumb_parent.url }}">{{ breadcrumb_parent.title }}</a></li>
                   <li>/</li>
@@ -69,23 +83,67 @@
             </nav>
           {% endif %}
 
-          {%- comment -%} Title {%- endcomment -%}
-          <h1 class="text-[20px] lg:text-[28px] font-normal text-left text-fg mb-2">
+          {%- comment -%} Title — Figma 6:2 spec: 28px bold uppercase on desktop {%- endcomment -%}
+          <h1 class="text-[20px] lg:text-[28px] font-bold text-left text-fg uppercase mb-2">
             {{ product.title }}
           </h1>
 
-          {%- comment -%} Price {%- endcomment -%}
-          <div class="text-left text-[12px] text-fg mb-6">
+          {%- comment -%} Price — 14px uppercase, wraps the product-detail-price snippet which has no sizing of its own {%- endcomment -%}
+          <div class="text-left text-[14px] text-fg uppercase mb-6">
             {% render 'product-detail-price',
                       product: product,
                       current_variant: current_variant
             %}
           </div>
 
-          {%- comment -%} Description {%- endcomment -%}
+          {%- comment -%}
+            Product description — short tagline + "Read more" toggle that
+            expands the full description below with the same animation
+            pattern used for the info accordion (see `.collapsible` /
+            `collapsible-toggle` in `_collapsible.css` +
+            `collapsibleToggle.ts`). The short-line summary is the
+            description itself truncated to two lines via `line-clamp-2`;
+            the full description repeats underneath inside the collapsible
+            panel so the text animates in instead of the clamp unsnapping
+            abruptly. The button label swaps on expand by listening for
+            the parent's `aria-expanded` state via CSS, not a separate
+            class toggle — keeps a single source of truth.
+          {%- endcomment -%}
           {% if product.description != blank %}
-            <div class="text-[12px] text-fg mb-6 leading-relaxed">
-              {{ product.description }}
+            {%- assign desc_id = 'product-desc-' | append: product.id -%}
+            {%- assign desc_toggle_id = desc_id | append: '-toggle' -%}
+            <div class="mb-6">
+              {%- comment -%}
+                Single-copy description that max-height-animates between
+                a 40px (2-line) clamped preview and its full height. See
+                `_collapsible.css::.description-expander__content` for
+                the animation math and the rationale for not using
+                `.collapsible` (which starts at 0 height, not 2 lines).
+                The `CollapsibleToggle` component flips `is-open` here
+                just like it does on info-accordion panels.
+              {%- endcomment -%}
+              <div
+                id="{{ desc_id }}"
+                class="description-expander__content"
+                role="region"
+                aria-labelledby="{{ desc_toggle_id }}"
+              >
+                <div class="description-expander__text text-[12px] text-fg uppercase leading-5">
+                  {{ product.description }}
+                </div>
+              </div>
+              <button
+                type="button"
+                id="{{ desc_toggle_id }}"
+                class="collapsible-toggle group mt-2 text-[10px] text-muted uppercase tracking-[0.04em] underline cursor-pointer"
+                aria-expanded="false"
+                aria-controls="{{ desc_id }}"
+                aria-label="{{ 'products.toggle_description' | t }}"
+                data-component="collapsible-toggle"
+              >
+                <span class="group-aria-expanded:hidden">{{ 'products.read_more' | t }}</span>
+                <span class="hidden group-aria-expanded:inline">{{ 'products.read_less' | t }}</span>
+              </button>
             </div>
           {% endif %}
 
@@ -154,13 +212,45 @@
 
             <input type="hidden" value="1" name="quantity" />
 
-            {%- comment -%} Add to Bag button {%- endcomment -%}
+            {%- comment -%}
+              Add to Bag button
+              ------------------------------------------------------------
+              Two state visual per Figma 173:446:
+                Default — `bg-fg-dark` + `text-bg`, label left + price right
+                          (`justify-between`).
+                Disabled — `bg-muted` + `text-accent`, label centered
+                           (`justify-center`), price hidden entirely.
+              The disabled variant is handled by:
+                - `disabled:*` utilities on the button itself for bg / text
+                  color / justify
+                - a CSS rule in `_styles/core/_forms.css` that hides the
+                  nested price span when the button is :disabled (Tailwind
+                  doesn't expose a `parent-disabled:` variant, so one CSS
+                  rule is simpler than fighting arbitrary-variant syntax).
+              Inline markup (not the shared `button` snippet) — this
+              button needs a two-child layout that the shared snippet
+              can't express.
+            {%- endcomment -%}
+            {%- comment -%}
+              `data-sold-out` vs `disabled`:
+                - `data-sold-out` is the VISUAL red state (Figma 173:446
+                  disabled variant — bg-muted + text-accent + centered
+                  label + price hidden). Applied only when the variant is
+                  actually unavailable.
+                - `disabled` is the FUNCTIONAL gate (blocks clicks) and is
+                  also toggled TRANSIENTLY during form submit to keep the
+                  user from double-clicking. We can't hang the red visual
+                  on `:disabled` because then the "Adding..." state (which
+                  momentarily sets `disabled` via JS) would also flash
+                  red — not what we want.
+            {%- endcomment -%}
             <button
               type="submit"
               name="add"
-              class="w-full h-12 bg-fg text-bg text-[12px] font-medium flex items-center justify-between px-6 mt-6 disabled:bg-muted disabled:cursor-not-allowed"
+              class="w-full h-12 rounded-[6px] flex items-center px-6 mt-6 text-[14px] font-medium uppercase tracking-[0.5px] bg-fg-dark text-bg justify-between data-[sold-out]:bg-accent data-[sold-out]:text-bg data-[sold-out]:justify-center disabled:cursor-not-allowed"
               {% if current_variant.available == false %}
                 disabled="disabled"
+                data-sold-out
               {% endif %}
               data-component="atc-button"
             >
@@ -182,12 +272,138 @@
               </div>
             </div>
 
-            {%- comment -%} Info links — open modal {%- endcomment -%}
-            <div class="mt-6 flex flex-col gap-3">
-              <button type="button" class="text-[12px] text-fg text-left" data-info-trigger="materials-care">{{ 'products.info.materials_care' | t }}</button>
-              <button type="button" class="text-[12px] text-fg text-left" data-info-trigger="size-guide">{{ 'products.info.size_guide' | t }}</button>
-              <button type="button" class="text-[12px] text-fg text-left" data-info-trigger="shipping-returns">{{ 'products.info.shipping_returns' | t }}</button>
-              <button type="button" class="text-[12px] text-fg text-left" data-info-trigger="payments">{{ 'products.info.payments' | t }}</button>
+            {%- comment -%}
+              Match With (left) + Model Info (right) share a horizontal row.
+                - Match With = merchant-curated companion products (metafield
+                  `custom.match_with`). Each pairing renders as a horizontal
+                  card (image + title + color dots + price) stacked
+                  vertically — see `product-match-with.liquid`. Left side,
+                  `flex-1 min-w-0` takes remaining width after Model Info.
+                - Model Info = fit-reference card (metaobject
+                  `custom.model` + `custom.model_size`, Figma 29:19).
+                  Right side, shrinks to content.
+              Each snippet renders nothing when its metafield is empty, so
+              the wrapper guards against empty `mt-10` dead space by only
+              rendering when at least one side has content. Placed here —
+              directly below ATC + payment terms — so the fit and pairing
+              info live in the purchase-decision zone rather than buried
+              under the info tabs.
+            {%- endcomment -%}
+            {%- comment -%}
+              Wrapper is conditional on at least one side having content.
+              Both snippets re-check their own metafield internally; the
+              guard here is only to avoid an empty `mt-10` + `gap-2` row
+              when everything is unset.
+            {%- endcomment -%}
+            {% if product.metafields.custom.match_with.value.size > 0 or product.metafields.custom.model.value.name != blank %}
+              {%- comment -%}
+                Row width math — same `flex-1 + gap-2` split at every
+                breakpoint so each card is always exactly 3 variant
+                tiles wide on its own row.
+
+                Desktop: info column content 464px. Variant tiles
+                sit at `flex-1` inside a `gap-x-2` (8px) row; with 6
+                sizes each tile = (464 − 5×8) / 6 ≈ 70.67px. Three
+                tiles + 2 gaps = 228px. Mirror `gap-2` here so each
+                card = (464 − 8) / 2 = 228px.
+
+                Mobile: info column content ~359px (375 viewport
+                − 16px `px-2`). Six tiles each = (359 − 40) / 6 ≈
+                53px. Three tiles + 2 gaps = 175px. Mirror `gap-2`
+                here so each card = (359 − 8) / 2 = 175.5px. Content
+                inside the card (48px image + text) is designed to
+                truncate cleanly at this width — title + meta lines
+                use `truncate` / line-clamp so they degrade to
+                ellipsis rather than overflowing.
+              {%- endcomment -%}
+              <div class="mt-10 flex items-start gap-2">
+                <div class="flex-1 min-w-0">
+                  {% render 'product-match-with', product: product %}
+                </div>
+                <div class="flex-1 min-w-0">
+                  {% render 'product-model-info', product: product %}
+                </div>
+              </div>
+            {% endif %}
+
+            {%- comment -%}
+              Info accordion — Figma 6:2: 48px rows with 12px medium
+              uppercase label + `›` chevron. Each row expands in place
+              via the shared `.collapsible` / `collapsible-toggle`
+              primitive (same pattern used for the Read more / Read
+              less description toggle below — and `_collapsible.css`
+              + `collapsibleToggle.ts` are the single source of truth
+              for the 500ms grid-template-rows animation and the
+              chevron rotation triggered by `aria-expanded`).
+
+              Content per row comes from per-product metafields
+              (namespace `custom`): product_details, size_guide,
+              care_instructions, shipping_returns. Each has a
+              fallback copy string so the row renders something
+              meaningful even on un-populated products.
+            {%- endcomment -%}
+            {%- comment -%}
+              Content + fallback resolution is branched per row via a
+              `case` statement rather than being zipped together via a
+              synthetic `|||` delimiter + `split` (earlier iteration
+              did that; footgun if a merchant enters literal `|||` in
+              any of the four metafields — the split would desync
+              content against fallbacks across all rows). Reading
+              `row → content` top-to-bottom is also just more obvious.
+            {%- endcomment -%}
+            <div class="mt-10">
+              {%- assign info_rows = 'product-details,size-guide,care-instructions,shipping-returns' | split: ',' -%}
+              {% for row in info_rows %}
+                {%- liquid
+                  case row
+                    when 'product-details'
+                      assign row_label = 'products.info.product_details' | t
+                      assign row_content = product.metafields.custom.product_details
+                      assign row_fallback = 'Describe construction, materials, and fit here. Populate per product via the `custom.product_details` metafield.'
+                    when 'size-guide'
+                      assign row_label = 'products.info.size_guide' | t
+                      assign row_content = product.metafields.custom.size_guide
+                      assign row_fallback = 'Replace with the brand’s size guide. Consider a metafield (`custom.size_guide`) if sizing differs per product.'
+                    when 'care-instructions'
+                      assign row_label = 'products.info.care_instructions' | t
+                      assign row_content = product.metafields.custom.care_instructions
+                      assign row_fallback = 'Describe care instructions here (wash, dry, iron). Populate per product via the `custom.care_instructions` metafield.'
+                    when 'shipping-returns'
+                      assign row_label = 'products.info.shipping_returns' | t
+                      assign row_content = product.metafields.custom.shipping_returns
+                      assign row_fallback = 'Describe shipping and returns policy here. Can be overridden per product via the `custom.shipping_returns` metafield.'
+                  endcase
+                  assign panel_id = 'product-info-' | append: row | append: '-' | append: product.id
+                  assign toggle_id = panel_id | append: '-toggle'
+                -%}
+                <div class="h-px bg-muted/30 w-full" aria-hidden="true"></div>
+                <button
+                  type="button"
+                  id="{{ toggle_id }}"
+                  class="collapsible-toggle w-full h-12 flex items-center justify-between text-left"
+                  aria-expanded="false"
+                  aria-controls="{{ panel_id }}"
+                  data-component="collapsible-toggle"
+                >
+                  <span class="text-label-tight text-fg">
+                    {{ row_label }}
+                  </span>
+                  <span class="text-[16px] text-muted" aria-hidden="true" data-chevron>›</span>
+                </button>
+                <div
+                  id="{{ panel_id }}"
+                  class="collapsible"
+                  role="region"
+                  aria-labelledby="{{ toggle_id }}"
+                >
+                  <div class="collapsible__inner">
+                    <p class="pb-4 text-[12px] text-fg leading-relaxed">
+                      {{ row_content | default: row_fallback }}
+                    </p>
+                  </div>
+                </div>
+              {% endfor %}
+              <div class="h-px bg-muted/30 w-full" aria-hidden="true"></div>
             </div>
           </div>
         </div>
@@ -198,60 +414,5 @@
       </script>
     {% endform %}
   </div>
-
-  {%- comment -%} Product Info Modal — tab navigation {%- endcomment -%}
-  <div class="fixed inset-0 z-200 pointer-events-none" data-product-info-modal data-component="product-info-modal" role="dialog" aria-modal="true" aria-label="{{ 'products.info.modal_label' | t }}" aria-hidden="true">
-    <div class="absolute inset-0 bg-fg/30 z-0 opacity-0 transition-opacity duration-300" data-modal-backdrop></div>
-    <div class="absolute right-0 top-0 bottom-0 w-full lg:w-[480px] bg-bg overflow-y-auto z-10 translate-x-full transition-transform duration-300" data-modal-panel>
-      {%- comment -%} Header: close button, same height/padding as main header {%- endcomment -%}
-      <div class="flex items-center justify-end container h-[var(--header-height)]">
-        <button type="button" class="text-[12px] text-fg" data-modal-close>{{ 'general.close' | t }}</button>
-      </div>
-
-      {%- comment -%} Tab navigation — vertical tablist {%- endcomment -%}
-      <div
-        class="flex flex-col gap-1 px-4 pb-6 border-b border-fg/10"
-        role="tablist"
-        aria-orientation="vertical"
-        aria-label="{{ 'products.info.modal_label' | t }}"
-      >
-        <button type="button" id="InfoTab-materials-care" role="tab" aria-selected="true" aria-controls="InfoPanel-materials-care" tabindex="0" class="text-[12px] font-medium text-fg text-left py-1" data-info-tab="materials-care">{{ 'products.info.materials_care' | t }}</button>
-        <button type="button" id="InfoTab-size-guide" role="tab" aria-selected="false" aria-controls="InfoPanel-size-guide" tabindex="-1" class="text-[12px] font-normal text-muted text-left py-1" data-info-tab="size-guide">{{ 'products.info.size_guide' | t }}</button>
-        <button type="button" id="InfoTab-shipping-returns" role="tab" aria-selected="false" aria-controls="InfoPanel-shipping-returns" tabindex="-1" class="text-[12px] font-normal text-muted text-left py-1" data-info-tab="shipping-returns">{{ 'products.info.shipping_returns' | t }}</button>
-        <button type="button" id="InfoTab-payments" role="tab" aria-selected="false" aria-controls="InfoPanel-payments" tabindex="-1" class="text-[12px] font-normal text-muted text-left py-1" data-info-tab="payments">{{ 'products.info.payments' | t }}</button>
-      </div>
-
-      {%- comment -%}
-        Tab content panels — default bodies are brand-agnostic placeholders.
-        Replace with brand copy, or keep the metafield-backed pattern
-        (e.g. product.metafields.custom.materials_care) so merchants can edit
-        per-product content in the Shopify admin.
-      {%- endcomment -%}
-      <div class="px-4 py-8">
-        <div id="InfoPanel-materials-care" role="tabpanel" aria-labelledby="InfoTab-materials-care" tabindex="0" data-info-panel="materials-care">
-          <p class="text-[12px] text-fg leading-relaxed">
-            {{ product.metafields.custom.materials_care | default: 'Describe materials and care instructions here. This content can also be populated per product via the `custom.materials_care` metafield.' }}
-          </p>
-        </div>
-        <div id="InfoPanel-size-guide" role="tabpanel" aria-labelledby="InfoTab-size-guide" tabindex="0" data-info-panel="size-guide" class="hidden">
-          <p class="text-[12px] text-fg leading-relaxed">
-            Replace with the brand’s size guide. Consider a metafield (`custom.size_guide`) if sizing differs per product.
-          </p>
-        </div>
-        <div id="InfoPanel-shipping-returns" role="tabpanel" aria-labelledby="InfoTab-shipping-returns" tabindex="0" data-info-panel="shipping-returns" class="hidden">
-          <p class="text-[12px] text-fg leading-relaxed">
-            {{ product.metafields.custom.shipping_returns | default: 'Describe shipping and returns policy here. Can be overridden per product via the `custom.shipping_returns` metafield.' }}
-          </p>
-        </div>
-        <div id="InfoPanel-payments" role="tabpanel" aria-labelledby="InfoTab-payments" tabindex="0" data-info-panel="payments" class="hidden">
-          <p class="text-[12px] text-fg leading-relaxed">
-            List the accepted payment methods. This copy typically comes from the brand’s commerce team.
-          </p>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  {%- comment -%} Info modal behavior handled by TS component (productInfoModal.ts) {%- endcomment -%}
 
 {% endunless %}

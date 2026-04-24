@@ -1,6 +1,24 @@
-label {
-  @apply inline-block;
-}
+/* NOTE: No global `label { display: inline-block }` rule.
+ *
+ * Previous iteration of this file had `label { @apply inline-block }` at
+ * top scope. Two problems:
+ *   1. Outside any @layer, that rule outranked Tailwind utilities like
+ *      `.hidden` and `.flex`, silently overriding display changes on
+ *      labels (e.g. the PDP size-tile labels, the description's
+ *      peer-checked:hidden read-less toggle). Whenever we tried
+ *      `display: flex` / `grid place-items-center` / `hidden` on a
+ *      label via utility classes, this rule quietly won the cascade and
+ *      we'd end up writing inline-style workarounds.
+ *   2. Applying ONE display value to every `<label>` on the site is too
+ *      broad: swatch picker labels, sr-only labels, size tile labels,
+ *      and form-group labels all have different layout needs.
+ *
+ * Display is now scoped to the specific form primitives that actually
+ * need it (`.form-group label`, `.composable-input label`). Every other
+ * label stays at its native `display: inline` unless a component
+ * explicitly overrides it via utility classes — which now works
+ * correctly because no rule is competing with them.
+ */
 
 /* Hide the cancel button on search inputs */
 input[type="search"]::-webkit-search-cancel-button {
@@ -44,7 +62,7 @@ input[type="number"] {
   }
 
   label {
-    @apply font-medium text-fg mb-1 text-sm;
+    @apply block font-medium text-fg mb-1 text-sm;
   }
 
   .form-group__helper,
@@ -249,6 +267,7 @@ input[type="number"] {
   position: relative;
 
   label {
+    @apply block;
     position: relative;
     width: 100%;
   }
@@ -262,4 +281,14 @@ input[type="number"] {
   &:focus-visible {
     @apply outline-none;
   }
+}
+
+/* ATC button sold-out state — hide the inline price when the button
+   carries `data-sold-out`. Figma 173:446 shows only the "SOLD OUT" label
+   centered; the price doesn't render. Tailwind doesn't expose a
+   `parent-data:` child variant, so a plain CSS rule is clearest. (We key
+   off `data-sold-out`, not `:disabled`, so the transient disable during
+   "Adding..." doesn't also hide the price.) */
+[data-component="atc-button"][data-sold-out] [data-atc-price] {
+  display: none;
 }

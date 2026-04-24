@@ -1,0 +1,69 @@
+{%- comment -%}
+  Product Recommendations ("You may also like")
+  ------------------------------------------------------------------------------
+  Rendered via Shopify's Section Rendering API — NOT placed in any product
+  template JSON directly. The PDP contains a `[data-component="product-
+  recommendations"]` placeholder; the `productRecommendations` TS component
+  fetches this section via:
+
+    /recommendations/products
+      ?section_id=product-recommendations
+      &product_id=<id>
+      &limit=12
+      &intent=related
+
+  Shopify populates the `recommendations` object only in the context of that
+  URL. On initial page render (no such URL), `recommendations.performed` is
+  false and this section renders empty — the placeholder stays a no-op.
+
+  Visual: reuses the `scroll-section` + `scroll-arrows` pattern from
+  `product-as-seen-on.liquid` so both share one horizontal-scroll UX.
+{%- endcomment -%}
+
+{%- if recommendations.performed and recommendations.products_count > 0 -%}
+  <div
+    data-component="scroll-section"
+    data-product-recommendations-content
+    class="flex flex-col gap-4 px-2 py-10 lg:py-16"
+  >
+    <div class="flex items-center justify-between">
+      {%- comment -%}
+        Section heading — bumped from 12px (info-row scale) to 16px
+        medium so the rail reads as a section separator, not a PDP
+        form label. Tracking matches the other uppercase labels on the
+        page (info accordion rows, variant picker labels) so the
+        typographic system stays consistent.
+      {%- endcomment -%}
+      <h2 class="text-[16px] font-medium text-fg uppercase tracking-[0.3px]">
+        {{ 'products.recommendations.title' | t }}
+      </h2>
+      {% if recommendations.products_count > 4 %}
+        {% render 'scroll-arrows' %}
+      {% endif %}
+    </div>
+    <div
+      class="flex gap-1 overflow-x-auto overflow-y-hidden snap-x snap-mandatory no-scrollbar"
+      data-scroll-container
+    >
+      {%- for recommended_product in recommendations.products -%}
+        <div class="w-[calc(50%-2px)] lg:w-[calc(25%-3px)] shrink-0 snap-start">
+          {%- render 'product-card', product: recommended_product -%}
+        </div>
+      {%- endfor -%}
+    </div>
+  </div>
+{%- endif -%}
+
+{%- comment -%}
+  This section is only ever rendered via the Section Rendering API — it's
+  never placed in a template JSON, so theme-editor settings here would be
+  unreachable. `limit` and `intent` are controlled by the placeholder URL
+  query params in `sections/main-product.liquid` instead.
+{%- endcomment -%}
+
+{% schema %}
+{
+  "name": "Product Recommendations",
+  "settings": []
+}
+{% endschema %}

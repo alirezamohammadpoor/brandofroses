@@ -14,7 +14,6 @@
 {%- liquid
   assign option_name_handle = option.name | handle
   assign option_parent_id = 'vpo-' | append: option_name_handle | append: '-' | append: product.id
-  assign swatch_count = option.values | map: 'swatch' | compact | size
   assign is_radio = false
   assign is_size = false
   assign is_color = false
@@ -45,13 +44,23 @@
 
 {% capture option_values_content %}
   {% if is_radio %}
-    <div class="{% if is_size %}grid grid-cols-6 auto-rows-[40px] gap-1{% else %}flex flex-wrap gap-1{% endif %}">
+    {%- comment -%}
+      Container:
+        Size  — `flex gap-x-2`. No wrap: all size tiles share one row by
+                flex-grow (each tile `flex-1`), collapsing their width
+                to whatever the row permits. Avoids a single orphan
+                ("2XL" by itself on a second row) at narrower info-column
+                widths. 8px horizontal gap per Figma.
+        Color — `flex flex-wrap gap-2` (8px gap; Figma is 8px between
+                32px swatch circles).
+    {%- endcomment -%}
+    <div class="flex {% if is_size %}w-full gap-x-2{% else %}flex-wrap gap-2{% endif %}">
       {%- for value in option.values -%}
         {%- liquid
           assign input_id = option_parent_id | append: forloop.index0
         -%}
 
-        <div>
+        <div{% if is_size %} class="flex-1 min-w-0"{% endif %}>
           <input
             type="radio"
             id="{{ input_id }}"
@@ -68,14 +77,63 @@
             {% endif %}
           >
 
-          <label for="{{ input_id }}" class="cursor-pointer{% if is_size %} block w-full text-[12px] text-center leading-[40px] peer-checked:border-b peer-checked:border-fg peer-disabled:opacity-40 peer-disabled:line-through{% endif %}">
-            {% if is_color and swatch_count > 0 and value.swatch %}
-              {% render 'swatch', option_value: value, swatch: value.swatch, variant_image: value.variant.featured_media, use_variant_image: false, extra_class: '!w-6 !h-6' %}
+          {%- comment -%}
+            Size tile (Figma 33:25): 72×44 rounded-6. Three states:
+              Default  — 1px muted border, fg text, normal weight
+              Active   — bg-fg-dark fill, bg-colored (inverse) text, medium
+                         weight, NO border
+              Sold out — 40% opacity, muted text, 1px muted border (same as
+                         default), cursor not-allowed (no line-through per
+                         Figma)
+
+            Earlier iteration used an inline `style="display: flex; ..."`
+            on the label to force letter centering because the global
+            `label { display: inline-block }` rule (in `_forms.css`, outside
+            any `@layer`) silently outranked utility classes like
+            `flex items-center justify-center`. That global rule has since
+            been scoped down to form-group / composable-input contexts, so
+            utility classes on labels now win the cascade as expected —
+            hence the plain Tailwind classes below, no inline style.
+          {%- endcomment -%}
+          <label
+            for="{{ input_id }}"
+            class="cursor-pointer{% if is_size %} flex items-center justify-center w-full h-11 rounded-[6px] text-[12px] uppercase leading-none border border-muted peer-checked:border-transparent peer-checked:bg-fg-dark peer-checked:text-bg peer-checked:font-medium peer-disabled:opacity-40 peer-disabled:text-muted peer-disabled:cursor-not-allowed{% endif %}"
+          >
+            {% if is_color %}
+              {%- comment -%}
+                If the merchant configured a Shopify swatch (color or
+                image) on this option value, use it. Otherwise fall back
+                to a circle coloured by the option value's NAME as a CSS
+                color keyword ("White" → white, "Black" → black, etc). If
+                the name isn't a valid CSS color, the browser drops the
+                inline style and `bg-muted` shows through so the circle
+                is always visible. A 1px muted border keeps pale colours
+                (e.g. "White") distinct from the page background.
+              {%- endcomment -%}
+              {% if value.swatch %}
+                {% render 'swatch', option_value: value, swatch: value.swatch, variant_image: value.variant.featured_media, use_variant_image: false %}
+              {% else %}
+                <span
+                  class="swatch bg-muted border border-muted/30"
+                  style="background-color: {{ value | downcase | escape }};"
+                  aria-hidden="true"
+                ></span>
+              {% endif %}
             {% elsif is_size %}
+              {%- comment -%}
+                All three size-system spans render unconditionally when
+                the toggle is enabled; the initial `data-size-system`
+                attribute on the picker root (set to "eu" by default)
+                drives which span is visible via CSS in `_product.css`.
+                Earlier iteration shipped the US + UK spans with
+                `class="hidden"` and JS toggled `hidden` on every click;
+                the CSS-only approach needs one attribute write per
+                click instead of three `querySelectorAll` passes.
+              {%- endcomment -%}
               <span data-size-eu>{{ value }}</span>
               {% if has_size_toggle %}
-                <span data-size-us class="hidden">{{ sizes_us[forloop.index0] | default: value }}</span>
-                <span data-size-uk class="hidden">{{ sizes_uk[forloop.index0] | default: value }}</span>
+                <span data-size-us>{{ sizes_us[forloop.index0] | default: value }}</span>
+                <span data-size-uk>{{ sizes_uk[forloop.index0] | default: value }}</span>
               {% endif %}
             {% else %}
               <span class="inline-block py-2 px-4 border border-fg text-[12px] leading-none cursor-pointer">
@@ -113,19 +171,47 @@
 <div
   data-component="variant-picker-option"
   data-name="{{ option.name }}"
+  {% if is_size and has_size_toggle %}data-size-system="eu"{% endif %}
 >
   {% if is_radio %}
     <fieldset>
       <legend class="sr-only">{{ option.name }}</legend>
-      <div class="text-[12px] font-normal text-fg mb-3 flex items-center justify-between">
-        <span>{{ option.name }}{% if is_color %}: <span class="font-normal" data-selected-color>{{ option.selected_value }}</span>{% endif %}</span>
+      {%- comment -%}
+        Label row — Figma 6:2: 12px medium uppercase. Color label shows
+        the currently-selected value inline ("Color: Black") at the same
+        weight so the emphasis is on the full phrase, not the value.
+      {%- endcomment -%}
+      <div class="text-label-tight text-fg mb-3 flex items-center justify-between">
+        <span>{{ option.name }}{% if is_color %}: <span data-selected-color>{{ option.selected_value }}</span>{% endif %}</span>
 
-        {%- comment -%} Size system toggle (EU/US/UK) {%- endcomment -%}
+        {%- comment -%}
+          Size system toggle (EU/US/UK). `role="group"` + `aria-label`
+          groups the three buttons for assistive tech so they're
+          announced as a single control. `aria-pressed` on each button
+          carries the selected state — a toggle-button pattern rather
+          than a radio group, since the buttons also function as plain
+          actions ("switch the displayed size values") and aren't tied
+          to a form submission.
+
+          Visual state is derived from `aria-pressed` via Tailwind's
+          `aria-pressed:*` variants — no separate class toggling. JS
+          only needs to update two attributes on click (one
+          `aria-pressed` flip across the 3 buttons, one
+          `data-size-system` on the root) and CSS handles the rest.
+          Size-value visibility (which of `data-size-eu/us/uk` spans
+          shows) is CSS-driven off `data-size-system` on the root —
+          see `_product.css`.
+        {%- endcomment -%}
         {% if is_size and has_size_toggle %}
-          <div class="flex items-center gap-3" data-size-toggle>
-            <button type="button" class="text-[12px] font-medium text-fg cursor-pointer" data-toggle-system="eu">EU</button>
-            <button type="button" class="text-[12px] font-normal text-muted cursor-pointer" data-toggle-system="us">US</button>
-            <button type="button" class="text-[12px] font-normal text-muted cursor-pointer" data-toggle-system="uk">UK</button>
+          <div
+            class="flex items-center gap-3"
+            role="group"
+            aria-label="{{ 'products.size_system_label' | t }}"
+            data-size-toggle
+          >
+            <button type="button" class="text-[12px] font-normal text-muted cursor-pointer aria-pressed:font-medium aria-pressed:text-fg" data-toggle-system="eu" aria-pressed="true">EU</button>
+            <button type="button" class="text-[12px] font-normal text-muted cursor-pointer aria-pressed:font-medium aria-pressed:text-fg" data-toggle-system="us" aria-pressed="false">US</button>
+            <button type="button" class="text-[12px] font-normal text-muted cursor-pointer aria-pressed:font-medium aria-pressed:text-fg" data-toggle-system="uk" aria-pressed="false">UK</button>
           </div>
         {% endif %}
       </div>
