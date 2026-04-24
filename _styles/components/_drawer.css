@@ -1,12 +1,19 @@
 .drawer {
-  @apply fixed z-(--z-drawer) top-0 left-0 h-[100dvh] w-full -translate-x-full;
+  @apply fixed z-(--z-drawer) top-0 left-0 h-[100dvh] w-full;
   @media (min-width: 1024px) { max-width: min(90vw, 500px); }
   @apply bg-bg;
 
+  /* Off-screen state — `translate: -100vw` instead of `translate-x-full`
+     (= `translate-x: -100%`). At mobile the drawer is `width: 100%` =
+     `100vw`, so `-100%` would shift its LEFT edge to `-100vw`, extending
+     the document width by a full viewport. `-100vw` anchors the travel
+     to the viewport so the off-screen position is capped regardless of
+     the drawer's own width. */
+  translate: -100vw 0;
   transition: var(--transition-drawer-out);
 
   &.is-open {
-    @apply translate-x-0;
+    translate: 0 0;
     transition: var(--transition-drawer-in);
   }
 }

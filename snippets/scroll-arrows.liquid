@@ -1,12 +1,19 @@
 {% doc %}
   Scroll Arrows
-  Prev/Next arrow buttons for horizontal scroll sections.
+  Prev/Next chevron buttons for horizontal scroll sections (e.g.
+  "you may also like" recommendations). Visible at all breakpoints so
+  mobile users have the same affordance as desktop — earlier iteration
+  was `hidden lg:flex` on the assumption that touch-swipe made arrows
+  redundant on mobile, but Figma 68:72 (mobile PDP) explicitly shows
+  them and they're useful for users who can't comfortably swipe (one-
+  handed use, motor-accessibility). Buttons are 44×44 to meet the
+  Apple HIG / WCAG 2.5.5 touch-target minimum.
 
   @example
     {% render 'scroll-arrows' %}
 {% enddoc %}
 
-<div class="hidden lg:flex items-center gap-3">
+<div class="flex items-center gap-3">
   <button type="button" class="w-11 h-11 inline-flex items-center justify-center text-muted" data-scroll-prev aria-label="Previous">
     <svg width="24" height="24" viewBox="0 0 16 16" fill="none"><path d="M10 12L6 8L10 4" stroke="currentColor" stroke-width="1"/></svg>
   </button>

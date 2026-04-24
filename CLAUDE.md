@@ -65,9 +65,15 @@ These conventions are assumed by the shipped product/cart/gallery snippets. Any 
 ## Key architecture notes (do not remove)
 
 - Global sections (header, footer, mobile-menu, ajax-cart) are registered in `_scripts/app.ts`. Keep `data-section-type` and `data-component` attributes intact when restyling.
+- Page-specific sections (Collection, Product, Blog, etc.) are registered on the Taxi renderer in `_scripts/renderers/base.ts::onEnter()` so each SPA navigation gets a fresh instance scoped to the freshly-swapped view DOM. Don't register a page-section in `app.ts` — it double-mounts.
 - `config/settings_data.json` must have section defaults for all global sections or pages break.
 - Design tokens are code-owned in `_styles/app.css` `@theme` block — not exposed as theme editor settings.
 - Locale strings → JS bridge: `snippets/head-scripts.liquid` → `window.app.strings`.
+- **Reusable primitives** (extend, don't re-invent):
+  - `.collapsible` / `.collapsible__inner` / `.collapsible-toggle` (`_styles/components/_collapsible.css` + `_scripts/components/collapsibleToggle.ts`) — expand/collapse any panel via a button with `aria-expanded` + `aria-controls`. Used by the PDP info accordion and the description Read more/less. Grid-rows auto-height animation at 500ms ease-in-out.
+  - `product-meta-card.liquid` — horizontal 48×48-image + details-stack card on `bg-bg-surface`. Takes a captured `body` slot from the caller. Used by Match With + Model Info cards in the PDP info column.
+  - `ProductRecommendations` component (`_scripts/components/productRecommendations.ts`) — async-fetches a Section Rendering API URL and swaps its content into an empty `[data-component="product-recommendations"]` placeholder. Used for PDP "You may also like" — pattern reusable for any recommendation rail.
+  - `text-label-tight` utility (`_styles/app.css`) — 12px medium uppercase + 0.3px tracking. Match With / Model / Color / info-row labels all share this. Distinct from `text-label` which uses a looser 0.08em tracking for cart/article/blog labels.
 
 ## Build
 

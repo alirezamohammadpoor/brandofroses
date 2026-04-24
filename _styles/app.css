@@ -43,6 +43,15 @@
 @utility text-nav { font-size: 12px; font-weight: 400; line-height: 140%; text-transform: uppercase; letter-spacing: 0.04em; }
 @utility text-label { font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; }
 @utility text-section-label { font-size: 10px; font-weight: 500; line-height: 140%; text-transform: uppercase; letter-spacing: 0.08em; }
+/* `text-label-tight` — same family as `text-label` but with a tighter
+   `letter-spacing: 0.3px` (≈ 0.025em at 12px) matching Figma's PDP info-
+   column label spec. Used for section headings inside the PDP info
+   column (Match With, Model, Color: XYZ, info accordion row labels).
+   A separate utility from `text-label` because bumping `text-label` to
+   0.025em would also tighten cart headers, article-card labels, blog
+   tags, etc. that use the looser 0.08em convention elsewhere in the
+   theme. */
+@utility text-label-tight { font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.3px; }
 
 @utility container {
   max-width: none;
@@ -145,6 +154,14 @@
     text-rendering: optimizeLegibility;
     -moz-osx-font-smoothing: grayscale;
     -webkit-font-smoothing: antialiased;
+
+    /* Global horizontal overflow clip. Off-screen transforms (drawer
+       slide-in / modal panel resting state) could otherwise extend
+       document width. Using `clip` rather than `hidden` because `clip`
+       doesn't create a new block-formatting / scroll context — so
+       `position: sticky` on the PDP info column and any future fixed
+       positioning keep working correctly. */
+    overflow-x: clip;
   }
 
   body.ajax-cart-open,
@@ -276,4 +293,5 @@ img.lazy-image {
 @import './components/_newsletter-form.css';
 @import './components/_ajax-cart.css';
 @import './components/_drawer.css';
+@import './components/_collapsible.css';
 @import './components/_policy.css';

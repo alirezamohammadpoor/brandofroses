@@ -18,12 +18,24 @@
   assign total_products = collection.products.size
 
   comment
-    Count editorial blocks with images
+    Capture the first two VALID editorial blocks (type == 'editorial' AND
+    an image set). Earlier iteration counted qualifying blocks but then
+    rendered `section.blocks[0]` / `[1]` by raw position — if a merchant
+    reordered blocks in the theme editor or left an earlier editorial's
+    image blank, we'd either render the wrong block or render one without
+    an image (broken visual). Collecting into two named slots as we go
+    makes the row 2 / row 3 rendering robust against reorder and blanks.
   endcomment
-  assign editorial_count = 0
+  assign ed_block_1 = blank
+  assign ed_block_2 = blank
   for block in section.blocks
     if block.type == 'editorial' and block.settings.image != blank
-      assign editorial_count = editorial_count | plus: 1
+      if ed_block_1 == blank
+        assign ed_block_1 = block
+      elsif ed_block_2 == blank
+        assign ed_block_2 = block
+        break
+      endif
     endif
   endfor
 -%}
@@ -98,84 +110,25 @@
         {% endfor %}
       </ul>
 
-      {%- comment -%} === ROW 2: editorial[0] + products 5-8 === {%- endcomment -%}
+      {%- comment -%} === ROW 2: first valid editorial (image LEFT) + products 5-8 === {%- endcomment -%}
       {% if total_products > 4 %}
-        {% if editorial_count > 0 %}
-          {%- assign ed_block = section.blocks[0] -%}
-          {%- assign ed_link = ed_block.settings.product.url | default: '' -%}
-          {%- comment -%} Mobile: editorial then grid {%- endcomment -%}
-          <div class="lg:hidden flex flex-col gap-1">
-            {% if ed_link != blank %}<a href="{{ ed_link }}" class="block">{% endif %}
-            <div class="w-full h-[80dvh] overflow-hidden bg-[#d9d4cc]">
-              {{ ed_block.settings.image | image_url: width: 780 | image_tag: loading: 'lazy', class: 'w-full h-full object-cover lazy-image', sizes: '100vw' }}
-            </div>
-            {% if ed_link != blank %}</a>{% endif %}
-            <ul class="grid grid-cols-2 gap-x-1 gap-y-[var(--section-spacing-y)]">
-              {% for product in collection.products limit: 4 offset: 4 %}
-                <li>{% render 'product-card', product: product, loading: 'eager', collection: collection %}</li>
-              {% endfor %}
-            </ul>
-          </div>
-          {%- comment -%} Desktop: image LEFT, products RIGHT — stretches to match 2×2 grid {%- endcomment -%}
-          <div class="hidden lg:flex lg:items-stretch lg:gap-1">
-            {% if ed_link != blank %}<a href="{{ ed_link }}" class="w-1/2 shrink-0">{% endif %}
-            <div class="{% if ed_link == blank %}w-1/2 shrink-0{% endif %} overflow-hidden bg-[#d9d4cc] h-full">
-              {{ ed_block.settings.image | image_url: width: 1420 | image_tag: loading: 'lazy', class: 'w-full h-full object-cover lazy-image', sizes: '50vw' }}
-            </div>
-            {% if ed_link != blank %}</a>{% endif %}
-            <ul class="flex-1 grid grid-cols-2 gap-x-1 gap-y-[var(--section-spacing-y)]">
-              {% for product in collection.products limit: 4 offset: 4 %}
-                <li>{% render 'product-card', product: product, loading: 'eager', collection: collection %}</li>
-              {% endfor %}
-            </ul>
-          </div>
-        {% else %}
-          <ul class="grid grid-cols-2 lg:grid-cols-4 gap-x-1 gap-y-[var(--section-spacing-y)]">
-            {% for product in collection.products limit: 4 offset: 4 %}
-              <li>{% render 'product-card', product: product, loading: 'eager', collection: collection %}</li>
-            {% endfor %}
-          </ul>
-        {% endif %}
+        {% render 'collection-editorial-row',
+                  ed_block: ed_block_1,
+                  offset: 4,
+                  image_side: 'left',
+                  collection: collection,
+                  card_loading: 'eager'
+        %}
       {% endif %}
 
-      {%- comment -%} === ROW 3: editorial[1] + products 9-12 === {%- endcomment -%}
+      {%- comment -%} === ROW 3: second valid editorial (image RIGHT) + products 9-12 === {%- endcomment -%}
       {% if total_products > 8 %}
-        {% if editorial_count > 1 %}
-          {%- assign ed_block = section.blocks[1] -%}
-          {%- assign ed_link = ed_block.settings.product.url | default: '' -%}
-          {%- comment -%} Mobile: editorial then grid {%- endcomment -%}
-          <div class="lg:hidden flex flex-col gap-1">
-            {% if ed_link != blank %}<a href="{{ ed_link }}" class="block">{% endif %}
-            <div class="w-full h-[80dvh] overflow-hidden bg-[#d9d4cc]">
-              {{ ed_block.settings.image | image_url: width: 780 | image_tag: loading: 'lazy', class: 'w-full h-full object-cover lazy-image', sizes: '100vw' }}
-            </div>
-            {% if ed_link != blank %}</a>{% endif %}
-            <ul class="grid grid-cols-2 gap-x-1 gap-y-[var(--section-spacing-y)]">
-              {% for product in collection.products limit: 4 offset: 8 %}
-                <li>{% render 'product-card', product: product, collection: collection %}</li>
-              {% endfor %}
-            </ul>
-          </div>
-          {%- comment -%} Desktop: products LEFT, image RIGHT — stretches to match 2×2 grid {%- endcomment -%}
-          <div class="hidden lg:flex lg:items-stretch lg:gap-1">
-            <ul class="flex-1 grid grid-cols-2 gap-x-1 gap-y-[var(--section-spacing-y)]">
-              {% for product in collection.products limit: 4 offset: 8 %}
-                <li>{% render 'product-card', product: product, collection: collection %}</li>
-              {% endfor %}
-            </ul>
-            {% if ed_link != blank %}<a href="{{ ed_link }}" class="w-1/2 shrink-0">{% endif %}
-            <div class="{% if ed_link == blank %}w-1/2 shrink-0{% endif %} overflow-hidden bg-[#d9d4cc] h-full">
-              {{ ed_block.settings.image | image_url: width: 1420 | image_tag: loading: 'lazy', class: 'w-full h-full object-cover lazy-image', sizes: '50vw' }}
-            </div>
-            {% if ed_link != blank %}</a>{% endif %}
-          </div>
-        {% else %}
-          <ul class="grid grid-cols-2 lg:grid-cols-4 gap-x-1 gap-y-[var(--section-spacing-y)]">
-            {% for product in collection.products limit: 4 offset: 8 %}
-              <li>{% render 'product-card', product: product, collection: collection %}</li>
-            {% endfor %}
-          </ul>
-        {% endif %}
+        {% render 'collection-editorial-row',
+                  ed_block: ed_block_2,
+                  offset: 8,
+                  image_side: 'right',
+                  collection: collection
+        %}
       {% endif %}
 
     </div>

@@ -1,0 +1,79 @@
+{% doc %}
+
+  Product Meta Card
+  ------------------------------------------------------------------------------
+
+  Horizontal card primitive used on the PDP info column:
+    - 48×48 image on the left (muted-square fallback if no image passed)
+    - details stack on the right (12px leading-16 text)
+    - `bg-bg-surface` (warm beige) rounded-6 container
+
+  Two concrete consumers today — extracted here so their markup can't drift
+  independently:
+    - `product-match-with.liquid` — per-pairing card, clickable (href =
+      related product URL), body = title + color dots + price.
+    - `product-model-info.liquid` — fit-reference card, NOT clickable, body
+      = model name + height + size lines.
+
+  If `href` is set, the root element renders as `<a>`; otherwise as `<div>`.
+  Everything inside the details stack is caller-owned: pass a `body`
+  capture from the calling snippet.
+
+  @param {string} alt     - Alt text for the image + aria-label on the root when the card is a link. Required.
+  @param {string} body    - Captured HTML for the details stack (title line, meta lines, etc). Required.
+  @param {object} [image] - Image or media_image object. Falls back to a muted square placeholder.
+  @param {string} [href]  - Link URL. If set, root is <a>; otherwise <div>.
+
+  @example
+    {% capture body %}
+      <p class="text-[12px] font-medium uppercase truncate w-full">{{ related.title }}</p>
+      <p class="text-[12px]">{{ related.price | money_without_trailing_zeros }}</p>
+    {% endcapture %}
+    {% render 'product-meta-card',
+              href: related.url,
+              image: related.featured_image,
+              alt: related.title,
+              body: body %}
+
+{% enddoc %}
+
+{%- comment -%}
+  `leading-[16px]` on the details stack — matches across both consumers so
+  baselines align when a Match With card and a Model Info card render side
+  by side in the PDP info-column row (see `product-detail-form.liquid`).
+  `min-w-0 flex-1` is load-bearing: without it, long text pushes the card
+  past its parent's width and `truncate` / `line-clamp` never kick in.
+{%- endcomment -%}
+
+{% if href != blank %}
+  <a
+    href="{{ href }}"
+    class="flex items-center gap-3 pl-3 pr-4 py-3 rounded-[6px] bg-bg-surface"
+    {% if alt != blank %}aria-label="{{ alt | escape }}"{% endif %}
+  >
+{% else %}
+  <div class="flex items-center gap-3 pl-3 pr-4 py-3 rounded-[6px] bg-bg-surface">
+{% endif %}
+
+  {% if image %}
+    {{ image
+      | image_url: width: 96
+      | image_tag:
+        loading: 'lazy',
+        class: 'w-12 h-12 rounded-[4px] object-cover shrink-0',
+        alt: alt,
+        sizes: '48px'
+    }}
+  {% else %}
+    <div class="w-12 h-12 rounded-[4px] bg-muted shrink-0" aria-hidden="true"></div>
+  {% endif %}
+
+  <div class="flex flex-col gap-[2px] items-start leading-[16px] text-fg min-w-0 flex-1">
+    {{ body }}
+  </div>
+
+{% if href != blank %}
+  </a>
+{% else %}
+  </div>
+{% endif %}

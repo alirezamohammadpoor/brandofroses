@@ -17,3 +17,21 @@ form[aria-busy="true"] [data-atc-price] {
 .composable-input input[type="radio"]:disabled + label .size-box {
   @apply border-muted text-muted cursor-not-allowed;
 }
+
+/* Size system (EU/US/UK) visibility. Earlier iteration toggled `.hidden`
+ * on each per-system span via three `querySelectorAll` passes per click
+ * (see git history of `variantPickerOption.ts`). Replaced with a single
+ * `data-size-system` attribute on the picker root; JS writes one attr,
+ * CSS handles visibility. Each tile contains all three spans; the active
+ * system is whichever matches `data-size-system`. */
+[data-size-system] [data-size-eu],
+[data-size-system] [data-size-us],
+[data-size-system] [data-size-uk] {
+  display: none;
+}
+
+[data-size-system="eu"] [data-size-eu],
+[data-size-system="us"] [data-size-us],
+[data-size-system="uk"] [data-size-uk] {
+  display: inline;
+}

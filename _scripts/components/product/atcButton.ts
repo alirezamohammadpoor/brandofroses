@@ -54,8 +54,23 @@ export default class ATCButton extends BaseComponent {
       }
     }
 
-    // Update the button state
+    // Three conceptually distinct states on this button:
+    //   - `disabled` — functional gate (blocks clicks). True whenever the
+    //     variant is unavailable OR no valid variant is selected, and is
+    //     ALSO toggled transiently during submit ("Adding…"). Cheap lock.
+    //   - `data-sold-out` — VISUAL red state (oxblood bg, centered label,
+    //     price hidden). Should fire ONLY when the variant is a real
+    //     product but sold out (Figma 173:446). NOT when the combo is
+    //     "Unavailable" (variant is undefined — user picked an invalid
+    //     color+size combo), because that's a user-correctable state that
+    //     should look muted, not alarming. And NOT during the submit-
+    //     disable window, or the "Adding…" label would flash red.
+    //     Deriving from `variant && !variant.available` keeps these three
+    //     cases cleanly separated.
+    const isSoldOut = Boolean(variant && !variant.available)
+
     this.el.disabled = isDisabled
+    this.el.toggleAttribute('data-sold-out', isSoldOut)
     this.label.textContent = labelText
   }
 

@@ -20,12 +20,19 @@
     {%- comment -%} A11y pagination — sr-only, updated by existing JS {%- endcomment -%}
     <div class="sr-only" data-pagination aria-hidden="true"></div>
 
-    {%- comment -%} Visual dot pagination — bottom-left of image {%- endcomment -%}
+    {%- comment -%}
+      Visual dot pagination — bottom-left of image. `rounded-full` per
+      Figma 68:72 (round dots, not the earlier square indicators). Active
+      dot = `bg-fg`, inactive = `bg-muted`; JS (`productDetailGallery.ts`)
+      toggles those two classes on `[data-dot]` elements on slide change,
+      so the shape (`rounded-full`, `w-1.5 h-1.5`) is owned by Liquid and
+      is the sole source of truth for dot geometry.
+    {%- endcomment -%}
     {% if slides_count > 1 %}
       <div class="absolute bottom-3 left-4 flex items-center gap-2" data-dots aria-hidden="true">
         {% for i in (1..slides_count) %}
           <span
-            class="block w-1.5 h-1.5 {% if forloop.first %}bg-fg{% else %}bg-muted{% endif %}"
+            class="block w-1.5 h-1.5 rounded-full {% if forloop.first %}bg-fg{% else %}bg-muted{% endif %}"
             data-dot="{{ forloop.index0 }}"
           ></span>
         {% endfor %}

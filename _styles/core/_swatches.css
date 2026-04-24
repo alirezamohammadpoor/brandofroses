@@ -30,11 +30,13 @@
   height: 2rem;
   width: 2rem;
   vertical-align: middle;
+  border-radius: 9999px;
+  overflow: hidden;
 
   svg {
     height: 100%;
     width: 100%;
-  }  
+  }
 
   img {
     position: absolute;
@@ -51,22 +53,24 @@ input[type="radio"] + label .swatch {
   cursor: pointer;
 }
 
-/* Hover state */
+/* Hover state — subtle inset ring so light swatches still feel "live". */
 input[type="checkbox"]:not(:disabled):not(:checked) + label:hover .swatch,
 input[type="radio"]:not(:disabled):not(:checked) + label:hover .swatch {
-  @apply outline-1 outline-offset-1 outline-[var(--color-fg)]/50;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-fg) 50%, transparent);
 }
 
-/* Selected state */
+/* Selected state — Figma 32:21: 1.5px fg border drawn INSIDE the swatch
+   (box-shadow inset so the 32×32 size doesn't shift). `overflow: hidden`
+   on `.swatch` clips the inset ring to the circular shape. */
 input[type="checkbox"]:checked + label .swatch,
 input[type="radio"]:checked + label .swatch {
-  @apply outline-1 outline-offset-1 outline-[var(--color-fg)];
+  box-shadow: inset 0 0 0 1.5px var(--color-fg);
 }
 
-/* Focus state */
+/* Focus state — match selected so keyboard focus is obvious. */
 input[type="checkbox"]:focus-visible + label .swatch,
 input[type="radio"]:focus-visible + label .swatch {
-  @apply outline-1 outline-offset-1 outline-[var(--color-fg)];
+  box-shadow: inset 0 0 0 1.5px var(--color-fg);
 }
 
 /* Disabled state */

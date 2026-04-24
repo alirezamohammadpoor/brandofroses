@@ -89,8 +89,21 @@
 
   {%- assign card_title_id = 'ProductCardTitle-' | append: product.id -%}
 
+  {%- comment -%}
+    `relative` (= `position: relative`) on the card root is load-bearing.
+    Swatches + price blocks inside the card contain `.sr-only` spans which
+    are `position: absolute`. Without a positioned ancestor on the card
+    itself, those spans anchor to `<html>` (the initial containing block)
+    and escape the parent scroll container's overflow clipping — their
+    static-position x-coordinates end up at the card's document position
+    (e.g. 3100px+ for the 10th card in a "You may also like" rail) and
+    inflate `documentElement.scrollWidth`, cascading into visible horizontal
+    overflow on the page. `position: relative` scopes their absolute
+    positioning to the card so the scroll container's `overflow-x: auto`
+    clips them cleanly.
+  {%- endcomment -%}
   <article
-    class="product-card group h-full pb-6"
+    class="product-card group h-full pb-6 relative"
     data-component="product-card"
     aria-labelledby="{{ card_title_id }}"
   >
