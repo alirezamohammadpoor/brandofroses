@@ -10,7 +10,6 @@ import Article from '@/sections/article'
 import Blog from '@/sections/blog'
 import Collection from '@/sections/collection'
 import Product from '@/sections/product'
-import ProductRelated from '@/sections/productRelated'
 import Login from '@/sections/login'
 import Search from '@/sections/search'
 import PageHero from '@/sections/pageHero'
@@ -47,7 +46,6 @@ export default class BaseRenderer extends Renderer {
       Blog,
       Collection,
       Product,
-      ProductRelated,
       Login,
       Search,
       PageHero

@@ -1,12 +1,19 @@
 .drawer {
-  @apply fixed z-(--z-drawer) top-0 left-0 h-[100dvh] w-full -translate-x-full;
+  @apply fixed z-(--z-drawer) top-0 left-0 h-[100dvh] w-full;
   @media (min-width: 1024px) { max-width: min(90vw, 500px); }
   @apply bg-bg;
 
+  /* Off-screen state — `translate: -100vw` instead of `translate-x-full`
+     (= `translate-x: -100%`). At mobile the drawer is `width: 100%` =
+     `100vw`, so `-100%` would shift its LEFT edge to `-100vw`, extending
+     the document width by a full viewport. `-100vw` anchors the travel
+     to the viewport so the off-screen position is capped regardless of
+     the drawer's own width. */
+  translate: -100vw 0;
   transition: var(--transition-drawer-out);
 
   &.is-open {
-    @apply translate-x-0;
+    translate: 0 0;
     transition: var(--transition-drawer-in);
   }
 }
@@ -24,4 +31,138 @@
     opacity: var(--backdrop-opacity);
     transition: var(--transition-backdrop-in);
   }
+}
+
+/* --- Mobile menu (overrides drawer base for brand-of-roses design) --- */
+.mobile-menu {
+  background-color: var(--color-bg-surface);
+}
+
+.mobile-menu__close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 10;
+  font-size: 24px;
+  line-height: 1;
+  color: var(--color-fg);
+  background: transparent;
+}
+
+.mobile-menu__scroller {
+  @apply h-full flex flex-col overflow-y-auto;
+  padding: 40px 8px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.mobile-menu__scroller::-webkit-scrollbar {
+  display: none;
+}
+
+/* Primary nav — big uppercase headings */
+.mobile-menu__primary {
+  @apply flex flex-col;
+  gap: 40px;
+}
+
+.mobile-menu__primary-item {
+  @apply flex flex-col;
+  gap: 24px;
+}
+
+.mobile-menu__primary-link {
+  @apply flex items-center text-[color:var(--color-fg)] uppercase whitespace-nowrap bg-transparent text-left;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 28px;
+  letter-spacing: 0;
+  gap: 8px;
+}
+
+.mobile-menu__caret {
+  font-size: 14px;
+  transition: transform 200ms ease;
+}
+
+.mobile-menu__primary-link[aria-expanded="true"] .mobile-menu__caret {
+  transform: rotate(180deg);
+}
+
+/* Categories accordion — hidden until .is-active */
+.mobile-menu__categories {
+  display: none;
+  flex-direction: column;
+  gap: 24px;
+  padding-left: 24px;
+  list-style: none;
+}
+
+.mobile-menu__categories.is-active {
+  display: flex;
+}
+
+.mobile-menu__category {
+  @apply text-[color:var(--color-fg)] uppercase whitespace-nowrap block;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 24px;
+}
+
+/* Divider between primary nav and search */
+.mobile-menu__divider {
+  height: 1px;
+  width: 100%;
+  margin: 40px 0;
+  background-color: var(--color-muted);
+  opacity: 0.3;
+}
+
+/* Search input */
+.mobile-menu__search {
+  position: relative;
+  width: calc(100% - 16px);
+  margin: 0 auto;
+}
+
+.mobile-menu__search-input {
+  @apply w-full bg-transparent border-0 outline-none;
+  height: 44px;
+  padding: 12px 0;
+  font-size: 12px;
+  color: var(--color-fg);
+  border-bottom: 1px solid var(--color-muted);
+}
+
+.mobile-menu__search-input::placeholder {
+  color: var(--color-muted);
+}
+
+/* Secondary nav (12px uppercase) */
+.mobile-menu__secondary {
+  @apply flex flex-col;
+  gap: 24px;
+  margin-top: 40px;
+}
+
+.mobile-menu__secondary-link {
+  @apply text-[color:var(--color-fg)] uppercase leading-[16px] whitespace-nowrap;
+  font-size: 12px;
+}
+
+/* Spacer pushes social to the bottom */
+.mobile-menu__spacer {
+  flex: 1 0 0;
+  min-height: 40px;
+}
+
+/* Social row at the bottom */
+.mobile-menu__social {
+  @apply flex items-start;
+  gap: 24px;
+}
+
+.mobile-menu__social-link {
+  @apply text-[color:var(--color-fg)] uppercase leading-[16px] whitespace-nowrap;
+  font-size: 12px;
 }

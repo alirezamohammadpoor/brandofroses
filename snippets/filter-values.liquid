@@ -1,0 +1,117 @@
+{% doc %}
+
+  Filter values
+  ------------------------------------------------------------------------------
+
+  Renders the form inputs for a single `collection.filters[]` entry. Handles
+  all three Shopify filter types (`list`, `price_range`, `boolean`). Shared
+  between the desktop pill-dropdown filter panels and the mobile filter
+  drawer's accordion sections — same markup both places.
+
+  @param {object} filter - Shopify collection filter (required)
+
+  @example
+    {% render 'filter-values', filter: f %}
+
+{% enddoc %}
+
+{%- liquid
+  comment
+    Long lists (like Color with 20+ values) render in a 2-col grid inside the
+    desktop pill panel to avoid an endless scroll. Threshold intentionally
+    low — filters with 9+ values already benefit from columnation.
+  endcomment
+  assign grid_modifier = ''
+  if filter.type == 'list' and filter.values.size > 8
+    assign grid_modifier = ' filter-values--grid-2'
+  endif
+-%}
+
+{% case filter.type %}
+  {% when 'list' %}
+    <ul class="pill-dropdown__panel-list filter-values{{ grid_modifier }}">
+      {% for value in filter.values %}
+        {%- liquid
+          assign is_disabled = false
+          if value.count == 0 and value.active == false
+            assign is_disabled = true
+          endif
+        -%}
+        <li>
+          <label class="filter-value{% if value.active %} filter-value--active{% endif %}{% if is_disabled %} filter-value--disabled{% endif %}">
+            <input
+              type="checkbox"
+              name="{{ value.param_name }}"
+              value="{{ value.value | escape }}"
+              class="sr-only"
+              data-filter-input
+              {% if value.active %}checked{% endif %}
+              {% if is_disabled %}disabled{% endif %}
+            >
+            <span class="filter-value__label">{{ value.label }}</span>
+          </label>
+        </li>
+      {% endfor %}
+    </ul>
+
+  {% when 'price_range' %}
+    {%- comment -%}
+      Shopify stores `filter.min_value.value` / `max_value.value` as integers
+      in the store's smallest currency unit (öre for SEK, cents for USD).
+      Rendering them raw makes "10 SEK" show up as "1000" in the input.
+      `money_without_currency` converts to the decimal representation
+      ("10.00"); `replace: ',' '.'` normalizes locales that use comma as the
+      decimal separator so <input type="number"> parses correctly. Shopify's
+      storefront filter backend accepts the decimal form on submit. Same
+      pattern used by Dawn.
+    {%- endcomment -%}
+    {%- assign range_max_display = filter.range_max | money_without_currency | replace: ',', '.' -%}
+    <div class="filter-price">
+      <label class="filter-price__field">
+        <span class="sr-only">{{ 'collections.filters.min_price' | t }}</span>
+        <input
+          type="number"
+          name="{{ filter.min_value.param_name }}"
+          {% if filter.min_value.value %}value="{{ filter.min_value.value | money_without_currency | replace: ',', '.' }}"{% endif %}
+          placeholder="{{ 'collections.filters.min' | t }}"
+          min="0"
+          max="{{ range_max_display }}"
+          step="0.01"
+          inputmode="decimal"
+          data-filter-input
+        >
+      </label>
+      <span class="filter-price__sep" aria-hidden="true">–</span>
+      <label class="filter-price__field">
+        <span class="sr-only">{{ 'collections.filters.max_price' | t }}</span>
+        <input
+          type="number"
+          name="{{ filter.max_value.param_name }}"
+          {% if filter.max_value.value %}value="{{ filter.max_value.value | money_without_currency | replace: ',', '.' }}"{% endif %}
+          placeholder="{{ 'collections.filters.max' | t }}"
+          min="0"
+          max="{{ range_max_display }}"
+          step="0.01"
+          inputmode="decimal"
+          data-filter-input
+        >
+      </label>
+    </div>
+
+  {% when 'boolean' %}
+    <ul class="pill-dropdown__panel-list filter-values">
+      <li>
+        <label class="filter-value{% if filter.active_values.first %} filter-value--active{% endif %}">
+          <input
+            type="checkbox"
+            name="{{ filter.true_value.param_name }}"
+            value="1"
+            class="sr-only"
+            data-filter-input
+            {% if filter.active_values.first %}checked{% endif %}
+          >
+          <span class="filter-value__label">{{ filter.label }}</span>
+        </label>
+      </li>
+    </ul>
+{% endcase %}

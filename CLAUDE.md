@@ -27,13 +27,28 @@ Shopify Online Store 2.0 theme built on [Cadaver 2.0](https://github.com/stefbow
 
 Type scale and spacing are exposed as Tailwind utilities (`text-display`, `text-h1`…`text-label`, `container`). Change values in `_styles/app.css`; classnames stay.
 
+### Animation standards
+
+| Pattern | Transition | Duration | Easing |
+|---|---|---|---|
+| Slide-in panels (drawers, cart, mobile menu) | `translate-x-full` → `translate-x-0` | 300ms | default |
+| Backdrop fade | `opacity-0` → `opacity-100` | 300ms | default |
+| Collapsible sections (accordions, pill dropdowns) | `max-height` + `opacity` | 500–700ms | `ease-in-out` |
+| Dropdown arrows / carets | `transition-transform` | 200ms | default |
+| Image crossfade on hover | `transition-opacity` | 300ms | default |
+| Toast | `translate-x` + `opacity` | 500ms | `ease-in-out` |
+
+Core rule: **panel modals = `translate-x` at 300ms, content expansions = `max-height` at 500–700ms, micro-interactions = 200–300ms.**
+
 ### Rules (do not violate without an inline-comment reason)
 
 - **Always use Tailwind classes for styling. Never write raw CSS.** Exceptions must be commented inline with a reason.
+- **Never use `@apply` for `display` properties on elements that also use Tailwind's responsive visibility utilities** (`hidden`, `lg:flex`, `lg:hidden`, `md:block`, etc.). Component CSS files are imported *after* Tailwind's utility layer in the compiled output, so at equal specificity (single class) custom rules win on `display` — which breaks the responsive show/hide pattern (the element stays visible when `.hidden` should hide it). Instead: set `flex-direction`, `align-items`, `gap` directly; let HTML utilities control `display`. If you truly need `display: flex` from the custom rule, wrap it in `@media (min-width: 1024px) { ... }` so mobile still honors `.hidden`. (This bit the mobile/desktop header overlap — don't repeat it.)
 - **Always use `const`/`let` and arrow functions in JavaScript. Never use `var`.**
 - **Never use inline `<script>` in any Liquid file for interactive behavior.** Taxi.js SPA navigation does not re-execute inline scripts after page transitions. All event listeners and DOM behavior live in TypeScript components (`_scripts/components/`), extended from `BaseComponent`, wired in `constructor()` and cleaned up in `destroy()`. Register standalone components in `app.ts`.
 - **Translations:** every user-facing string uses the `t` filter. Locale strings in `locales/en.default.json`, exported to JS via `snippets/head-scripts.liquid` → `window.app.strings`.
 - **Never co-author commits.** Do not add `Co-Authored-By: Claude...` trailers to git commit messages. Commits are authored solely by the user.
+- **Verify responsive behavior before marking work done.** After editing shared CSS (design tokens, drawer styles, header base rules, `--header-height`) or base components, explicitly walk through mobile and desktop viewports. Shared rules cascade — changes in them frequently break previously-working surfaces. Run `bun run build` and `shopify theme check` as a floor, but visual regression at each breakpoint is the real check.
 
 ## Data contracts (customize per brand)
 
@@ -50,9 +65,15 @@ These conventions are assumed by the shipped product/cart/gallery snippets. Any 
 ## Key architecture notes (do not remove)
 
 - Global sections (header, footer, mobile-menu, ajax-cart) are registered in `_scripts/app.ts`. Keep `data-section-type` and `data-component` attributes intact when restyling.
+- Page-specific sections (Collection, Product, Blog, etc.) are registered on the Taxi renderer in `_scripts/renderers/base.ts::onEnter()` so each SPA navigation gets a fresh instance scoped to the freshly-swapped view DOM. Don't register a page-section in `app.ts` — it double-mounts.
 - `config/settings_data.json` must have section defaults for all global sections or pages break.
 - Design tokens are code-owned in `_styles/app.css` `@theme` block — not exposed as theme editor settings.
 - Locale strings → JS bridge: `snippets/head-scripts.liquid` → `window.app.strings`.
+- **Reusable primitives** (extend, don't re-invent):
+  - `.collapsible` / `.collapsible__inner` / `.collapsible-toggle` (`_styles/components/_collapsible.css` + `_scripts/components/collapsibleToggle.ts`) — expand/collapse any panel via a button with `aria-expanded` + `aria-controls`. Used by the PDP info accordion and the description Read more/less. Grid-rows auto-height animation at 500ms ease-in-out.
+  - `product-meta-card.liquid` — horizontal 48×48-image + details-stack card on `bg-bg-surface`. Takes a captured `body` slot from the caller. Used by Match With + Model Info cards in the PDP info column.
+  - `ProductRecommendations` component (`_scripts/components/productRecommendations.ts`) — async-fetches a Section Rendering API URL and swaps its content into an empty `[data-component="product-recommendations"]` placeholder. Used for PDP "You may also like" — pattern reusable for any recommendation rail.
+  - `text-label-tight` utility (`_styles/app.css`) — 12px medium uppercase + 0.3px tracking. Match With / Model / Color / info-row labels all share this. Distinct from `text-label` which uses a looser 0.08em tracking for cart/article/blog labels.
 
 ## Build
 

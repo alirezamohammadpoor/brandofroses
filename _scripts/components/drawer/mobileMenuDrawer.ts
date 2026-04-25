@@ -6,6 +6,9 @@ export default class MobileMenuDrawer extends Drawer {
   static TYPE = 'mobile-menu-drawer'
 
   searchInline: SearchInline
+  toggles: HTMLButtonElement[]
+
+  #onToggleClick: (e: MouseEvent) => void
 
   constructor(el: HTMLElement) {
     super(el, {
@@ -14,18 +17,32 @@ export default class MobileMenuDrawer extends Drawer {
 
     this.searchInline = new SearchInline(this.qs(SearchInline.SELECTOR) as HTMLFormElement)
 
-    // Expandable search bar toggle
-    const searchToggle = this.qs('[data-search-toggle]')
-    const searchForm = this.qs('[data-search-form]') as HTMLFormElement | null
+    this.toggles = Array.from(this.el.querySelectorAll<HTMLButtonElement>('[data-mobile-menu-toggle]'))
 
-    if (searchToggle && searchForm) {
-      searchToggle.addEventListener('click', () => {
-        searchForm.classList.toggle('hidden')
-        if (!searchForm.classList.contains('hidden')) {
-          const input = searchForm.querySelector('input') as HTMLInputElement
-          input?.focus()
-        }
-      })
+    this.#onToggleClick = this.onToggleClick.bind(this)
+    for (const t of this.toggles) {
+      t.addEventListener('click', this.#onToggleClick)
+    }
+  }
+
+  destroy() {
+    for (const t of this.toggles) {
+      t.removeEventListener('click', this.#onToggleClick)
+    }
+    super.destroy()
+  }
+
+  onToggleClick(e: MouseEvent) {
+    e.preventDefault()
+    const btn = e.currentTarget as HTMLButtonElement
+    const key = btn.dataset.panelKey ?? ''
+    const isOpen = btn.getAttribute('aria-expanded') === 'true'
+
+    btn.setAttribute('aria-expanded', String(!isOpen))
+
+    const panel = this.el.querySelector<HTMLElement>(`[data-panel-key="${key}"].mobile-menu__categories`)
+    if (panel) {
+      panel.classList.toggle('is-active', !isOpen)
     }
   }
 }

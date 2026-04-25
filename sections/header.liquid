@@ -1,170 +1,233 @@
 <header
-  class="header"
+  class="header header--{{ section.settings.style | default: 'pill' }}"
   data-section-id="{{ section.id }}"
   data-section-type="header"
   role="banner"
 >
-  <div class="container">
-    <div class="relative flex items-center justify-between h-[var(--header-height)]">
-      {%- comment -%} Left: Menu {%- endcomment -%}
-      <div class="relative">
-        {%- comment -%} Mobile: opens drawer {%- endcomment -%}
-        <button
-          type="button"
-          class="text-[12px] text-fg lg:hidden"
-          data-mobile-menu-toggle
-          aria-label="Toggle Menu"
-          aria-controls="mobile-menu"
-          aria-expanded="false"
-        >
-          Menu
-        </button>
+  {%- liquid
+    assign style = section.settings.style | default: 'pill'
+    assign menu = settings.primary_menu
+  -%}
 
-        {%- comment -%} Desktop: toggles dropdown {%- endcomment -%}
-        <button
-          type="button"
-          class="text-[12px] text-fg hidden lg:block"
-          data-desktop-menu-toggle
-          aria-label="Toggle Menu"
-          aria-controls="desktop-menu-panel"
-          aria-expanded="false"
-        >
-          Menu
-        </button>
+  <div class="header__row">
+    {%- comment -%} --- Mobile: Menu pill (left) --- {%- endcomment -%}
+    <div class="header__mobile-left lg:hidden">
+      <button
+        type="button"
+        class="header__pill-btn"
+        data-mobile-menu-toggle
+        aria-label="Toggle menu"
+        aria-controls="mobile-menu"
+        aria-expanded="false"
+      >
+        <span class="pill-dropdown__item">Menu</span>
+      </button>
+    </div>
+
+    {%- comment -%} --- Desktop: Left navigation --- {%- endcomment -%}
+    {% if style == 'pill' %}
+      <div
+        id="desktop-menu-panel"
+        class="pill-dropdown hidden lg:flex"
+        data-component="pill-dropdown"
+      >
+        <nav class="pill-dropdown__nav" aria-label="Primary">
+          {% if menu != blank %}
+            {% for link in menu.links %}
+              {% if link.links.size > 0 %}
+                <button
+                  type="button"
+                  class="pill-dropdown__item pill-dropdown__item--toggle"
+                  data-pill-toggle
+                  data-panel-key="{{ forloop.index0 }}"
+                  aria-controls="desktop-menu-panel-{{ forloop.index0 }}"
+                  aria-expanded="false"
+                >
+                  <span>{{ link.title }}</span>
+                </button>
+              {% else %}
+                <a href="{{ link.url }}" class="pill-dropdown__item"{% if link.current %} aria-current="page"{% endif %}>
+                  {{ link.title }}
+                </a>
+              {% endif %}
+              {% unless forloop.last %}<span class="pill-dropdown__divider" aria-hidden="true"></span>{% endunless %}
+            {% endfor %}
+          {% endif %}
+        </nav>
+
+        {% if menu != blank %}
+          {% for link in menu.links %}
+            {% if link.links.size > 0 %}
+              <div
+                class="pill-dropdown__panel pill-dropdown__panel--menu"
+                data-panel-key="{{ forloop.index0 }}"
+              >
+                <div class="pill-dropdown__panel-inner">
+                  <ul
+                    id="desktop-menu-panel-{{ forloop.index0 }}"
+                    class="pill-dropdown__panel-list"
+                    role="menu"
+                  >
+                    {% for sublink in link.links %}
+                      <li role="none">
+                        <a
+                          href="{{ sublink.url }}"
+                          class="pill-dropdown__category"
+                          role="menuitem"
+                          {% if sublink.current %}aria-current="page"{% endif %}
+                        >{{ sublink.title }}</a>
+                      </li>
+                    {% endfor %}
+                  </ul>
+                </div>
+              </div>
+            {% endif %}
+          {% endfor %}
+        {% endif %}
       </div>
-
-      {%- comment -%} Center: Brand wordmark — pulls from Shopify shop name; swap for an SVG logo if the brand has one {%- endcomment -%}
-      <a href="{{ routes.root_url }}" class="absolute left-1/2 -translate-x-1/2 text-[12px] text-fg whitespace-nowrap" aria-label="{{ shop.name }}">
+    {% else %}
+      {%- comment -%} Flat: wordmark sits on the left {%- endcomment -%}
+      <a href="{{ routes.root_url }}" class="header__wordmark header__wordmark--left hidden lg:block" aria-label="{{ shop.name }}">
         {{ shop.name | upcase }}
       </a>
+    {% endif %}
 
-      {%- comment -%} Right: Currency + Bag {%- endcomment -%}
-      <div class="flex items-center gap-4">
-        <div class="hidden lg:block">
-          {% render 'currency-selector', style: 'header' %}
+    {%- comment -%} --- Center: wordmark (pill mode) or inline nav (flat mode) --- {%- endcomment -%}
+    {% if style == 'pill' %}
+      <a href="{{ routes.root_url }}" class="header__wordmark header__wordmark--center" aria-label="{{ shop.name }}">
+        {{ shop.name | upcase }}
+      </a>
+    {% else %}
+      <nav class="header__flat-nav hidden lg:flex" aria-label="Primary">
+        {% if menu != blank %}
+          {% for link in menu.links %}
+            <a href="{{ link.url }}" class="header__flat-item"{% if link.current %} aria-current="page"{% endif %}>
+              {{ link.title }}
+            </a>
+          {% endfor %}
+        {% endif %}
+      </nav>
+    {% endif %}
+
+    {%- comment -%} Mobile wordmark (always centered on mobile) {%- endcomment -%}
+    {% if style == 'flat' %}
+      <a href="{{ routes.root_url }}" class="header__wordmark header__wordmark--mobile lg:hidden" aria-label="{{ shop.name }}">
+        {{ shop.name | upcase }}
+      </a>
+    {% endif %}
+
+    {%- comment -%} --- Right: utility pill group (Search / Account / Bag) --- {%- endcomment -%}
+    {% if style == 'pill' %}
+      <div
+        id="utility-menu-panel"
+        class="pill-dropdown pill-dropdown--utility hidden lg:flex"
+        data-component="pill-dropdown"
+        data-cart-add-key="bag"
+      >
+        <nav class="pill-dropdown__nav" aria-label="Utility">
+          <button
+            type="button"
+            class="pill-dropdown__item pill-dropdown__item--toggle"
+            data-pill-toggle
+            data-panel-key="search"
+            aria-controls="utility-menu-panel-search"
+            aria-expanded="false"
+          >Search</button>
+          <span class="pill-dropdown__divider" aria-hidden="true"></span>
+          <button
+            type="button"
+            class="pill-dropdown__item pill-dropdown__item--toggle"
+            data-pill-toggle
+            data-panel-key="account"
+            aria-controls="utility-menu-panel-account"
+            aria-expanded="false"
+          >{{ 'layout.customer.account' | t }}</button>
+          <span class="pill-dropdown__divider" aria-hidden="true"></span>
+          <button
+            type="button"
+            class="pill-dropdown__item pill-dropdown__item--toggle"
+            data-pill-toggle
+            data-panel-key="bag"
+            aria-controls="utility-menu-panel-bag"
+            aria-expanded="false"
+          >
+            <span data-component="header-cart-control">
+              Bag (<span data-count>{{ cart.item_count }}</span>)
+            </span>
+          </button>
+        </nav>
+
+        <div
+          id="utility-menu-panel-search"
+          class="pill-dropdown__panel pill-dropdown__panel--search"
+          data-panel-key="search"
+        >
+          <div class="pill-dropdown__panel-inner">
+            {% render 'search-inline', id: section.id | append: '-search' %}
+          </div>
         </div>
+
+        <div
+          id="utility-menu-panel-account"
+          class="pill-dropdown__panel pill-dropdown__panel--account"
+          data-panel-key="account"
+        >
+          <div class="pill-dropdown__panel-inner">
+            {% render 'customer-login-inline' %}
+          </div>
+        </div>
+
+        <div
+          id="utility-menu-panel-bag"
+          class="pill-dropdown__panel pill-dropdown__panel--bag"
+          data-panel-key="bag"
+          data-header-cart-panel
+        >
+          <div class="pill-dropdown__panel-inner">
+            {% render 'cart-body' %}
+            {% render 'cart-footer', threshold: settings.free_shipping_threshold %}
+            <script type="application/json" data-cart-json>
+              {% render 'cart-json' %}
+            </script>
+          </div>
+        </div>
+      </div>
+    {% else %}
+      <nav class="header__flat-nav header__flat-nav--utility hidden lg:flex" aria-label="Utility">
+        <a href="{{ routes.search_url }}" class="header__flat-item">Search</a>
         <button
           type="button"
-          class="text-[12px] text-fg"
+          class="header__flat-item"
           data-ajax-cart-toggle
-          aria-label="Toggle Bag"
+          aria-label="Toggle bag"
           aria-controls="ajax-cart"
           aria-expanded="false"
         >
-          <span
-            class="{% if cart.item_count > 0 %}has-items{% endif %}"
-            data-component="header-cart-control"
-          >
+          <span data-component="header-cart-control">
             Bag (<span data-count>{{ cart.item_count }}</span>)
           </span>
         </button>
-      </div>
+      </nav>
+    {% endif %}
+
+    {%- comment -%} Mobile cart pill (right) {%- endcomment -%}
+    <div class="header__mobile-right lg:hidden">
+      <button
+        type="button"
+        class="header__pill-btn"
+        data-ajax-cart-toggle
+        aria-label="Toggle bag"
+        aria-controls="ajax-cart"
+        aria-expanded="false"
+      >
+        <span class="pill-dropdown__item" data-component="header-cart-control">
+          Bag (<span data-count>{{ cart.item_count }}</span>)
+        </span>
+      </button>
     </div>
   </div>
 
-  {%- comment -%} Desktop mega menu — matches Figma node 25:2 {%- endcomment -%}
-  {% if section.settings.primary_menu != blank %}
-    <div
-      id="desktop-menu-panel"
-      class="hidden lg:block opacity-0 pointer-events-none transition-opacity duration-300"
-      data-desktop-menu-panel
-      data-component="desktop-menu"
-    >
-      <div class="border-b border-fg bg-bg">
-        <div class="flex gap-14 items-start px-4 py-8 overflow-hidden">
-
-          {%- comment -%} Nav columns — one per top-level menu item {%- endcomment -%}
-          {% for link in section.settings.primary_menu.links %}
-            <div class="flex flex-col gap-1 shrink-0">
-              <span class="text-[12px] text-muted leading-[22px]">{{ link.title }}</span>
-              <div class="h-2"></div>
-              {% if link.links.size > 0 %}
-                {% for sublink in link.links %}
-                  <a
-                    href="{{ sublink.url }}"
-                    class="text-[12px] text-fg leading-[22px] hover:text-muted transition-colors"
-                    data-menu-link
-                    data-collection-handle="{{ sublink.url | split: '/collections/' | last | split: '?' | first }}"
-                    {% if sublink.current %}aria-current="page"{% endif %}
-                  >
-                    {{ sublink.title }}
-                  </a>
-                {% endfor %}
-              {% endif %}
-            </div>
-          {% endfor %}
-
-          {%- comment -%} Editorial block — right side {%- endcomment -%}
-          {%- liquid
-            assign default_col = collections['new-arrivals']
-          -%}
-          <div class="flex items-end ml-auto shrink-0" data-menu-editorial>
-            <div class="flex flex-col gap-2 pr-6 shrink-0 w-[250px]">
-              <h3 class="text-h3 text-fg transition-opacity duration-500" data-menu-preview-title>
-                {{ default_col.title }}
-              </h3>
-              <p class="text-[12px] text-fg leading-[18px] transition-opacity duration-500" data-menu-preview-desc>
-                {{ default_col.description | strip_html }}
-              </p>
-            </div>
-            <div class="w-[350px] aspect-[4/5] shrink-0 overflow-hidden bg-[#dcd7d0]" data-menu-preview-image>
-              {% if default_col.image %}
-                <img
-                  src="{{ default_col.image | image_url: width: 700 }}"
-                  alt="{{ default_col.title }}"
-                  width="700"
-                  height="875"
-                  class="w-full h-full object-cover transition-opacity duration-500"
-                  data-default-image
-                >
-              {% endif %}
-            </div>
-          </div>
-
-        </div>
-      </div>
-    </div>
-
-    {%- comment -%} Preload collection images for hover swap — all links + sub-links {%- endcomment -%}
-    <div class="hidden" data-menu-collection-images>
-      {% for link in section.settings.primary_menu.links %}
-        {% if link.url contains '/collections/' %}
-          {%- assign col_handle = link.url | split: '/collections/' | last | split: '?' | first -%}
-          {%- assign col = collections[col_handle] -%}
-          {% if col.image %}
-            <img
-              src="{{ col.image | image_url: width: 700 }}"
-              alt="{{ col.title }}"
-              width="700"
-              height="875"
-              data-collection="{{ col_handle }}"
-              data-title="{{ col.title }}"
-              data-desc="{{ col.description | strip_html | escape }}"
-            >
-          {% endif %}
-        {% endif %}
-        {% for sublink in link.links %}
-          {% unless sublink.url contains '/collections/' %}{% continue %}{% endunless %}
-          {%- assign sub_handle = sublink.url | split: '/collections/' | last | split: '?' | first -%}
-          {%- assign sub_col = collections[sub_handle] -%}
-          {% if sub_col.image and sub_handle != col_handle %}
-            <img
-              src="{{ sub_col.image | image_url: width: 700 }}"
-              alt="{{ sub_col.title }}"
-              width="700"
-              height="875"
-              data-collection="{{ sub_handle }}"
-              data-title="{{ sub_col.title }}"
-              data-desc="{{ sub_col.description | strip_html | escape }}"
-            >
-          {% endif %}
-        {% endfor %}
-      {% endfor %}
-    </div>
-  {% endif %}
 </header>
-
-{%- comment -%} Desktop menu behavior moved to _scripts/components/desktopMenu.ts for Taxi.js SPA compatibility {%- endcomment -%}
 
 <script type="application/ld+json">
   {
@@ -190,9 +253,18 @@
   "name": "Header",
   "settings": [
     {
-      "type": "link_list",
-      "id": "primary_menu",
-      "label": "Primary Menu"
+      "type": "select",
+      "id": "style",
+      "label": "Header style",
+      "options": [
+        { "value": "pill", "label": "Pill (rounded nav + centered wordmark)" },
+        { "value": "flat", "label": "Flat (wordmark left + inline nav)" }
+      ],
+      "default": "pill"
+    },
+    {
+      "type": "paragraph",
+      "content": "The primary menu comes from Theme Settings → Navigation. Configure it once there."
     }
   ]
 }

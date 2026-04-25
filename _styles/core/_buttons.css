@@ -1,3 +1,18 @@
+/* Button system
+   ------------------------------------------------------------------------------
+   Single source of truth for all CTAs. Use via `snippets/button.liquid`.
+
+   Structure:
+     .btn                       base reset, layout, typography
+     .btn--primary              solid dark on light (default)
+     .btn--secondary            outlined, transparent bg
+     .btn--ghost                no border, no bg — text-only with hit area
+     .btn--sm | .btn--md | .btn--lg
+     .btn--block                full width
+
+   Tokens respected: --color-fg, --color-bg, --color-muted, --color-fg-dark.
+*/
+
 button[disabled] {
   @apply cursor-not-allowed;
 }
@@ -7,29 +22,71 @@ button[disabled] {
 }
 
 .btn {
-  @apply inline-flex items-center justify-center text-center; /* Layout */
-  @apply py-3 px-5 border; /* Design */
-  @apply bg-fg text-bg border-fg; /* Colors */
-  @apply uppercase text-sm leading-none font-bold; /* Text */
+  @apply inline-flex items-center justify-center gap-2 text-center whitespace-nowrap;
+  @apply uppercase font-medium tracking-[0.04em];
+  @apply rounded-md border border-transparent;
 
-  transition-property: background-color, border-color, color;
+  transition-property: background-color, border-color, color, opacity;
   transition-duration: 250ms;
   transition-timing-function: ease;
-
-  &[disabled] {
-    @apply bg-muted border-muted text-bg;
-  }
-
-  &:not([disabled]) {
-    @apply hover:bg-fg/80 hover:border-fg/80;
-    @apply active:bg-fg active:border-fg;
-  }
 
   &:focus-visible {
     @apply outline outline-fg;
   }
+
+  &[disabled] {
+    @apply opacity-50 pointer-events-none;
+  }
 }
 
-.btn-block {
-  @apply w-full flex-1;
+/* --- Variants --- */
+
+.btn--primary {
+  @apply bg-fg-dark text-bg border-fg-dark;
+
+  &:not([disabled]):hover {
+    @apply bg-fg border-fg;
+  }
+}
+
+.btn--secondary {
+  @apply bg-transparent text-fg border-fg;
+
+  &:not([disabled]):hover {
+    @apply bg-fg text-bg;
+  }
+}
+
+.btn--ghost {
+  @apply bg-transparent text-fg border-transparent;
+
+  &:not([disabled]):hover {
+    @apply text-muted;
+  }
+}
+
+/* --- Sizes (height + padding + text-size) --- */
+
+.btn--sm {
+  height: 36px;
+  padding-inline: 16px;
+  font-size: 11px;
+}
+
+.btn--md {
+  height: 44px;
+  padding-inline: 20px;
+  font-size: 12px;
+}
+
+.btn--lg {
+  height: 52px;
+  padding-inline: 24px;
+  font-size: 12px;
+}
+
+/* --- Block (full-width) --- */
+
+.btn--block {
+  @apply w-full;
 }

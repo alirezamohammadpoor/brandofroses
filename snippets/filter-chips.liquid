@@ -1,0 +1,56 @@
+{% doc %}
+
+  Filter chips
+  ------------------------------------------------------------------------------
+
+  Renders the active filter chip row: × LABEL for each active filter value +
+  a Reset link that clears all filters.
+
+  @param {object} filters - collection.filters (required)
+
+  @example
+    {% render 'filter-chips', filters: collection.filters %}
+
+{% enddoc %}
+
+{%- liquid
+  assign any_active = false
+  for f in filters
+    if f.active_values.size > 0
+      assign any_active = true
+      break
+    endif
+    if f.type == 'price_range'
+      if f.min_value.value or f.max_value.value
+        assign any_active = true
+        break
+      endif
+    endif
+  endfor
+-%}
+
+{% if any_active %}
+  <div class="filter-chips" data-filter-chips>
+    {% for f in filters %}
+      {% for value in f.active_values %}
+        <a href="{{ value.url_to_remove }}" class="filter-chips__chip" rel="nofollow">
+          <span class="filter-chips__x" aria-hidden="true">×</span>
+          <span>{{ value.label | upcase }}</span>
+        </a>
+      {% endfor %}
+
+      {% if f.type == 'price_range' %}
+        {% if f.min_value.value or f.max_value.value %}
+          <a href="{{ f.url_to_remove }}" class="filter-chips__chip" rel="nofollow">
+            <span class="filter-chips__x" aria-hidden="true">×</span>
+            <span>{{ f.label | upcase }}</span>
+          </a>
+        {% endif %}
+      {% endif %}
+    {% endfor %}
+
+    <a href="{{ collection.url }}" class="filter-chips__reset" rel="nofollow">
+      {{ 'collections.filters.reset' | t }}
+    </a>
+  </div>
+{% endif %}

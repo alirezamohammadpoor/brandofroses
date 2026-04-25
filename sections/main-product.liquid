@@ -3,7 +3,14 @@
 %}
 
 <div data-section-id="{{ section.id }}" data-section-type="product">
-  <div class="flex flex-col lg:flex-row">
+  {%- comment -%}
+    Layout max-width cap. Figma designs the PDP at 1440px wide; without a
+    constraint the `lg:w-1/2` columns stretch to fill wide monitors
+    (3000px+ on HiDPI displays), pushing the gallery to absurd sizes and
+    leaving huge gutters around the info column. `max-w-[1440px] mx-auto`
+    caps the layout at the design width and centers it on wider viewports.
+  {%- endcomment -%}
+  <div class="max-w-[1440px] mx-auto flex flex-col lg:flex-row">
     <div class="lg:w-1/2 lg:shrink-0">
       {% render 'product-detail-gallery',
                  product: product,
@@ -19,6 +26,34 @@
       %}
     </div>
   </div>
+
+  {%- comment -%}
+    "You may also like" — async-fetched via the Section Rendering API.
+    Initial render is an empty placeholder; the productRecommendations TS
+    component fetches `sections/product-recommendations.liquid` with the
+    current product id + `limit=12` + `intent=related`, and swaps the
+    response into this element on mount. See
+    `_scripts/components/productRecommendations.ts`.
+
+    `limit=12` chosen to fill a 4-column desktop grid three rows deep
+    (12 cards total) with plenty of horizontal-scroll content on mobile.
+    Also sits comfortably above the `recommendations.products_count > 4`
+    threshold in `product-recommendations.liquid` that gates the scroll
+    arrows — without enough cards to scroll, the arrows would render
+    but do nothing.
+
+    `overflow-x: clip` on this wrapper keeps the rail's internal overflow
+    (12 cards wider than the viewport) from contributing to
+    `document.scrollWidth`. Without this, browsers report a
+    `documentElement.scrollWidth` larger than the viewport even though
+    body's `overflow-x: clip` prevents actual page scrolling — creates
+    rubber-band / wide-page visual artifacts on some browsers.
+  {%- endcomment -%}
+  <div
+    data-component="product-recommendations"
+    data-url="{{ routes.product_recommendations_url }}?section_id=product-recommendations&product_id={{ product.id }}&limit=12&intent=related"
+    class="overflow-x-clip"
+  ></div>
 
   <script type="application/ld+json">
     {{ product | structured_data }}

@@ -1,0 +1,127 @@
+{% doc %}
+
+  Product — Match With
+  ------------------------------------------------------------------------------
+
+  Small row of curated product thumbnails shown inside the PDP info column
+  under the info accordion rows. Distinct from the algorithmic "You may
+  also like" section at the bottom of the page:
+
+    - Match With = **merchant-picked** per product via metafield
+      (`product.metafields.custom.match_with`, list of product references).
+    - You may also like = **Shopify native recommendations** (algorithmic,
+      see `sections/product-recommendations.liquid`).
+
+  Each item is rendered as a horizontal card mirroring the sibling
+  Model Info card (48×48 image on the left + title / color dots / price
+  stacked right, `bg-bg-surface` rounded-6 padded container). Cards stack
+  vertically — one per row — so multiple pairings read cleanly at the
+  narrow PDP info-column width without overflowing.
+
+  Earlier iteration used 80×80 vertical thumbnails in a single horizontal
+  row, but (a) it desynced visually with the Model Info card on the right
+  and (b) horizontal-scrolled once more than 2 items were pinned at the
+  narrow info-column width. The horizontal-card pattern scales down
+  gracefully: 1 item = compact, 5 items = tidy stack.
+
+  Renders nothing if the metafield is empty or missing.
+
+  Metafield to set up in Shopify admin → Settings → Custom data → Products:
+    - Namespace: custom
+    - Key: match_with
+    - Type: List of product references
+    - Per-product: pick the products you want to pair with.
+
+  @param {object} product - Required.
+
+  @example
+    {% render 'product-match-with', product: product %}
+
+{% enddoc %}
+
+{%- liquid
+  assign match_with = product.metafields.custom.match_with.value
+-%}
+
+{% if match_with.size > 0 %}
+  <div class="flex flex-col gap-2">
+    <h3 class="text-label-tight text-fg">
+      {{ 'products.match_with' | t }}
+    </h3>
+    <ul class="flex flex-col gap-2" role="list">
+      {% for related in match_with %}
+        {%- comment -%}
+          Resolve the related product's Color option (if any) by
+          iterating rather than using `options_by_name["Color"]` — the
+          `options_by_name` lookup is case-sensitive and brittle across
+          merchants who might type "color"/"Colour"/etc. Mirror the
+          pattern already used in `product-card.liquid`.
+        {%- endcomment -%}
+        {%- liquid
+          assign color_option = nil
+          for option in related.options_with_values
+            if option.name == 'Color'
+              assign color_option = option
+              break
+            endif
+          endfor
+        -%}
+
+        {%- comment -%}
+          Card body (title + color dots + price) is captured and handed
+          to the shared `product-meta-card` primitive. Card chrome
+          (image, bg-surface, rounded, padding) lives in that primitive;
+          Match With only owns the content that makes it a Match With
+          card (vs a Model Info card, which passes a different body).
+        {%- endcomment -%}
+        {%- capture meta_card_body -%}
+          <p class="text-[12px] font-medium uppercase truncate w-full">
+            {{ related.title }}
+          </p>
+          {% if color_option and color_option.values.size > 0 %}
+            {%- comment -%}
+              Cap at 3 swatches + `+N` overflow chip (matches
+              product-card convention). Each dot is 10×10 with a
+              muted border so pale swatches (white, cream) stay
+              visible against the `bg-bg-surface` card.
+            {%- endcomment -%}
+            {%- assign color_count = color_option.values.size -%}
+            {%- assign max_visible = 3 -%}
+            {%- assign overflow = color_count | minus: max_visible -%}
+            <ul
+              class="flex items-center gap-1"
+              role="list"
+              aria-label="{{ 'products.product.available_colors' | t }}"
+            >
+              {% for value in color_option.values limit: max_visible %}
+                <li
+                  class="block w-2.5 h-2.5 rounded-full border border-muted/30"
+                  style="background-color: {% if value.swatch.color != blank %}{{ value.swatch.color }}{% else %}{{ value | downcase | escape }}{% endif %};"
+                  title="{{ value }}"
+                ><span class="sr-only">{{ value }}</span></li>
+              {% endfor %}
+              {% if overflow > 0 %}
+                <li
+                  class="text-[12px] text-muted ml-1"
+                  aria-label="{{ 'products.product.more_colors' | t: count: overflow }}"
+                >+{{ overflow }}</li>
+              {% endif %}
+            </ul>
+          {% endif %}
+          <p class="text-[12px]">
+            {{ related.price | money_without_trailing_zeros }}
+          </p>
+        {%- endcapture -%}
+
+        <li>
+          {% render 'product-meta-card',
+                    href: related.url,
+                    image: related.featured_image,
+                    alt: related.title,
+                    body: meta_card_body
+          %}
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+{% endif %}

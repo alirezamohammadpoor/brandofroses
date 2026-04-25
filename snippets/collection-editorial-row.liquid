@@ -1,0 +1,120 @@
+{% doc %}
+
+  Collection — Editorial Row
+  ------------------------------------------------------------------------------
+
+  One of the structured grid rows inside `main-collection.liquid` that pairs
+  an editorial image with a 2×2 product sub-grid. Row 2 puts the image on
+  the left, row 3 puts it on the right — merchants see a balanced page with
+  alternating emphasis rather than all imagery biased one side.
+
+  The snippet handles both the "editorial present" and "editorial absent"
+  shapes so the caller doesn't need to branch:
+    - If `ed_block` is blank → renders a plain 4-col product grid (desktop)
+      / 2-col (mobile) for `products 1-4` at the given offset.
+    - If `ed_block` is present → renders the editorial image + 2×2 product
+      grid pair, with mobile stacking image-above-grid and desktop
+      side-by-side.
+
+  Earlier iteration duplicated ~90 lines of this markup across rows 2 and 3
+  in `main-collection.liquid`, differing only by `image_side` and `offset`.
+  Extracting here means tweaks to padding / aspect / image widths land in
+  one place.
+
+  @param {object} ed_block      - Section block of type 'editorial' (or blank to render the fallback grid). Required.
+  @param {number} offset        - Product offset into `collection.products` for this row's sub-grid. Required.
+  @param {string} image_side    - 'left' or 'right'. Desktop image-column position. Required.
+  @param {object} collection    - The parent collection — passed into each `product-card`. Required.
+  @param {string} [card_loading] - `image_tag` loading attribute forwarded to each card's featured image. Defaults to 'lazy'.
+
+  @example
+    {% render 'collection-editorial-row',
+              ed_block: ed_block_1,
+              offset: 4,
+              image_side: 'left',
+              collection: collection,
+              card_loading: 'eager' %}
+
+{% enddoc %}
+
+{%- liquid
+  assign card_loading = card_loading | default: 'lazy'
+-%}
+
+{% if ed_block == blank %}
+  {%- comment -%}
+    Fallback — no editorial image to pair with. Plain 4-col grid on desktop,
+    2-col on mobile, same four products this row would have rendered
+    alongside the editorial.
+  {%- endcomment -%}
+  <ul class="grid grid-cols-2 lg:grid-cols-4 gap-x-1 gap-y-[var(--section-spacing-y)]">
+    {% for product in collection.products limit: 4 offset: offset %}
+      <li>{% render 'product-card', product: product, loading: card_loading, collection: collection %}</li>
+    {% endfor %}
+  </ul>
+{% else %}
+  {%- liquid
+    assign ed_link = ed_block.settings.product.url | default: ''
+  -%}
+
+  {%- comment -%}
+    Mobile — editorial above, 2-col grid below. Identical regardless of
+    `image_side` since the mobile layout is always single-column stacked.
+  {%- endcomment -%}
+  <div class="lg:hidden flex flex-col gap-1">
+    {% if ed_link != blank %}<a href="{{ ed_link }}" class="block">{% endif %}
+    <div class="w-full h-[80dvh] overflow-hidden bg-[#d9d4cc]">
+      {{ ed_block.settings.image
+         | image_url: width: 780
+         | image_tag:
+           loading: 'lazy',
+           class: 'w-full h-full object-cover lazy-image',
+           sizes: '100vw'
+      }}
+    </div>
+    {% if ed_link != blank %}</a>{% endif %}
+    <ul class="grid grid-cols-2 gap-x-1 gap-y-[var(--section-spacing-y)]">
+      {% for product in collection.products limit: 4 offset: offset %}
+        <li>{% render 'product-card', product: product, loading: card_loading, collection: collection %}</li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  {%- comment -%}
+    Desktop — side-by-side. Two captures (`image_block` and `grid_block`)
+    so the only thing that differs between row 2 (image left) and row 3
+    (image right) is render order. Keeps the two image-side branches from
+    each carrying their own full copy of the markup.
+  {%- endcomment -%}
+  {%- capture image_block -%}
+    {% if ed_link != blank %}<a href="{{ ed_link }}" class="w-1/2 shrink-0">{% endif %}
+    <div class="{% if ed_link == blank %}w-1/2 shrink-0{% endif %} overflow-hidden bg-[#d9d4cc] h-full">
+      {{ ed_block.settings.image
+         | image_url: width: 1420
+         | image_tag:
+           loading: 'lazy',
+           class: 'w-full h-full object-cover lazy-image',
+           sizes: '50vw'
+      }}
+    </div>
+    {% if ed_link != blank %}</a>{% endif %}
+  {%- endcapture -%}
+
+  {%- capture grid_block -%}
+    <ul class="flex-1 grid grid-cols-2 gap-x-1 gap-y-[var(--section-spacing-y)]">
+      {% for product in collection.products limit: 4 offset: offset %}
+        <li>{% render 'product-card', product: product, loading: card_loading, collection: collection %}</li>
+      {% endfor %}
+    </ul>
+  {%- endcapture -%}
+
+  <div class="hidden lg:flex lg:items-stretch lg:gap-1">
+    {% if image_side == 'left' %}
+      {{ image_block }}
+      {{ grid_block }}
+    {% else %}
+      {{ grid_block }}
+      {{ image_block }}
+    {% endif %}
+  </div>
+{% endif %}

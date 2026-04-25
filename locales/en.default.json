@@ -1,3 +1,12 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin language editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "app": {
     "add_to_cart": "Add to bag",
@@ -128,6 +137,20 @@
       "no_products_found": "No products found",
       "link_title": "Browse our {{ title }} collection",
       "products": "products"
+    },
+    "filters": {
+      "title": "Filter",
+      "toolbar_label": "Filter and sort",
+      "reset": "Reset",
+      "apply": "Apply",
+      "clear_all": "Clear all",
+      "min": "Min",
+      "max": "Max",
+      "min_price": "Min price",
+      "max_price": "Max price"
+    },
+    "sort": {
+      "label": "Sort"
     }
   },
   "contact": {
@@ -283,7 +306,10 @@
     "footer": {
       "social_platform": "{{ name }} on {{ platform }}",
       "copyright": "Copyright",
-      "payment_methods": "Payment methods accepted"
+      "payment_methods": "Payment methods accepted",
+      "newsletter": "Newsletter",
+      "newsletter_placeholder": "Enter your email",
+      "newsletter_submit": "Subscribe"
     }
   },
   "products": {
@@ -326,22 +352,32 @@
       }
     },
     "info": {
-      "materials_care": "Materials & Care",
+      "product_details": "Product Details",
       "size_guide": "Size Guide",
-      "shipping_returns": "Shipping & Returns",
-      "payments": "Payments",
-      "modal_label": "Product information"
-    }
+      "care_instructions": "Care Instructions",
+      "shipping_returns": "Shipping & Returns"
+    },
+    "match_with": "Match With",
+    "model": "Model",
+    "size_system_label": "Size system",
+    "recommendations": {
+      "title": "You may also like"
+    },
+    "read_more": "Read more",
+    "read_less": "Read less",
+    "toggle_description": "Toggle full description"
   },
   "ajax_cart": {
     "general": {
       "title": "Bag",
       "remove": "Remove",
       "subtotal": "Subtotal",
-      "shipping": "Shipping",
-      "calculated_in_checkout": "Calculated in checkout",
-      "total_value": "Total value",
-      "checkout": "Go to checkout"
+      "checkout": "Checkout",
+      "empty_title": "Your cart is empty",
+      "empty_cta": "Explore our products",
+      "view_cart": "View cart",
+      "free_shipping_progress_html": "You're {{ amount }} away from free shipping",
+      "free_shipping_unlocked": "Free shipping unlocked"
     }
   },
   "announcement_bar": {

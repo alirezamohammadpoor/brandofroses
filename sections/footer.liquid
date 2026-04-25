@@ -3,90 +3,156 @@
   data-section-id="{{ section.id }}"
   data-section-type="footer"
 >
-  <div class="container py-10 lg:py-10">
-    <div class="flex flex-col gap-10 lg:flex-row lg:justify-between">
-      {%- comment -%} Left: links {%- endcomment -%}
-      <div class="flex flex-col gap-6 lg:flex-row lg:gap-20">
-        <div class="flex flex-col gap-1">
-          <span class="text-label text-fg">Customer Care</span>
-          <a href="mailto:{{ section.settings.email | default: shop.email }}" class="text-[14px] text-muted">
-            {{ section.settings.email | default: shop.email }}
-          </a>
-        </div>
+  {%- liquid
+    assign social = settings.social_menu
+    assign newsletter_description = section.settings.newsletter_description
+    assign wordmark = section.settings.wordmark_text | default: shop.name
+    assign current_year = 'now' | date: '%Y'
+    assign shop_name = shop.name
+    assign copyright = section.settings.copyright_text | replace: '$year', current_year | replace: '$shop', shop_name
+  -%}
 
-        {% for block in section.blocks %}
-          <div class="flex flex-col gap-1" {{ block.shopify_attributes }}>
-            <span class="text-label text-fg">
-              {{ block.settings.title }}
-            </span>
-
-            {%- if block.settings.menu != blank -%}
-              <nav aria-label="{{ block.settings.title }}">
-                <ul class="flex flex-col gap-1">
-                  {%- for link in block.settings.menu.links -%}
-                    <li>
+  <div class="footer__inner">
+    <div class="footer__top">
+      {%- comment -%} Menu columns — merchant-configurable blocks. Desktop: row.
+      Mobile: stacked. Merchant typically adds "Legal", "Customer", "Brand", etc. {%- endcomment -%}
+      {% if section.blocks.size > 0 %}
+        <div class="footer__columns">
+          {% for block in section.blocks %}
+            {% if block.type == 'menu_column' %}
+              <div class="footer__column" {{ block.shopify_attributes }}>
+                {% if block.settings.title != blank %}
+                  <span class="footer__column-title">{{ block.settings.title }}</span>
+                {% endif %}
+                {% if block.settings.menu != blank and block.settings.menu.links.size > 0 %}
+                  <nav class="footer__column-nav" aria-label="{{ block.settings.title | default: 'Footer menu' }}">
+                    {% for link in block.settings.menu.links %}
                       <a
                         href="{{ link.url }}"
-                        class="text-[14px] text-muted"
+                        class="footer__column-link"
                         {% if link.current %}aria-current="page"{% endif %}
-                      >
-                        {{ link.title }}
-                      </a>
-                    </li>
-                  {%- endfor -%}
-                </ul>
-              </nav>
-            {%- endif -%}
+                      >{{ link.title }}</a>
+                    {% endfor %}
+                  </nav>
+                {% endif %}
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      {%- comment -%} Newsletter — inlined rather than using the shared
+      newsletter-form snippet because the footer uses a different visual
+      treatment (boxed input + submit button below). Data attributes are
+      preserved so the newsletter-form JS component picks it up. {%- endcomment -%}
+      <div class="footer__newsletter">
+        <span class="footer__newsletter-label">{{ 'layout.footer.newsletter' | t | default: 'Newsletter' }}</span>
+
+        {% if newsletter_description != blank %}
+          <p class="footer__newsletter-description">{{ newsletter_description }}</p>
+        {% endif %}
+
+        <form
+          method="post"
+          class="newsletter-form footer__newsletter-form"
+          data-component="newsletter-form"
+          data-source="footer"
+        >
+          <div class="newsletter-form-contents" data-form-contents>
+            <label for="{{ section.id }}-newsletter-input" class="sr-only">
+              {{ 'layout.footer.newsletter_placeholder' | t | default: 'Enter your email' }}
+            </label>
+            <input
+              id="{{ section.id }}-newsletter-input"
+              name="email"
+              type="email"
+              inputmode="email"
+              autocomplete="email"
+              autocorrect="off"
+              autocapitalize="off"
+              required
+              aria-required="true"
+              aria-describedby="{{ section.id }}-newsletter-message"
+              placeholder="{{ 'layout.footer.newsletter_placeholder' | t | default: 'Enter your email' }}"
+              class="footer__newsletter-input"
+            >
+
+            {%- assign newsletter_submit_label = 'layout.footer.newsletter_submit' | t | default: 'Subscribe' -%}
+            {% render 'button',
+                      label: newsletter_submit_label,
+                      type: 'submit',
+                      variant: 'primary',
+                      size: 'md',
+                      block: true,
+                      class: 'footer__newsletter-submit'
+            %}
+
+            <div
+              id="{{ section.id }}-newsletter-message"
+              class="newsletter-form-message footer__newsletter-message"
+              data-form-message
+              data-success="Thank you for subscribing"
+              data-already-subscribed="This email address is already subscribed"
+              data-fail="Please check your email and try again"
+              role="status"
+              aria-live="polite"
+              aria-atomic="true"
+            ></div>
           </div>
-        {% endfor %}
-      </div>
-
-      {%- comment -%} Right: newsletter {%- endcomment -%}
-      <div class="w-full lg:w-[400px] shrink-0 flex flex-col gap-1">
-        <span class="text-label text-fg">Newsletter</span>
-        {% render 'newsletter-form', id_prefix: section.id, source: 'footer' %}
+        </form>
       </div>
     </div>
 
-    {%- comment -%} Copyright {%- endcomment -%}
-    {%- comment -%} Currency selector {%- endcomment -%}
-    <div class="mt-6">
-      {% render 'currency-selector', style: 'footer' %}
+    {%- comment -%} Utility row — social left, copyright right. Small, compact,
+    below the main top row. {%- endcomment -%}
+    <div class="footer__utility">
+      {% if social != blank and social.links.size > 0 %}
+        <nav class="footer__social" aria-label="Social">
+          {% for link in social.links %}
+            <a
+              href="{{ link.url }}"
+              class="footer__social-link"
+              target="_blank"
+              rel="noopener"
+            >{{ link.title }}</a>
+          {% endfor %}
+        </nav>
+      {% endif %}
+
+      {% if copyright != blank %}
+        <p class="footer__copyright">{{ copyright }}</p>
+      {% endif %}
     </div>
 
-    {% if section.settings.copyright_text != blank %}
-      {%- liquid
-        assign current_year = 'now' | date: '%Y'
-        assign shop_name = shop.name
-      %}
-      <div class="mt-10 text-[12px] text-muted">
-        {{ section.settings.copyright_text | replace: '$year', current_year | replace: '$shop', shop_name }}
-      </div>
-    {% endif %}
+    <div class="footer__divider" aria-hidden="true"></div>
 
-  </div>
-
-  {%- comment -%} Payment icons {%- endcomment -%}
-  {% if section.settings.show_payment_icons %}
-    {% if shop.enabled_payment_types.size > 0 %}
-      <div class="flex items-center justify-center gap-3 pb-6 [&_svg]:h-5 [&_svg]:w-auto [&_svg]:opacity-100">
-        {% for type in shop.enabled_payment_types %}
-          {{ type | payment_type_svg_tag }}
-        {% endfor %}
-      </div>
-    {% else %}
-      <div class="flex items-center justify-center gap-3 pb-6 opacity-40">
-        <span class="text-label text-muted">Visa</span>
-        <span class="text-label text-muted">Mastercard</span>
-        <span class="text-label text-muted">Amex</span>
-        <span class="text-label text-muted">Klarna</span>
-      </div>
-    {% endif %}
-  {% endif %}
-
-  {%- comment -%} Large brand text — edge to edge; pulls from Shopify shop name {%- endcomment -%}
-  <div class="text-[15vw] font-light leading-none text-fg overflow-hidden text-center">
-    {{ shop.name | upcase }}
+    {%- comment -%}
+      Wordmark as SVG so the text scales exactly to the container width,
+      edges aligned to the same gutter as the columns above. viewBox is
+      tuned for "BRAND OF ROSES" (14 chars incl. spaces); if the merchant
+      sets a wordmark_text of a different length, the text still renders —
+      just with more or less whitespace. For pixel-perfect output, swap
+      this for outlined glyph paths.
+    {%- endcomment -%}
+    <svg
+      class="footer__wordmark"
+      viewBox="0 0 220 26"
+      preserveAspectRatio="xMidYMid meet"
+      role="presentation"
+      aria-hidden="true"
+    >
+      <text
+        x="110"
+        y="22"
+        text-anchor="middle"
+        font-size="26"
+        font-weight="700"
+        font-family="Helvetica Neue, Helvetica, Arial, sans-serif"
+        fill="currentColor"
+        textLength="220"
+        lengthAdjust="spacingAndGlyphs"
+      >{{ wordmark | upcase }}</text>
+    </svg>
   </div>
 </footer>
 
@@ -96,43 +162,57 @@
   "max_blocks": 4,
   "settings": [
     {
+      "type": "paragraph",
+      "content": "Social links (Instagram, TikTok, etc.) come from Theme Settings → Navigation → Social Menu. Configure them once there."
+    },
+    {
+      "type": "header",
+      "content": "Newsletter"
+    },
+    {
       "type": "text",
-      "id": "email",
-      "label": "Customer Care Email",
-      "info": "Leave blank to use the store email from Shopify settings."
+      "id": "newsletter_description",
+      "label": "Newsletter description",
+      "default": "Sign up for drops, restocks and exclusive access."
     },
     {
       "type": "header",
       "content": "Copyright"
     },
     {
-      "type": "checkbox",
-      "id": "show_payment_icons",
-      "label": "Show payment icons",
-      "default": true
-    },
-    {
       "type": "textarea",
       "id": "copyright_text",
-      "label": "Copyright Text",
+      "label": "Copyright text",
       "info": "Use $year for current year. Use $shop for shop name.",
       "default": "© $year $shop"
+    },
+    {
+      "type": "header",
+      "content": "Wordmark"
+    },
+    {
+      "type": "text",
+      "id": "wordmark_text",
+      "label": "Wordmark text",
+      "info": "Large uppercase brand text at the bottom of the footer. Leave blank to use the shop name."
     }
   ],
   "blocks": [
     {
-      "type": "menu",
-      "name": "Menu",
+      "type": "menu_column",
+      "name": "Menu column",
       "settings": [
         {
           "type": "text",
           "id": "title",
-          "label": "Title"
+          "label": "Column title",
+          "info": "E.g. Legal, Customer, Brand"
         },
         {
           "type": "link_list",
           "id": "menu",
-          "label": "Menu"
+          "label": "Menu",
+          "info": "Create menus in Online Store → Navigation, then pick one here."
         }
       ]
     }

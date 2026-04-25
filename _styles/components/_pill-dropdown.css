@@ -1,0 +1,160 @@
+/* Pill dropdown primitive
+   ------------------------------------------------------------------------------
+   A rounded "pill" container with one or more toggle items. Each toggle opens a
+   panel in-flow below the pill. Multiple toggles share the same pill — only one
+   panel is visible at a time.
+
+   Used by:
+   - Header utility pill (Search / Account / Bag)
+   - Header primary nav pill (Shop All / Collections / Lookbooks)
+   - Collection toolbar filter pills and sort pill
+
+   HTML wiring:
+     <div class="pill-dropdown" data-component="pill-dropdown">
+       <nav class="pill-dropdown__nav">
+         <button data-pill-toggle data-panel-key="foo" aria-controls="panel-foo">…</button>
+       </nav>
+       <div class="pill-dropdown__panel" data-panel-key="foo" id="panel-foo">
+         <div class="pill-dropdown__panel-inner">…content…</div>
+       </div>
+     </div>
+*/
+
+.pill-dropdown {
+  flex-direction: column;
+  align-items: stretch;
+  background-color: var(--color-bg);
+  border: 1px solid var(--color-muted);
+  border-radius: 18px;
+  align-self: flex-start;
+  position: relative;
+  overflow: hidden;
+  inline-size: max-content;
+  max-inline-size: calc(100vw - 32px);
+}
+
+/* Pill nav row — fixed 36h, flex on desktop. Display is controlled by
+   surrounding HTML utilities (e.g. `hidden lg:flex` on the utility variant
+   in the header) so the pill can be shown/hidden responsively. */
+.pill-dropdown__nav {
+  align-items: center;
+  flex-shrink: 0;
+  height: 36px;
+}
+
+@media (min-width: 1024px) {
+  .pill-dropdown__nav {
+    display: flex;
+  }
+}
+
+.pill-dropdown__item {
+  @apply inline-flex items-center justify-center gap-[2px] text-[color:var(--color-fg)] uppercase leading-[16px] whitespace-nowrap bg-transparent;
+  font-size: 12px;
+  padding-inline: 16px;
+  height: 100%;
+}
+
+.pill-dropdown__item--toggle {
+  @apply cursor-pointer;
+}
+
+/* Filled variant — used when a filter pill has active values selected.
+   Inverts the pill to solid dark to signal "this filter has applied values". */
+.pill-dropdown__item--filled {
+  background-color: var(--color-fg);
+  color: var(--color-bg);
+}
+
+/* Hide the dividers adjacent to a filled tab — the solid fill is its own
+   visual boundary, and the thin muted divider next to a dark rectangle reads
+   as a defect. `visibility: hidden` (not `display: none`) preserves the
+   divider's layout space so tab positions don't shift between states. */
+.pill-dropdown__item--filled + .pill-dropdown__divider,
+.pill-dropdown__divider:has(+ .pill-dropdown__item--filled) {
+  visibility: hidden;
+}
+
+/* Exception: two filled tabs side-by-side. Hiding the divider lets the two
+   dark backgrounds merge into a single ambiguous blob. Show a lighter
+   divider instead so the tabs stay distinct. The compound selector
+   (:has inside an adjacent-sibling combinator) has higher specificity than
+   the hide rule above, so this override wins naturally. */
+.pill-dropdown__item--filled
+  + .pill-dropdown__divider:has(+ .pill-dropdown__item--filled) {
+  visibility: visible;
+  background-color: var(--color-bg);
+  opacity: 0.4;
+}
+
+.pill-dropdown__caret {
+  font-size: 10px;
+  margin-left: 2px;
+  transition: transform 200ms ease;
+}
+
+.pill-dropdown__item[aria-expanded="true"] .pill-dropdown__caret {
+  transform: rotate(180deg);
+}
+
+.pill-dropdown__divider {
+  @apply self-center bg-[color:var(--color-muted)] shrink-0;
+  width: 1px;
+  height: 20px;
+}
+
+/* Panels use grid-template-rows: 0fr -> 1fr for auto-height animation.
+   Motion duration maps to the real content height, so short and tall panels
+   feel consistent without a guessed max-height target. */
+.pill-dropdown__panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  visibility: hidden;
+  /* Panel must not contribute intrinsic width to the pill — pill width is
+     driven by the nav row only. `inline-size: 0; min-inline-size: 100%`
+     gives the panel 0 intrinsic width but renders it at parent's full width. */
+  inline-size: 0;
+  min-inline-size: 100%;
+  transition:
+    grid-template-rows 350ms ease-in-out,
+    opacity 200ms ease-out,
+    visibility 0s linear 350ms;
+}
+
+.pill-dropdown__panel.is-active {
+  grid-template-rows: 1fr;
+  opacity: 1;
+  visibility: visible;
+  transition:
+    grid-template-rows 350ms ease-in-out,
+    opacity 200ms ease-out 50ms,
+    visibility 0s linear 0s;
+}
+
+.pill-dropdown__panel-list,
+.pill-dropdown__panel-inner {
+  min-height: 0;
+  overflow: hidden;
+  list-style: none;
+}
+
+/* Padding lives on the content, not on .pill-dropdown__panel-inner: padding
+   on the grid item adds to its min-size (content-box), so the track won't
+   collapse to 0 when closed and a blank strip would show under the nav row. */
+.pill-dropdown__panel-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 8px 12px;
+}
+
+.pill-dropdown__category {
+  @apply text-[color:var(--color-fg)] uppercase whitespace-nowrap block;
+  font-size: 12px;
+  line-height: 24px;
+}
+
+.pill-dropdown__category:hover {
+  @apply text-[color:var(--color-muted)];
+}

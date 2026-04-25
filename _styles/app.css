@@ -16,6 +16,11 @@
 
   --spacing-container: 8px;
 
+  /* Vertical gap between sections on a page. Mobile default lives here;
+     desktop override is set in :root below (Tailwind v4's @theme block only
+     accepts custom properties or @keyframes — no @media). */
+  --section-spacing-y: 24px;
+
   --font-sans: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 
   --z-1: 1;
@@ -28,7 +33,7 @@
 }
 
 /* Typography — mirrors Figma text styles. */
-@utility text-display { font-size: 72px; font-weight: 700; line-height: 110%; letter-spacing: -0.01em; }
+@utility text-display { font-size: 48px; font-weight: 700; line-height: 110%; letter-spacing: -0.01em; }
 @utility text-h1 { font-size: 40px; font-weight: 700; line-height: 110%; letter-spacing: -0.005em; }
 @utility text-h2 { font-size: 32px; font-weight: 700; line-height: 120%; }
 @utility text-h3 { font-size: 24px; font-weight: 700; line-height: 125%; }
@@ -38,6 +43,15 @@
 @utility text-nav { font-size: 12px; font-weight: 400; line-height: 140%; text-transform: uppercase; letter-spacing: 0.04em; }
 @utility text-label { font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; }
 @utility text-section-label { font-size: 10px; font-weight: 500; line-height: 140%; text-transform: uppercase; letter-spacing: 0.08em; }
+/* `text-label-tight` — same family as `text-label` but with a tighter
+   `letter-spacing: 0.3px` (≈ 0.025em at 12px) matching Figma's PDP info-
+   column label spec. Used for section headings inside the PDP info
+   column (Match With, Model, Color: XYZ, info accordion row labels).
+   A separate utility from `text-label` because bumping `text-label` to
+   0.025em would also tighten cart headers, article-card labels, blog
+   tags, etc. that use the looser 0.08em convention elsewhere in the
+   theme. */
+@utility text-label-tight { font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.3px; }
 
 @utility container {
   max-width: none;
@@ -61,17 +75,27 @@
     --backdrop-color: #000;
     --backdrop-opacity: 0.6;      
 
-    --header-height: 40px;
+    --header-height: 48px;
     --announcement-height: 32px;
     --chrome-height: calc(var(--header-height) + var(--announcement-height));
+
+    @media (min-width: 1024px) {
+      --header-height: 56px;
+    }
 
     --layout-padding-top: 24px;
     --layout-padding-bottom: 24px;
 
+    /* Horizontal page gutter — shared between the header, footer, and any
+       full-bleed section that should align to the site edges. */
+    --layout-padding-x: 8px;
+
     @media (min-width: 1024px) {
       --layout-padding-top: 40px;
       --layout-padding-bottom: 40px;
-    }      
+      --layout-padding-x: 16px;
+      --section-spacing-y: 40px;
+    }
 
     /* Uncomment as needed */
     /*
@@ -130,6 +154,14 @@
     text-rendering: optimizeLegibility;
     -moz-osx-font-smoothing: grayscale;
     -webkit-font-smoothing: antialiased;
+
+    /* Global horizontal overflow clip. Off-screen transforms (drawer
+       slide-in / modal panel resting state) could otherwise extend
+       document width. Using `clip` rather than `hidden` because `clip`
+       doesn't create a new block-formatting / scroll context — so
+       `position: sticky` on the PDP info column and any future fixed
+       positioning keep working correctly. */
+    overflow-x: clip;
   }
 
   body.ajax-cart-open,
@@ -250,6 +282,7 @@ img.lazy-image {
 @import './core/_forms.css';
 @import './core/_embla.css';
 
+@import './components/_pill-dropdown.css';
 @import './components/_header.css';
 @import './components/_footer.css';
 @import './components/_collection.css';
@@ -260,4 +293,5 @@ img.lazy-image {
 @import './components/_newsletter-form.css';
 @import './components/_ajax-cart.css';
 @import './components/_drawer.css';
+@import './components/_collapsible.css';
 @import './components/_policy.css';

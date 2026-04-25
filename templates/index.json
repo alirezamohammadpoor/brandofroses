@@ -9,20 +9,6 @@
  */
 {
   "sections": {
-    "hero_split_iDL6UE": {
-      "type": "hero-split",
-      "name": "Hero Split",
-      "settings": {
-        "left_image": "shopify://shop_images/sania-dmina-DUN-ivory-suede-square-toe-mule-sandals-shoes-beige-summer.jpg",
-        "left_title": "DUN",
-        "left_subtitle": "",
-        "left_link": "shopify://products/dun",
-        "right_image": "shopify://shop_images/sania-dmina-ELENA-pistachio-suede-slingback-shoes-comfortable-bridesmaid-wedding.jpg",
-        "right_title": "ELENA",
-        "right_subtitle": "",
-        "right_link": "shopify://products/elena"
-      }
-    },
     "featured-products": {
       "type": "featured-products",
       "settings": {
@@ -51,41 +37,41 @@
         "entry_nJn4mA": {
           "type": "entry",
           "settings": {
-            "image": "shopify://shop_images/downloadgram.org_641623446_18565762258044942_3446250424782444638_n.jpg",
-            "product": "bondi",
-            "color": "Black",
-            "name": "SHARAREH HOSS",
-            "instagram": "@sharareh.hoss"
+            "image": "",
+            "product": "",
+            "color": "",
+            "name": "",
+            "instagram": ""
           }
         },
         "entry_bbFxUn": {
           "type": "entry",
           "settings": {
-            "image": "shopify://shop_images/downloadgram.org_642369717_18571594336022661_2144700104056212830_n.jpg",
-            "product": "elena",
-            "color": "Black",
-            "name": "BABBA C RIVERIA",
-            "instagram": "@babba"
+            "image": "",
+            "product": "",
+            "color": "",
+            "name": "",
+            "instagram": ""
           }
         },
         "entry_GpgkHA": {
           "type": "entry",
           "settings": {
-            "image": "shopify://shop_images/downloadgram.org_656291130_18075219359176866_2126849560883856540_n.jpg",
-            "product": "bondi",
-            "color": "Black",
-            "name": "EMELIE ANDRÉA",
-            "instagram": "@mliandrea"
+            "image": "",
+            "product": "",
+            "color": "",
+            "name": "",
+            "instagram": ""
           }
         },
         "entry_qEpWg3": {
           "type": "entry",
           "settings": {
-            "image": "shopify://shop_images/downloadgram.org_538225210_18530708827052914_6390897102737833055_n.jpg",
-            "product": "elena",
-            "color": "Black Leather",
-            "name": "MATILDA DJERF",
-            "instagram": "@matildadjerf"
+            "image": "",
+            "product": "",
+            "color": "",
+            "name": "",
+            "instagram": ""
           }
         }
       },
@@ -104,16 +90,15 @@
       "type": "image-text-split",
       "name": "Image + Text Split",
       "settings": {
-        "image": "shopify://shop_images/downloadgram.org_544861547_18376326361177173_7845137417686966486_n.jpg",
+        "image": "",
         "image_position": "left",
-        "subtitle": "NORDISKA KOMPANIET STOCKHOLM",
-        "heading": "Shop in store",
+        "subtitle": "",
+        "heading": "",
         "link": ""
       }
     }
   },
   "order": [
-    "hero_split_iDL6UE",
     "featured-products",
     "journal_featured",
     "product_as_seen_on_RWngnY",

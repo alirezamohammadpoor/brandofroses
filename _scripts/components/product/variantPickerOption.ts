@@ -42,22 +42,25 @@ export default class VariantPickerOption extends BaseComponent {
       })
     }
 
-    // Size toggle — swap EU/US/UK labels
+    // Size system toggle — on click, set `data-size-system="eu|us|uk"` on
+    // the picker root and flip `aria-pressed` across the three toggle
+    // buttons. Everything visual falls out of those two attributes via
+    // CSS: the button's own `aria-pressed:font-medium aria-pressed:text-fg`
+    // utilities handle the pressed styling, and the
+    // `[data-size-system="..."]` rules in `_product.css` handle the
+    // visibility of the three per-system size-value spans on each tile.
+    // Earlier iteration ran three `querySelectorAll` passes per click to
+    // toggle `.hidden` on every span; replaced with one attribute write.
     const toggles = this.qsa('[data-toggle-system]') as HTMLElement[]
     if (toggles.length) {
       toggles.forEach(btn => {
         btn.addEventListener('click', () => {
           const system = btn.dataset.toggleSystem
+          if (!system) return
+          this.el.setAttribute('data-size-system', system)
           toggles.forEach(b => {
-            const isActive = b.dataset.toggleSystem === system
-            b.classList.toggle('font-medium', isActive)
-            b.classList.toggle('text-fg', isActive)
-            b.classList.toggle('font-normal', !isActive)
-            b.classList.toggle('text-muted', !isActive)
+            b.setAttribute('aria-pressed', String(b.dataset.toggleSystem === system))
           })
-          this.qsa('[data-size-eu]').forEach(el => el.classList.toggle('hidden', system !== 'eu'))
-          this.qsa('[data-size-us]').forEach(el => el.classList.toggle('hidden', system !== 'us'))
-          this.qsa('[data-size-uk]').forEach(el => el.classList.toggle('hidden', system !== 'uk'))
         })
       })
     }

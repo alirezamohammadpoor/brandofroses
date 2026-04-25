@@ -6,7 +6,6 @@ import BaseComponent from '@/components/base'
 import ProductPrice from '@/components/product/productPrice'
 import ATCButton from '@/components/product/atcButton'
 import VariantPicker, { type VariantChangeEvent } from '@/components/product/variantPicker'
-import ProductInfoModal from '@/components/product/productInfoModal'
 import A11yStatus from '@/components/a11y/a11yStatus'
 
 const selectors = {
@@ -32,10 +31,8 @@ export default class ProductDetailForm extends BaseComponent {
   price: ProductPrice
   atcButton: ATCButton
   variantPicker: VariantPicker
-  infoModal: ProductInfoModal | null
   a11yStatus: A11yStatus
 
-  #onInfoTriggerClick: (e: Event) => void
   #onFormSubmitBound: (e: SubmitEvent) => void
 
   /**
@@ -68,17 +65,12 @@ export default class ProductDetailForm extends BaseComponent {
       onVariantChange: this.onVariantChange.bind(this)
     })
 
-    const infoModalEl = document.querySelector(ProductInfoModal.SELECTOR) as HTMLElement | null
-    this.infoModal = infoModalEl ? new ProductInfoModal(infoModalEl) : null
-
-    // Info trigger buttons open the modal — store bound ref for cleanup
-    this.#onInfoTriggerClick = (e: Event) => {
-      const trigger = (e.target as HTMLElement).closest('[data-info-trigger]') as HTMLElement
-      if (trigger && this.infoModal) {
-        this.infoModal.open(trigger.dataset.infoTrigger)
-      }
-    }
-    this.el.addEventListener('click', this.#onInfoTriggerClick)
+    // Info rows are wired via the `collapsible-toggle` standalone component
+    // (registered in `_scripts/app.ts`) — no section-level wiring needed
+    // here. Earlier iteration mounted a `ProductInfoModal` and forwarded
+    // clicks from `[data-info-trigger]` buttons; replaced by the
+    // `<button class="collapsible-toggle"> + <div class="collapsible">`
+    // pattern (see `_styles/components/_collapsible.css`).
 
     this.a11yStatus = A11yStatus.generate(this.form)
 
@@ -87,7 +79,6 @@ export default class ProductDetailForm extends BaseComponent {
   }
 
   destroy() {
-    this.el.removeEventListener('click', this.#onInfoTriggerClick)
     this.form.removeEventListener('submit', this.#onFormSubmitBound)
     super.destroy()
   }

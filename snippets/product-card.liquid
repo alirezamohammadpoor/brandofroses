@@ -7,10 +7,14 @@
   @param {object} [collection] - Optional collection the product was reached from; used to build `within:` URLs for PDP breadcrumb context
 
   Badge priority (first match wins):
-    1. SOLD OUT   — !product.available
-    2. -XX%       — variant.compare_at_price > variant.price
-    3. PRE-ORDER  — tag `badge:pre-order`
-    4. NEW        — tag `badge:new`
+    1. SOLD OUT   — !product.available        — bg-accent + text-bg (matches sold-out ATC state)
+    2. -XX%       — compare_at_price > price  — bg-accent + text-bg
+    3. PRE-ORDER  — tag `badge:pre-order`     — bg-fg + text-bg
+    4. NEW        — tag `badge:new`           — bg-accent + text-bg (Figma 38:21)
+
+  Badge visual spec (inline classes on the span — see line ~170):
+  10px Inter Medium uppercase, 12px line-height, 0.5px tracking,
+  8px horizontal + 3px vertical padding, 4px rounded corners.
 
   @example
   {% render 'product-card',
@@ -59,7 +63,7 @@
     assign badge_classes = ''
     if product.available == false
       assign badge_text = 'products.product.sold_out' | t | upcase
-      assign badge_classes = 'bg-muted text-fg'
+      assign badge_classes = 'bg-accent text-bg'
     elsif on_sale
       assign badge_text = '-' | append: discount_pct | append: '%'
       assign badge_classes = 'bg-accent text-bg'
@@ -89,14 +93,32 @@
 
   {%- assign card_title_id = 'ProductCardTitle-' | append: product.id -%}
 
+  {%- comment -%}
+    `relative` (= `position: relative`) on the card root is load-bearing.
+    Swatches + price blocks inside the card contain `.sr-only` spans which
+    are `position: absolute`. Without a positioned ancestor on the card
+    itself, those spans anchor to `<html>` (the initial containing block)
+    and escape the parent scroll container's overflow clipping — their
+    static-position x-coordinates end up at the card's document position
+    (e.g. 3100px+ for the 10th card in a "You may also like" rail) and
+    inflate `documentElement.scrollWidth`, cascading into visible horizontal
+    overflow on the page. `position: relative` scopes their absolute
+    positioning to the card so the scroll container's `overflow-x: auto`
+    clips them cleanly.
+  {%- endcomment -%}
   <article
-    class="product-card group h-full pb-6"
+    class="product-card group h-full pb-6 relative"
     data-component="product-card"
     aria-labelledby="{{ card_title_id }}"
   >
     <a href="{{ product_url }}" class="flex flex-col gap-2" tabindex="-1" aria-hidden="true">
-      {%- comment -%} Image — 3:4 ratio, bg-surface placeholder {%- endcomment -%}
-      <div class="relative w-full aspect-[3/4] overflow-hidden bg-bg-surface">
+      {%- comment -%}
+        Image — 1:1 ratio. Source product photos are roughly square, so a
+        square container sidesteps the baked-in vertical whitespace we saw
+        with the earlier 3:4 container (Figma frame 85:80 is 3:3.88, but
+        matches the render, not the source images).
+      {%- endcomment -%}
+      <div class="relative w-full aspect-square overflow-hidden bg-bg-surface">
         {{ product.featured_image
           | image_url: width: image_max_width
           | image_tag:
@@ -134,8 +156,19 @@
           }}
         {% endif %}
 
+        {%- comment -%}
+          Badge spec — Figma 38:21 (PLP Product Card > Badge): 10px
+          Inter Medium uppercase, 12px line-height, 0.5px tracking,
+          `bg-accent` + `text-bg` for NEW / -XX% states. Inline classes
+          here instead of the shared `text-section-label` utility —
+          that utility is also used by the `+N` color-overflow chip
+          further down in this file (line ~246), and the chip's looser
+          line-height + tracking (`text-section-label` = 140% +
+          0.08em) read fine there; tightening the utility would drift
+          the chip off-spec too.
+        {%- endcomment -%}
         {% if badge_text != blank %}
-          <span class="absolute top-2 left-2 text-section-label {{ badge_classes }} px-2 py-[3px] rounded-[4px]">
+          <span class="absolute top-2 left-2 text-[10px] font-medium uppercase tracking-[0.5px] leading-[12px] {{ badge_classes }} px-2 py-[3px] rounded-[4px]">
             {{ badge_text }}
           </span>
         {% endif %}
@@ -144,54 +177,42 @@
 
     {%- comment -%}
       Meta — outside the outer <a> so swatches don't navigate.
-      Layout:
-        Row 1: title (left) + swatches (right)
+      Layout (Figma 187:474, adapted per product spec):
+        Row 1: title
         Row 2: price (sale-aware)
+        Row 3: color name — secondary muted text, selected variant's color
+        Row 4: swatches — visual only, no interaction (click the title / image)
+
+      Vertical rhythm: 4px between all text rows (`gap-1`), and the swatches
+      get an additional `mt-1` so the visual block sits 8px below the color
+      name text. The 8px gap from image to meta block is the `mt-2` wrapper.
     {%- endcomment -%}
+
+    {%- liquid
+      assign color_option = nil
+      for option in product.options_with_values
+        if option.name == 'Color'
+          assign color_option = option
+          break
+        endif
+      endfor
+    -%}
+
     <div class="mt-2 flex flex-col gap-1">
-      {%- comment -%} Row 1: title + swatches {%- endcomment -%}
-      <div class="flex items-center justify-between gap-2">
-        <a
-          href="{{ product_url }}"
-          id="{{ card_title_id }}"
-          class="text-caption text-fg truncate"
-        >{{ product.title }}</a>
+      {%- comment -%} Title {%- endcomment -%}
+      <a
+        href="{{ product_url }}"
+        id="{{ card_title_id }}"
+        class="text-caption text-fg uppercase truncate"
+      >{{ product.title }}</a>
 
-        {% for option in product.options_with_values %}
-          {% if option.name == 'Color' %}
-            {%- assign color_count = option.values.size -%}
-            {%- assign max_mobile = 3 -%}
-            {%- assign overflow = color_count | minus: max_mobile -%}
-            <ul
-              class="flex items-center gap-1 shrink-0"
-              role="list"
-              aria-label="{{ 'products.product.available_colors' | t }}"
-            >
-              {% for value in option.values %}
-                <li
-                  class="block w-2.5 h-2.5 rounded-full border border-muted/30{% if forloop.index > max_mobile %} hidden lg:block{% endif %}"
-                  style="{% if value.swatch.color %}background-color: {{ value.swatch.color }};{% else %}background-color: #1A1A18;{% endif %}"
-                  title="{{ value }}"
-                ><span class="sr-only">{{ value }}</span></li>
-              {% endfor %}
-              {% if overflow > 0 %}
-                <li
-                  class="text-section-label text-muted lg:hidden"
-                  aria-label="{{ 'products.product.more_colors' | t: count: overflow }}"
-                >+{{ overflow }}</li>
-              {% endif %}
-            </ul>
-          {% endif %}
-        {% endfor %}
-      </div>
-
-      {%- comment -%} Row 2: price — strikethrough compare + sale price when on sale {%- endcomment -%}
+      {%- comment -%} Price — strikethrough compare + sale price when on sale {%- endcomment -%}
       <div class="flex items-center gap-2 text-caption">
         {% if on_sale %}
           <s class="text-muted" aria-hidden="true">
             {{ current_variant.compare_at_price | money_without_trailing_zeros }}
           </s>
-          <span class="text-accent">
+          <span class="text-accent font-medium">
             <span class="sr-only">{{ 'products.product.price.sale_price' | t }}</span>
             {{ current_variant.price | money_without_trailing_zeros }}
           </span>
@@ -205,6 +226,44 @@
           </span>
         {% endif %}
       </div>
+
+      {% if color_option %}
+        {%- comment -%} Color name — reflects the currently-selected variant {%- endcomment -%}
+        <p class="text-caption text-muted uppercase">{{ color_option.selected_value }}</p>
+
+        {%- comment -%}
+          Swatches — visual only. Show the first 3; spill the rest into a
+          `+N` chip so cards stay compact regardless of how many colors a
+          product has. The label / card click takes the user to the PDP
+          where they can actually pick a variant.
+
+          `!= blank` catches both `nil` and empty-string swatch colors
+          (some Shopify swatch entries ship with `""` which would defeat a
+          plain truthiness check and render invisible circles).
+        {%- endcomment -%}
+        {%- assign color_count = color_option.values.size -%}
+        {%- assign max_visible = 3 -%}
+        {%- assign overflow = color_count | minus: max_visible -%}
+        <ul
+          class="flex items-center gap-1 mt-1"
+          role="list"
+          aria-label="{{ 'products.product.available_colors' | t }}"
+        >
+          {% for value in color_option.values limit: max_visible %}
+            <li
+              class="block w-2.5 h-2.5 rounded-full border border-muted/30"
+              style="background-color: {% if value.swatch.color != blank %}{{ value.swatch.color }}{% else %}#1A1A18{% endif %};"
+              title="{{ value }}"
+            ><span class="sr-only">{{ value }}</span></li>
+          {% endfor %}
+          {% if overflow > 0 %}
+            <li
+              class="text-section-label text-muted ml-1"
+              aria-label="{{ 'products.product.more_colors' | t: count: overflow }}"
+            >+{{ overflow }}</li>
+          {% endif %}
+        </ul>
+      {% endif %}
     </div>
   </article>
 {% endif %}

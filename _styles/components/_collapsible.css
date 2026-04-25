@@ -1,0 +1,122 @@
+/* Collapsible panel primitive
+ * ---------------------------------------------------------------------------
+ * Reusable button + panel pair for expand/collapse interactions:
+ *   - PDP info accordion (Product Details / Size Guide / ...)
+ *   - PDP description Read more / Read less toggle
+ *
+ * Wiring:
+ *   <button class="collapsible-toggle" aria-expanded="false"
+ *           aria-controls="some-id" data-component="collapsible-toggle">
+ *     Label
+ *     <span data-chevron>›</span>
+ *   </button>
+ *   <div id="some-id" class="collapsible">
+ *     <div class="collapsible__inner">…content…</div>
+ *   </div>
+ *
+ * `collapsibleToggle.ts` flips `aria-expanded` on the button and toggles
+ * `is-open` on the paired panel. The chevron rotates from this CSS purely
+ * via the button's own `aria-expanded` state — the DOM aria attribute is
+ * the single source of truth, no separate class.
+ *
+ * Animation mirrors the pill-dropdown (`_pill-dropdown.css`): grid-template-
+ * rows 0fr → 1fr gives an auto-height expand that matches the content's
+ * real size, avoiding the "guess a big max-height and accept proportional
+ * timing" tradeoff. 500ms ease-in-out matches the CLAUDE.md animation
+ * standard for collapsible sections.
+ */
+
+.collapsible {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  /* `visibility: hidden` on close makes the collapsed content
+   * non-focusable and hidden from AT (tab-through was possible with
+   * just grid-track collapse because form inputs / buttons inside
+   * were still in the tab order even when height-clipped to 0).
+   * `visibility 0s linear 500ms` defers the hide until AFTER the
+   * collapse animation finishes so content stays visible during the
+   * close transition. Same trick `.pill-dropdown__panel` uses. */
+  visibility: hidden;
+  transition:
+    grid-template-rows 500ms ease-in-out,
+    opacity 500ms ease-in-out,
+    visibility 0s linear 500ms;
+}
+
+.collapsible.is-open {
+  grid-template-rows: 1fr;
+  opacity: 1;
+  visibility: visible;
+  /* Flip visibility immediately on open so tab order + AT recognize
+   * the content as the expand animation begins, not only once it
+   * finishes. */
+  transition:
+    grid-template-rows 500ms ease-in-out,
+    opacity 500ms ease-in-out,
+    visibility 0s linear 0s;
+}
+
+/* The grid-track collapse trick needs a child with `min-height: 0` + clipping
+ * so content overflow during the transition doesn't push the track open
+ * past 0fr. */
+.collapsible__inner {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.collapsible-toggle [data-chevron] {
+  transition: transform 300ms ease;
+  display: inline-block;
+  line-height: 1;
+}
+
+/* Expanded state: chevron rotates 90° clockwise. `›` (U+203A) rendered at
+ * rotate(90deg) points downward — i.e. toward the now-visible content below
+ * the button. */
+.collapsible-toggle[aria-expanded="true"] [data-chevron] {
+  transform: rotate(90deg);
+}
+
+/* Description expander — variant of the collapsible pattern where the
+ * closed state shows a 2-line preview (via line-clamp) rather than
+ * height 0. Previous iteration rendered the description twice (clamped
+ * preview + full-description `.collapsible` hidden below, with a `:has()`
+ * rule hiding the preview on open) — screen readers heard the text
+ * twice, and there was a duplicate DOM node for no layout gain.
+ *
+ * Single-copy approach: one `.description-expander__content` element
+ * wraps the description. When closed, `max-height: 40px` clips it to
+ * two lines of 12px/leading-5 text AND the inner `.__text` carries
+ * `-webkit-line-clamp: 2` for the ellipsis. When `.is-open` is added
+ * (by `collapsibleToggle.ts`), `max-height` animates to a large
+ * clearing value and the line-clamp is lifted.
+ *
+ * Motion duration matches the info-accordion `.collapsible` for
+ * consistency. `max-height: 60em` is a one-size-fits-all ceiling for
+ * realistic product descriptions; hitting it is not a regression
+ * because the scrollable parent still handles overflow if we ever do.
+ */
+
+.description-expander__content {
+  overflow: hidden;
+  transition:
+    max-height 500ms ease-in-out,
+    opacity 500ms ease-in-out;
+}
+
+.description-expander__content:not(.is-open) {
+  /* 2 lines at text-[12px] / leading-5 (20px per line) = 40px. */
+  max-height: 40px;
+}
+
+.description-expander__content.is-open {
+  max-height: 60em;
+}
+
+.description-expander__content:not(.is-open) .description-expander__text {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}

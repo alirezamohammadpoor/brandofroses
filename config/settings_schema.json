@@ -35,6 +35,45 @@
     ]
   },
   {
+    "name": "Navigation",
+    "settings": [
+      {
+        "type": "paragraph",
+        "content": "These menus are shared by the header and the mobile menu. Configure them once here."
+      },
+      {
+        "type": "link_list",
+        "id": "primary_menu",
+        "label": "Primary Menu",
+        "info": "The top-level nav. Nest items under a parent to make that parent a dropdown."
+      },
+      {
+        "type": "link_list",
+        "id": "secondary_menu",
+        "label": "Secondary Menu (mobile only)",
+        "info": "Small links below the search in the mobile drawer (Login, Track Order, FAQs, etc.)"
+      },
+      {
+        "type": "link_list",
+        "id": "social_menu",
+        "label": "Social Menu (mobile only)",
+        "info": "Links shown at the bottom of the mobile drawer (Instagram, TikTok, etc.)"
+      }
+    ]
+  },
+  {
+    "name": "Cart",
+    "settings": [
+      {
+        "type": "number",
+        "id": "free_shipping_threshold",
+        "label": "Free shipping threshold",
+        "info": "Order total (in store currency) above this amount unlocks free shipping. Shown as a progress message in the cart drawer and pill panel. Set to 0 to hide the message.",
+        "default": 1000
+      }
+    ]
+  },
+  {
     "name": "Social Accounts",
     "settings": [
       {

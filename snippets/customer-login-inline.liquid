@@ -1,0 +1,173 @@
+{% doc %}
+
+  Customer Account (inline)
+  ------------------------------------------------------------------------------
+
+  Renders inside the header utility pill "account" panel.
+
+  - Logged out: login form with a toggle to swap to the register form.
+    Both use Shopify's `customer_login` / `create_customer` form tags.
+  - Logged in: account shortcuts and a logout link.
+
+  @example
+    {% render 'customer-login-inline' %}
+
+{% enddoc %}
+
+{% if customer %}
+  <div class="customer-login-inline" data-component="customer-login-inline">
+    <p class="customer-login-inline__greeting">
+      {{ 'layout.customer.logged_in_as_html' | t: first_name: customer.first_name }}
+    </p>
+    <nav class="customer-login-inline__account-nav" aria-label="{{ 'layout.customer.account' | t }}">
+      <a href="{{ routes.account_url }}" class="customer-login-inline__account-link">
+        {{ 'layout.customer.my_account' | t }}
+      </a>
+      <a href="{{ routes.account_logout_url }}" class="customer-login-inline__account-link">
+        {{ 'layout.customer.log_out' | t }}
+      </a>
+    </nav>
+  </div>
+{% else %}
+  <div
+    class="customer-login-inline"
+    data-component="customer-login-inline"
+  >
+    <div class="customer-login-inline__view" data-view-target="login">
+      {% form 'customer_login', class: 'customer-login-inline__form' %}
+
+        {{ form.errors | default_errors }}
+
+        <div class="customer-login-inline__field">
+          <label for="customer-login-inline-email" class="sr-only">
+            {{ 'customer.login.email' | t }}
+          </label>
+          <input
+            type="email"
+            id="customer-login-inline-email"
+            name="customer[email]"
+            placeholder="{{ 'customer.login.email' | t }}"
+            autocomplete="email"
+            autocorrect="off"
+            autocapitalize="off"
+            spellcheck="false"
+            required
+          >
+        </div>
+
+        {% if form.password_needed %}
+          <div class="customer-login-inline__field">
+            <label for="customer-login-inline-password" class="sr-only">
+              {{ 'customer.login.password' | t }}
+            </label>
+            <input
+              type="password"
+              id="customer-login-inline-password"
+              name="customer[password]"
+              placeholder="{{ 'customer.login.password' | t }}"
+              autocomplete="current-password"
+              required
+            >
+          </div>
+        {% endif %}
+
+        <button type="submit" class="customer-login-inline__submit">
+          {{ 'customer.login.sign_in' | t }}
+        </button>
+
+        <div class="customer-login-inline__meta">
+          {% if form.password_needed %}
+            <a href="{{ routes.account_recover_url }}" class="customer-login-inline__link">
+              {{ 'customer.login.forgot_password' | t }}
+            </a>
+          {% endif %}
+          <button
+            type="button"
+            class="customer-login-inline__link customer-login-inline__toggle"
+            data-view-switch="register"
+          >{{ 'layout.customer.create_account' | t }}</button>
+        </div>
+
+      {% endform %}
+    </div>
+
+    <div class="customer-login-inline__view" data-view-target="register" hidden>
+      {% form 'create_customer', class: 'customer-login-inline__form' %}
+
+        {{ form.errors | default_errors }}
+
+        <div class="customer-login-inline__field">
+          <label for="customer-register-inline-first-name" class="sr-only">
+            {{ 'customer.register.first_name' | t }}
+          </label>
+          <input
+            type="text"
+            id="customer-register-inline-first-name"
+            name="customer[first_name]"
+            placeholder="{{ 'customer.register.first_name' | t }}"
+            autocomplete="given-name"
+            required
+          >
+        </div>
+
+        <div class="customer-login-inline__field">
+          <label for="customer-register-inline-last-name" class="sr-only">
+            {{ 'customer.register.last_name' | t }}
+          </label>
+          <input
+            type="text"
+            id="customer-register-inline-last-name"
+            name="customer[last_name]"
+            placeholder="{{ 'customer.register.last_name' | t }}"
+            autocomplete="family-name"
+            required
+          >
+        </div>
+
+        <div class="customer-login-inline__field">
+          <label for="customer-register-inline-email" class="sr-only">
+            {{ 'customer.register.email' | t }}
+          </label>
+          <input
+            type="email"
+            id="customer-register-inline-email"
+            name="customer[email]"
+            placeholder="{{ 'customer.register.email' | t }}"
+            autocomplete="email"
+            autocorrect="off"
+            autocapitalize="off"
+            spellcheck="false"
+            required
+          >
+        </div>
+
+        <div class="customer-login-inline__field">
+          <label for="customer-register-inline-password" class="sr-only">
+            {{ 'customer.register.password' | t }}
+          </label>
+          <input
+            type="password"
+            id="customer-register-inline-password"
+            name="customer[password]"
+            placeholder="{{ 'customer.register.password' | t }}"
+            autocomplete="new-password"
+            required
+          >
+        </div>
+
+        <button type="submit" class="customer-login-inline__submit">
+          {{ 'customer.register.submit' | t }}
+        </button>
+
+        <div class="customer-login-inline__meta customer-login-inline__meta--center">
+          <button
+            type="button"
+            class="customer-login-inline__link customer-login-inline__toggle"
+            data-view-switch="login"
+          >{{ 'customer.login.sign_in' | t }}</button>
+        </div>
+
+      {% endform %}
+    </div>
+  </div>
+{% endif %}

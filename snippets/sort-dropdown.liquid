@@ -1,0 +1,71 @@
+{% doc %}
+
+  Sort dropdown
+  ------------------------------------------------------------------------------
+
+  Renders a pill-dropdown for the collection's sort options. Single-select
+  radio group; auto-submits via the parent form on change.
+
+  @param {object} sort_options - collection.sort_options (required)
+  @param {string} current_sort - collection.sort_by (optional — defaults to
+                                 collection.default_sort_by)
+
+  @example
+    {% render 'sort-dropdown',
+              sort_options: collection.sort_options,
+              current_sort: collection.sort_by | default: collection.default_sort_by
+    %}
+
+{% enddoc %}
+
+{%- liquid
+  assign current_label = ''
+  for option in sort_options
+    if option.value == current_sort
+      assign current_label = option.name
+      break
+    endif
+  endfor
+  if current_label == ''
+    assign current_label = sort_options.first.name
+  endif
+-%}
+
+<div class="pill-dropdown pill-dropdown--sort" data-component="pill-dropdown">
+  <nav class="pill-dropdown__nav">
+    <button
+      type="button"
+      class="pill-dropdown__item pill-dropdown__item--toggle"
+      data-pill-toggle
+      data-panel-key="sort"
+      aria-controls="sort-panel"
+      aria-expanded="false"
+    >{{ 'collections.sort.label' | t }}: {{ current_label }}</button>
+  </nav>
+
+  <div
+    id="sort-panel"
+    class="pill-dropdown__panel pill-dropdown__panel--sort"
+    data-panel-key="sort"
+  >
+    <div class="pill-dropdown__panel-inner">
+      <ul class="pill-dropdown__panel-list filter-values">
+        {% for option in sort_options %}
+          <li>
+            <label class="filter-value{% if option.value == current_sort %} filter-value--active{% endif %}">
+              <input
+                type="radio"
+                name="sort_by"
+                value="{{ option.value }}"
+                class="sr-only"
+                data-sort-input
+                {% if option.value == current_sort %}checked{% endif %}
+              >
+              <span class="filter-value__label">{{ option.name }}</span>
+            </label>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,8 @@
+# Merchant-editable files — changes happen in the theme editor,
+# don't let `shopify theme dev` push stale local values over them.
+config/settings_data.json
+templates/*.json
+
+# Keep code-owned template JSON in version control (these define
+# structure rather than merchant content).
+!templates/customers/*.json

@@ -1,4 +1,265 @@
 header.header {
   @apply relative z-(--z-header) bg-bg;
-  height: var(--header-height);
+
+  --header-height-mobile: 48px;
+  --header-height-desktop: 56px;
+
+  height: var(--header-height-mobile);
+
+  /* Allow the pill dropdown to overflow downward without clipping */
+  overflow: visible;
+
+  @media (min-width: 1024px) {
+    height: var(--header-height-desktop);
+  }
+}
+
+.header__row {
+  @apply relative flex items-center justify-between h-full;
+  padding-inline: var(--layout-padding-x);
+
+  @media (min-width: 1024px) {
+    /* Align to top so the pill group can grow downward without
+       dragging the wordmark or right nav with it. The 10px top-pad
+       keeps closed pill vertically centered in the 56px row. */
+    .header--pill & {
+      align-items: flex-start;
+      padding-top: 10px;
+    }
+  }
+
+  .header--flat & {
+    @media (min-width: 1024px) {
+      /* Flat style uses a wider gutter for the logo-left layout. */
+      padding-inline: 40px;
+    }
+  }
+}
+
+/* --- Wordmark --- */
+.header__wordmark {
+  @apply text-[color:var(--color-fg)] font-bold uppercase whitespace-nowrap leading-[16px];
+  font-size: 10px;
+  letter-spacing: 1px;
+
+  @media (min-width: 1024px) {
+    font-size: 12px;
+    letter-spacing: 1.5px;
+  }
+}
+
+.header__wordmark--center {
+  @apply absolute left-1/2 -translate-x-1/2;
+  top: 20px; /* visually centered in the 56px header when row uses items-start */
+}
+
+.header__wordmark--mobile {
+  @apply absolute left-1/2 -translate-x-1/2;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* --- Header-specific pill-dropdown variants ---
+   The generic `.pill-dropdown` primitive lives in `_pill-dropdown.css`.
+   Only wrappers/variants that are meaningful to the header live here. */
+
+/* Right utility pill — same primitive as the left nav pill, just anchored
+   to the right side of the header row. */
+.pill-dropdown--utility {
+  margin-left: auto;
+}
+
+/* --- Panel content variants (search / account / bag) ---
+   These target snippet internals inside specific pill panels. They live here
+   because they're tied to the header's specific pill contents rather than the
+   primitive. */
+
+/* Padding on each panel's content root (not on .pill-dropdown__panel-inner) so
+   the grid track can collapse cleanly when closed. */
+.pill-dropdown__panel--search .form-group,
+.pill-dropdown__panel--account .customer-login-inline,
+.pill-dropdown__panel--bag .ajax-cart__body,
+.pill-dropdown__panel--bag .ajax-cart__footer {
+  margin: 0;
+  padding: 8px 8px 12px;
+}
+
+.pill-dropdown__panel--search .form-control {
+  border: 0;
+  border-bottom: 1px solid var(--color-muted);
+  overflow: visible;
+  gap: 0;
+}
+
+.pill-dropdown__panel--search .form-control__affix:last-child {
+  padding-right: 0;
+}
+
+.pill-dropdown__panel--search input[type="search"] {
+  width: 100%;
+  background: transparent;
+  border: 0;
+  outline: none;
+  padding: 8px 0;
+  font-size: 14px;
+  color: var(--color-fg);
+}
+
+.pill-dropdown__panel--search input[type="search"]::placeholder {
+  color: var(--color-muted);
+}
+
+.pill-dropdown__panel--search [data-icon] {
+  background: transparent;
+  border: 0;
+  color: var(--color-fg);
+  padding: 4px;
+}
+
+/* Bag panel — cart-body / cart-footer bring their own padding, so strip the
+   inner wrapper's default padding. */
+.pill-dropdown__panel--bag .pill-dropdown__panel-inner {
+  padding: 0;
+}
+
+/* Account panel (login / register / logged-in) */
+.customer-login-inline__view[hidden] {
+  display: none;
+}
+
+.customer-login-inline__greeting {
+  font-size: 12px;
+  color: var(--color-fg);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 12px;
+}
+
+.customer-login-inline__account-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.customer-login-inline__account-link {
+  font-size: 12px;
+  color: var(--color-fg);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  line-height: 24px;
+}
+
+.customer-login-inline__account-link:hover {
+  color: var(--color-muted);
+}
+
+.customer-login-inline__meta--center {
+  justify-content: center;
+}
+
+.customer-login-inline__toggle {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+}
+
+.customer-login-inline__form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.customer-login-inline__field input {
+  width: 100%;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--color-muted);
+  outline: none;
+  padding: 10px 0;
+  font-size: 12px;
+  color: var(--color-fg);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.customer-login-inline__field input::placeholder {
+  color: var(--color-muted);
+}
+
+.customer-login-inline__submit {
+  width: 100%;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-fg-dark);
+  color: var(--color-bg);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 4px;
+}
+
+.customer-login-inline__meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.customer-login-inline__link {
+  font-size: 11px;
+  color: var(--color-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.customer-login-inline__link:hover {
+  color: var(--color-fg);
+}
+
+.customer-login-inline__errors {
+  padding: 8px 12px;
+  border-left: 2px solid var(--color-accent);
+  background-color: color-mix(in srgb, var(--color-accent) 8%, transparent);
+}
+
+.customer-login-inline__error {
+  font-size: 11px;
+  color: var(--color-accent);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* --- Mobile pill buttons — standalone pills (not the dropdown primitive) --- */
+.header__pill-btn {
+  @apply inline-flex items-center border border-[color:var(--color-muted)] rounded-full overflow-hidden;
+  height: 32px;
+}
+
+.header__pill-btn .pill-dropdown__item {
+  font-size: 10px;
+  padding-inline: 12px;
+}
+
+/* --- Flat nav (desktop) --- */
+.header__flat-nav {
+  @apply items-center;
+  gap: 24px;
+}
+
+.header__flat-nav--utility {
+  gap: 20px;
+}
+
+.header__flat-item {
+  @apply text-[color:var(--color-fg)] uppercase leading-[16px] whitespace-nowrap bg-transparent;
+  font-size: 12px;
 }

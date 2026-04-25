@@ -1,0 +1,101 @@
+{% doc %}
+
+  Product — Model Info
+  ------------------------------------------------------------------------------
+
+  Fit-reference card showing the model's name, height, and the sizes they're
+  wearing on the product shoot. Helps shoppers gauge fit on a real body.
+  Figma 29:19 — 48×48 avatar on the left + name (11px medium uppercase)
+  + height + size (10px) stacked right, 12px/16px padding, rounded-6.
+
+  Data model — split across two metafields:
+
+    1. A "Model" metaobject (Settings → Custom data → Metaobjects → Model)
+       holds the reusable person-level info: name, height, avatar. One
+       record per model, reused across every product they were shot in.
+
+    2. A per-product single-line text metafield `custom.model_size` holds
+       the specific size the model wore of THIS product. Size sits at
+       product level because it varies per garment (e.g. Shaho wears M
+       in a tee, L in a chunky knit) — keeping it on the Model record
+       would force one size across every product.
+
+  Product then references the Model record via a single metaobject-reference
+  metafield: `product.metafields.custom.model`.
+
+  Card only renders when a Model is linked AND that Model has a `name`.
+  Every other field (height, avatar, size) is optional.
+
+  Merchant setup:
+    1. Settings → Custom data → Metaobjects → Add "Model"
+         - name    (single-line text)
+         - height  (single-line text)
+         - avatar  (file reference → image)
+    2. Settings → Custom data → Products → add metafields:
+         - `custom.model`        — metaobject reference → Model
+         - `custom.model_size`   — single-line text (e.g. "Shirt: M, Pant: M/32")
+    3. Content → Metaobjects → Model → create records (SHAHO, etc.)
+    4. Per product: pick the linked model + fill in `model_size`.
+
+  @param {object} product - Required.
+
+  @example
+    {% render 'product-model-info', product: product %}
+
+{% enddoc %}
+
+{%- comment -%}
+  `.value` on `custom.model` unwraps the metafield drop to the underlying
+  Model metaobject drop. From there each field is accessible by its key
+  (`model.name`, `model.height`). For the image, `avatar` is a
+  file-reference → image, so `.value` yields a media_image drop usable
+  by `image_url` / `image_tag`.
+
+  `model_size` resolution: prefer the per-product metafield
+  (`custom.model_size`, single-line text) because size varies per
+  product — fall back to a `size` field on the Model metaobject
+  itself for merchants who kept the original metaobject schema with
+  size baked in. `| default:` triggers on nil OR empty string so either
+  omitted case resolves cleanly.
+{%- endcomment -%}
+{%- liquid
+  assign model = product.metafields.custom.model.value
+  assign model_name = model.name
+  assign model_height = model.height
+  assign model_avatar = model.avatar.value
+  assign model_size = product.metafields.custom.model_size.value | default: model.size
+-%}
+
+{% if model_name != blank %}
+  {%- comment -%}
+    Heading + card structure mirrors the sibling Match With snippet so
+    when the two render side by side (see `product-detail-form.liquid`'s
+    Match With + Model Info row), their headings line up on the same
+    y-axis. Card chrome itself (image, bg-surface, rounded, padding) is
+    owned by the shared `product-meta-card` primitive — only the body
+    (name + height + size lines) is Model-specific.
+
+    Card fills its `flex-1` parent wrapper (sized in
+    `product-detail-form.liquid` to equal 3 variant-picker tiles wide);
+    width math lives there, not here.
+  {%- endcomment -%}
+  <div class="flex flex-col gap-2">
+    <h3 class="text-label-tight text-fg">
+      {{ 'products.model' | t }}
+    </h3>
+    {%- capture meta_card_body -%}
+      <p class="text-[12px] font-medium uppercase truncate w-full">{{ model_name }}</p>
+      {% if model_height != blank %}
+        <p class="text-[12px] truncate w-full">{{ model_height }}</p>
+      {% endif %}
+      {% if model_size != blank %}
+        <p class="text-[12px] truncate w-full">{{ model_size }}</p>
+      {% endif %}
+    {%- endcapture -%}
+    {% render 'product-meta-card',
+              image: model_avatar,
+              alt: model_name,
+              body: meta_card_body
+    %}
+  </div>
+{% endif %}
