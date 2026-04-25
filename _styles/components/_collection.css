@@ -22,18 +22,25 @@
   pointer-events: none;
 }
 
-/* --- Collection toolbar (filter + sort bar above the grid) --- */
+/* --- Collection toolbar (filter + sort bar above the grid) ---
+ * Single-row horizontal layout. `justify-content: space-between` puts
+ * the filter at the left edge and the sort at the right edge.
+ * - Mobile: just the filter button on the row (sort lives inside the
+ *   filter drawer as its own accordion). Active-filter chips wrap to
+ *   row 2 via `.collection-toolbar__chips-mobile` (flex-basis: 100%).
+ * - Desktop: filter pill (left) + chips (middle) + sort pill (right).
+ */
 .collection-toolbar {
   display: flex;
-  flex-direction: column;
-  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  column-gap: 8px;
+  row-gap: 12px;
   padding: 16px var(--layout-padding-x);
 
   @media (min-width: 1024px) {
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
+    column-gap: 16px;
     padding-block: 24px;
   }
 }
@@ -53,19 +60,25 @@
   cursor: pointer;
 }
 
-.collection-toolbar__right {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
 .collection-toolbar__chips {
   align-items: center;
 }
 
 .collection-toolbar__chips-mobile {
+  /* Force a new row after the top pills row — without this the chips
+     would try to wedge in inline wherever there's horizontal space
+     left. */
+  flex-basis: 100%;
   padding-top: 4px;
 }
+
+/* Sort-pill right-edge alignment is handled by `justify-content:
+ * space-between` on `.collection-toolbar`. With two items (mobile:
+ * filter button + sort) the filter goes left, sort right. With three
+ * (desktop: filter pill + chips + sort) chips sit in the middle and
+ * sort still hits the right edge. `.collection-toolbar__chips-mobile`
+ * wraps to its own row below (`flex-basis: 100%`) so it never
+ * participates in the top-row distribution. */
 
 /* 2-column layout for long value lists (Color, Sort). Scoped to the desktop
    pill panel so the mobile drawer stays single-column (narrow viewport). */
@@ -76,10 +89,16 @@
 }
 
 /* Give the sort pill a minimum width so long sort labels
-   ("Price, Low to High", etc.) don't wrap inside the panel. The pill's own
-   nav row + dropdown panel both respect min-width here. */
-.pill-dropdown--sort {
-  min-inline-size: 240px;
+   ("Price, Low to High", etc.) don't wrap inside the panel. Scoped to
+   desktop only — on mobile the sort pill shares a row with the filter
+   button + product count, and a 240px floor would eat ~two-thirds of
+   the viewport and push the count onto a wrap line. Mobile lets the
+   pill size to its content; the dropdown panel still widens as needed
+   when opened. */
+@media (min-width: 1024px) {
+  .pill-dropdown--sort {
+    min-inline-size: 240px;
+  }
 }
 
 /* --- Filter value (checkbox / radio list item inside a filter pill panel) --- */
@@ -263,42 +282,81 @@
   padding: 16px 0;
 }
 
+/* Drawer group title — now a `<button>` not a `<summary>` (the drawer
+ * switched from native `<details>` to the `.collapsible-toggle` pattern
+ * for consistent 500ms expand animation with the PDP info accordion).
+ * `list-style: none` + `::-webkit-details-marker` removal no longer
+ * needed — native summary markers are a `<details>`-only concern. */
 .collection-filter-drawer__group-title {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  width: 100%;
   font-size: 14px;
   font-weight: 500;
   color: var(--color-fg);
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  list-style: none;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  padding: 0;
   cursor: pointer;
 }
 
-.collection-filter-drawer__group-title::-webkit-details-marker {
-  display: none;
-}
-
+/* Caret char size is owned by the drawer (was 12px, bumped to 18px
+ * for clearer visibility — the drawer's row-height + 14px group title
+ * made 12px read as a floating dot at a glance, users kept missing
+ * that the rows were expandable). Rotation + transition come from
+ * the shared `.collapsible-toggle [data-chevron]` rules in
+ * `_collapsible.css`: `›` → 90° clockwise (pointing down) when the
+ * paired button reports `aria-expanded="true"`. Same behavior PDP
+ * info accordion uses (which is 16px — drawer 18px is intentionally
+ * a hair larger because the drawer has more stage space). */
 .collection-filter-drawer__group-caret {
-  font-size: 12px;
-  transition: transform 200ms ease;
-}
-
-.collection-filter-drawer__group[open] .collection-filter-drawer__group-caret {
-  transform: rotate(180deg);
+  font-size: 18px;
 }
 
 .collection-filter-drawer__group-body {
   padding-top: 12px;
 }
 
+/* Drawer filter + sort value lists — CSS multi-column, fixed 2 columns.
+ * Browser balances items across both columns top-to-bottom, so 21
+ * colors render as ~11+10, not 5 narrow columns.
+ *
+ * `display: block` is load-bearing — `.pill-dropdown__panel-list`
+ * ships with `display: flex` for the desktop pill panel, and CSS
+ * multi-column only kicks in when display is block/inline-block.
+ * Without this override, `columns: 2` is parsed but silently ignored,
+ * and items render as a single flex column.
+ *
+ * `break-inside: avoid` on the `<li>` children stops a single color
+ * label from splitting across the column boundary (otherwise "BLUE/
+ * WHITE" could render with "BLUE" at the bottom of column 1 and
+ * "WHITE" at the top of column 2).
+ *
+ * Applies to drawer `filter-values` lists like Color AND to the sort
+ * section's own `.__values` list. Earlier iteration used a 5-row
+ * column-flow grid which produced 5 columns at 21 items — too narrow,
+ * cells overlapped.
+ */
+.collection-filter-drawer .pill-dropdown__panel-list,
 .collection-filter-drawer__values {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+  display: block;
+  columns: 2;
+  column-gap: 12px;
   list-style: none;
   padding: 0;
+  margin: 0;
+}
+
+.collection-filter-drawer .pill-dropdown__panel-list > li,
+.collection-filter-drawer__values > li {
+  /* multi-column layout has no `row-gap` — use padding/margin on
+     children to space items vertically. */
+  padding-bottom: 4px;
+  break-inside: avoid;
 }
 
 .collection-filter-drawer__footer {

@@ -37,6 +37,16 @@
       >&times;</button>
     </header>
 
+    {%- comment -%}
+      Drawer groups use the shared `.collapsible` / `.collapsible-toggle`
+      primitive (same as the PDP info accordion) so both surfaces share
+      one 500ms grid-rows animation matching CLAUDE.md's standard.
+      Earlier iteration used native `<details>` which has no built-in
+      expand/collapse animation across browsers.
+
+      Groups default to open when their filter has active values, so
+      users land on the state that reflects what's already applied.
+    {%- endcomment -%}
     <div class="collection-filter-drawer__body">
       {% for f in collection.filters %}
         {%- liquid
@@ -49,18 +59,101 @@
               assign has_active = true
             endif
           endif
+          assign drawer_panel_id = 'drawer-filter-' | append: forloop.index
+          assign drawer_toggle_id = drawer_panel_id | append: '-toggle'
         -%}
-        <details class="collection-filter-drawer__group" {% if has_active %}open{% endif %}>
-          <summary class="collection-filter-drawer__group-title">
+        <div class="collection-filter-drawer__group">
+          <button
+            type="button"
+            id="{{ drawer_toggle_id }}"
+            class="collapsible-toggle collection-filter-drawer__group-title"
+            aria-expanded="{% if has_active %}true{% else %}false{% endif %}"
+            aria-controls="{{ drawer_panel_id }}"
+            data-component="collapsible-toggle"
+          >
             <span>{{ f.label }}</span>
-            <span class="collection-filter-drawer__group-caret" aria-hidden="true">▾</span>
-          </summary>
-
-          <div class="collection-filter-drawer__group-body">
-            {% render 'filter-values', filter: f %}
+            <span class="collection-filter-drawer__group-caret" aria-hidden="true" data-chevron>›</span>
+          </button>
+          <div
+            id="{{ drawer_panel_id }}"
+            class="collapsible{% if has_active %} is-open{% endif %}"
+            role="region"
+            aria-labelledby="{{ drawer_toggle_id }}"
+          >
+            <div class="collapsible__inner">
+              <div class="collection-filter-drawer__group-body">
+                {% render 'filter-values', filter: f %}
+              </div>
+            </div>
           </div>
-        </details>
+        </div>
       {% endfor %}
+
+      {%- comment -%}
+        Sort accordion — lives inside the drawer on mobile instead of
+        being a separate pill on the toolbar. Matches the filter-group
+        markup + CSS so the drawer reads as one consistent list of
+        collapsible sections.
+
+        `name="sort_by"` is intentionally the same as the desktop sort
+        pill's radios (see `sort-dropdown.liquid`): the browser treats
+        them as one radio group and keeps selection in sync. On Apply,
+        the form serializes whichever `sort_by` is currently checked
+        and the page navigates to the new URL.
+      {%- endcomment -%}
+      {%- liquid
+        assign current_sort = collection.sort_by | default: collection.default_sort_by
+        assign current_sort_label = ''
+        for option in collection.sort_options
+          if option.value == current_sort
+            assign current_sort_label = option.name
+            break
+          endif
+        endfor
+        if current_sort_label == ''
+          assign current_sort_label = collection.sort_options.first.name
+        endif
+      -%}
+      <div class="collection-filter-drawer__group">
+        <button
+          type="button"
+          id="drawer-sort-toggle"
+          class="collapsible-toggle collection-filter-drawer__group-title"
+          aria-expanded="false"
+          aria-controls="drawer-sort-panel"
+          data-component="collapsible-toggle"
+        >
+          <span>{{ 'collections.sort.label' | t }}: {{ current_sort_label }}</span>
+          <span class="collection-filter-drawer__group-caret" aria-hidden="true" data-chevron>›</span>
+        </button>
+        <div
+          id="drawer-sort-panel"
+          class="collapsible"
+          role="region"
+          aria-labelledby="drawer-sort-toggle"
+        >
+          <div class="collapsible__inner">
+            <div class="collection-filter-drawer__group-body">
+              <ul class="collection-filter-drawer__values">
+                {% for option in collection.sort_options %}
+                  <li>
+                    <label class="filter-value{% if option.value == current_sort %} filter-value--active{% endif %}">
+                      <input
+                        type="radio"
+                        name="sort_by"
+                        value="{{ option.value }}"
+                        class="sr-only"
+                        {% if option.value == current_sort %}checked{% endif %}
+                      >
+                      <span class="filter-value__label">{{ option.name }}</span>
+                    </label>
+                  </li>
+                {% endfor %}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <footer class="collection-filter-drawer__footer">

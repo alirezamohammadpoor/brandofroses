@@ -107,11 +107,32 @@
     </div>
   {% endif %}
 
-  <div class="collection-toolbar__right">
-    <div class="collection-toolbar__chips hidden lg:flex">
-      {% render 'filter-chips', filters: filters %}
-    </div>
+  {%- comment -%}
+    Desktop chips row (lg:flex) — sits between the filter pill and the
+    right-aligned sort pill. On mobile the chips wrap to their own row
+    at the bottom of the toolbar via `.collection-toolbar__chips-mobile`
+    (flex-basis: 100% in `_collection.css`).
+  {%- endcomment -%}
+  <div class="collection-toolbar__chips hidden lg:flex">
+    {% render 'filter-chips', filters: filters %}
+  </div>
 
+  {%- comment -%}
+    Sort pill — DESKTOP ONLY (wrapped in `hidden lg:flex`). On mobile
+    the sort options live inside the filter drawer as its own
+    accordion section at the bottom of the body (see
+    `collection-filter-drawer.liquid`), so the mobile toolbar row has
+    just the single `[FILTER]` button.
+
+    Same `name="sort_by"` on inputs in both places: the browser treats
+    them as a single radio group and keeps selection in sync across
+    desktop pill + mobile drawer. Visual `.filter-value--active` state
+    is driven by Liquid comparing `option.value == current_sort` at
+    render time, not by radio DOM state, so both surfaces render the
+    correct selection regardless of which one "wins" the HTML `checked`
+    attribute race at parse time.
+  {%- endcomment -%}
+  <div class="hidden lg:flex">
     {% render 'sort-dropdown',
               sort_options: collection.sort_options,
               current_sort: collection.sort_by | default: collection.default_sort_by
