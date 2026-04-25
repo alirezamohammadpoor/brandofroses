@@ -7,10 +7,14 @@
   @param {object} [collection] - Optional collection the product was reached from; used to build `within:` URLs for PDP breadcrumb context
 
   Badge priority (first match wins):
-    1. SOLD OUT   — !product.available
-    2. -XX%       — variant.compare_at_price > variant.price
-    3. PRE-ORDER  — tag `badge:pre-order`
-    4. NEW        — tag `badge:new`
+    1. SOLD OUT   — !product.available        — bg-accent + text-bg (matches sold-out ATC state)
+    2. -XX%       — compare_at_price > price  — bg-accent + text-bg
+    3. PRE-ORDER  — tag `badge:pre-order`     — bg-fg + text-bg
+    4. NEW        — tag `badge:new`           — bg-accent + text-bg (Figma 38:21)
+
+  Badge visual spec (inline classes on the span — see line ~170):
+  10px Inter Medium uppercase, 12px line-height, 0.5px tracking,
+  8px horizontal + 3px vertical padding, 4px rounded corners.
 
   @example
   {% render 'product-card',
@@ -59,7 +63,7 @@
     assign badge_classes = ''
     if product.available == false
       assign badge_text = 'products.product.sold_out' | t | upcase
-      assign badge_classes = 'bg-muted text-fg'
+      assign badge_classes = 'bg-accent text-bg'
     elsif on_sale
       assign badge_text = '-' | append: discount_pct | append: '%'
       assign badge_classes = 'bg-accent text-bg'
@@ -152,8 +156,19 @@
           }}
         {% endif %}
 
+        {%- comment -%}
+          Badge spec — Figma 38:21 (PLP Product Card > Badge): 10px
+          Inter Medium uppercase, 12px line-height, 0.5px tracking,
+          `bg-accent` + `text-bg` for NEW / -XX% states. Inline classes
+          here instead of the shared `text-section-label` utility —
+          that utility is also used by the `+N` color-overflow chip
+          further down in this file (line ~246), and the chip's looser
+          line-height + tracking (`text-section-label` = 140% +
+          0.08em) read fine there; tightening the utility would drift
+          the chip off-spec too.
+        {%- endcomment -%}
         {% if badge_text != blank %}
-          <span class="absolute top-2 left-2 text-section-label {{ badge_classes }} px-2 py-[3px] rounded-[4px]">
+          <span class="absolute top-2 left-2 text-[10px] font-medium uppercase tracking-[0.5px] leading-[12px] {{ badge_classes }} px-2 py-[3px] rounded-[4px]">
             {{ badge_text }}
           </span>
         {% endif %}

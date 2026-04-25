@@ -30,14 +30,31 @@
   display: grid;
   grid-template-rows: 0fr;
   opacity: 0;
+  /* `visibility: hidden` on close makes the collapsed content
+   * non-focusable and hidden from AT (tab-through was possible with
+   * just grid-track collapse because form inputs / buttons inside
+   * were still in the tab order even when height-clipped to 0).
+   * `visibility 0s linear 500ms` defers the hide until AFTER the
+   * collapse animation finishes so content stays visible during the
+   * close transition. Same trick `.pill-dropdown__panel` uses. */
+  visibility: hidden;
   transition:
     grid-template-rows 500ms ease-in-out,
-    opacity 500ms ease-in-out;
+    opacity 500ms ease-in-out,
+    visibility 0s linear 500ms;
 }
 
 .collapsible.is-open {
   grid-template-rows: 1fr;
   opacity: 1;
+  visibility: visible;
+  /* Flip visibility immediately on open so tab order + AT recognize
+   * the content as the expand animation begins, not only once it
+   * finishes. */
+  transition:
+    grid-template-rows 500ms ease-in-out,
+    opacity 500ms ease-in-out,
+    visibility 0s linear 0s;
 }
 
 /* The grid-track collapse trick needs a child with `min-height: 0` + clipping
