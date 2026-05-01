@@ -18,7 +18,7 @@
    received, without full opacity (which would hide the current products). */
 [data-collection-results].is-fetching {
   opacity: 0.6;
-  transition: opacity 150ms ease;
+  transition: opacity 150ms var(--ease-out);
   pointer-events: none;
 }
 
@@ -113,11 +113,13 @@
   letter-spacing: 0.04em;
   cursor: pointer;
   border-radius: 12px;
-  transition: background-color 150ms ease, color 150ms ease;
+  transition: background-color 150ms var(--ease-out), color 150ms var(--ease-out);
 }
 
-.filter-value:hover {
-  background-color: color-mix(in srgb, var(--color-fg) 12%, transparent);
+@media (hover: hover) and (pointer: fine) {
+  .filter-value:hover {
+    background-color: color-mix(in srgb, var(--color-fg) 12%, transparent);
+  }
 }
 
 /* Keyboard focus — the real input is .sr-only (visually hidden but
@@ -208,8 +210,10 @@
   line-height: 1;
 }
 
-.filter-chips__chip:hover {
-  color: var(--color-muted);
+@media (hover: hover) and (pointer: fine) {
+  .filter-chips__chip:hover {
+    color: var(--color-muted);
+  }
 }
 
 .filter-chips__reset {
@@ -223,9 +227,11 @@
   border-radius: 9999px;
 }
 
-.filter-chips__reset:hover {
-  background-color: var(--color-fg);
-  color: var(--color-bg);
+@media (hover: hover) and (pointer: fine) {
+  .filter-chips__reset:hover {
+    background-color: var(--color-fg);
+    color: var(--color-bg);
+  }
 }
 
 /* --- Collection filter drawer (mobile) --- */
@@ -243,17 +249,8 @@
 .collection-filter-drawer__header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   padding: 16px var(--layout-padding-x);
-  border-bottom: 1px solid var(--color-muted);
-}
-
-.collection-filter-drawer__title {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--color-fg);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
 }
 
 .collection-filter-drawer__close {
@@ -277,9 +274,30 @@
   display: none;
 }
 
+.collection-filter-drawer__section + .collection-filter-drawer__section {
+  margin-top: 24px;
+}
+
+/* Single-row sections (sort) get a bottom divider — multi-row sections
+ * (filters) already have inter-row dividers, so a section-bottom would
+ * be redundant. */
+.collection-filter-drawer__section:has(> .collection-filter-drawer__group:only-of-type) {
+  border-bottom: 1px solid color-mix(in srgb, var(--color-muted) 40%, transparent);
+}
+
+.collection-filter-drawer__section-label {
+  padding: 16px 0 8px;
+  margin: 0;
+  color: var(--color-muted);
+}
+
 .collection-filter-drawer__group {
   border-bottom: 1px solid color-mix(in srgb, var(--color-muted) 40%, transparent);
   padding: 16px 0;
+}
+
+.collection-filter-drawer__section > .collection-filter-drawer__group:last-of-type {
+  border-bottom: 0;
 }
 
 /* Drawer group title — now a `<button>` not a `<summary>` (the drawer
@@ -360,8 +378,7 @@
 }
 
 .collection-filter-drawer__footer {
-  padding: 16px var(--layout-padding-x) calc(24px + env(safe-area-inset-bottom, 0px));
-  border-top: 1px solid var(--color-muted);
+  padding: 24px var(--layout-padding-x) calc(24px + env(safe-area-inset-bottom, 0px));
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -373,8 +390,11 @@
   color: var(--color-muted);
   text-transform: uppercase;
   letter-spacing: 0.04em;
+  transition: color 150ms var(--ease-out);
 }
 
-.collection-filter-drawer__clear:hover {
-  color: var(--color-fg);
+@media (hover: hover) and (pointer: fine) {
+  .collection-filter-drawer__clear:hover {
+    color: var(--color-fg);
+  }
 }

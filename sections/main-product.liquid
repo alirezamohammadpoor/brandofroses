@@ -4,13 +4,11 @@
 
 <div data-section-id="{{ section.id }}" data-section-type="product">
   {%- comment -%}
-    Layout max-width cap. Figma designs the PDP at 1440px wide; without a
-    constraint the `lg:w-1/2` columns stretch to fill wide monitors
-    (3000px+ on HiDPI displays), pushing the gallery to absurd sizes and
-    leaving huge gutters around the info column. `max-w-[1440px] mx-auto`
-    caps the layout at the design width and centers it on wider viewports.
+    No max-width cap on the row — the gallery scales with viewport.
+    The info form's own cap (`lg:w-[560px] lg:max-w-full`) plus
+    `lg:justify-center` keeps it readable on wide screens.
   {%- endcomment -%}
-  <div class="max-w-[1440px] mx-auto flex flex-col lg:flex-row">
+  <div class="mx-auto flex flex-col lg:flex-row">
     <div class="lg:w-1/2 lg:shrink-0">
       {% render 'product-detail-gallery',
                  product: product,

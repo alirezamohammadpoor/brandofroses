@@ -62,15 +62,21 @@
 
 @layer base {
   :root {
-    --transition-drawer-in: translate 300ms ease;
-    --transition-drawer-out: translate 300ms ease;
-    --transition-backdrop-in: opacity 300ms ease;
-    --transition-backdrop-out: opacity 300ms ease;
+    /* Enter/exit → --ease-out. On-screen movement → --ease-in-out.
+     * Drawers → --ease-drawer. Avoid `ease-in` for user-facing motion. */
+    --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+    --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+    --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+
+    --transition-drawer-in: translate 300ms var(--ease-drawer);
+    --transition-drawer-out: translate 300ms var(--ease-drawer);
+    --transition-backdrop-in: opacity 300ms var(--ease-out);
+    --transition-backdrop-out: opacity 300ms var(--ease-out);
 
     /* Set these as CSS variables so they can be adjusted via inline styling or modifier classes if necessary */
     --lazy-image-transition-timing-function: cubic-bezier(0.42, 0.33, 0.21, 0.82);
     --lazy-image-transition-duration: 0.32s;
-    --lazy-image-transition: opacity var(--lazy-image-transition-timing-function, ease-in) var(--lazy-image-transition-duration, 0.25s);    
+    --lazy-image-transition: opacity var(--lazy-image-transition-duration, 0.25s) var(--lazy-image-transition-timing-function, var(--ease-out));
 
     --backdrop-color: #000;
     --backdrop-opacity: 0.6;      
@@ -208,21 +214,21 @@
     @apply cursor-not-allowed;
   }
 
-  /* Remove all animations and transitions for people that prefer not to see them */
+  /* Strip motion-family transitions; preserve opacity/color fades for
+   * comprehension. Cap looping animations to one iteration. */
   @media (prefers-reduced-motion: reduce) {
     *,
     *::before,
     *::after {
-      animation-duration: 0.01ms !important;
       animation-iteration-count: 1 !important;
-      transition-duration: 0.01ms !important;
+      transition-property: opacity, color, background-color, border-color !important;
       scroll-behavior: auto !important;
     }
 
     html {
       scroll-behavior: initial;
     }
-  }  
+  }
 }
 
 .image-responsive {
