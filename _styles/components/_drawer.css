@@ -66,9 +66,10 @@
   gap: 40px;
 }
 
+/* No `gap` — when the collapsible is closed, a parent gap would leave
+ * dead space below the toggle. Spacing comes from the inner padding. */
 .mobile-menu__primary-item {
   @apply flex flex-col;
-  gap: 24px;
 }
 
 .mobile-menu__primary-link {
@@ -82,24 +83,20 @@
 
 .mobile-menu__caret {
   font-size: 14px;
-  transition: transform 200ms ease;
+  transition: transform 200ms var(--ease-out);
 }
 
 .mobile-menu__primary-link[aria-expanded="true"] .mobile-menu__caret {
   transform: rotate(180deg);
 }
 
-/* Categories accordion — hidden until .is-active */
-.mobile-menu__categories {
-  display: none;
+.collapsible > .collapsible__inner > .mobile-menu__categories {
+  display: flex;
   flex-direction: column;
   gap: 24px;
-  padding-left: 24px;
+  padding: 24px 0 0 24px;
   list-style: none;
-}
-
-.mobile-menu__categories.is-active {
-  display: flex;
+  margin: 0;
 }
 
 .mobile-menu__category {

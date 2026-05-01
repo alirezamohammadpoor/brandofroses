@@ -147,10 +147,13 @@ header.header {
   text-transform: uppercase;
   letter-spacing: 0.04em;
   line-height: 24px;
+  transition: color 150ms var(--ease-out);
 }
 
-.customer-login-inline__account-link:hover {
-  color: var(--color-muted);
+@media (hover: hover) and (pointer: fine) {
+  .customer-login-inline__account-link:hover {
+    color: var(--color-muted);
+  }
 }
 
 .customer-login-inline__meta--center {
@@ -219,10 +222,13 @@ header.header {
   color: var(--color-muted);
   text-transform: uppercase;
   letter-spacing: 0.04em;
+  transition: color 150ms var(--ease-out);
 }
 
-.customer-login-inline__link:hover {
-  color: var(--color-fg);
+@media (hover: hover) and (pointer: fine) {
+  .customer-login-inline__link:hover {
+    color: var(--color-fg);
+  }
 }
 
 .customer-login-inline__errors {

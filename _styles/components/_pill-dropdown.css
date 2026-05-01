@@ -90,7 +90,7 @@
 .pill-dropdown__caret {
   font-size: 10px;
   margin-left: 2px;
-  transition: transform 200ms ease;
+  transition: transform 200ms var(--ease-out);
 }
 
 .pill-dropdown__item[aria-expanded="true"] .pill-dropdown__caret {
@@ -103,22 +103,21 @@
   height: 20px;
 }
 
-/* Panels use grid-template-rows: 0fr -> 1fr for auto-height animation.
-   Motion duration maps to the real content height, so short and tall panels
-   feel consistent without a guessed max-height target. */
+/* Panels use grid-template-rows: 0fr -> 1fr for auto-height animation. */
 .pill-dropdown__panel {
   display: grid;
   grid-template-rows: 0fr;
   opacity: 0;
   visibility: hidden;
+  transform-origin: top;
   /* Panel must not contribute intrinsic width to the pill — pill width is
      driven by the nav row only. `inline-size: 0; min-inline-size: 100%`
      gives the panel 0 intrinsic width but renders it at parent's full width. */
   inline-size: 0;
   min-inline-size: 100%;
   transition:
-    grid-template-rows 350ms ease-in-out,
-    opacity 200ms ease-out,
+    grid-template-rows 350ms var(--ease-in-out),
+    opacity 200ms var(--ease-out),
     visibility 0s linear 350ms;
 }
 
@@ -127,8 +126,8 @@
   opacity: 1;
   visibility: visible;
   transition:
-    grid-template-rows 350ms ease-in-out,
-    opacity 200ms ease-out 50ms,
+    grid-template-rows 350ms var(--ease-out),
+    opacity 200ms var(--ease-out) 50ms,
     visibility 0s linear 0s;
 }
 
@@ -153,8 +152,11 @@
   @apply text-[color:var(--color-fg)] uppercase whitespace-nowrap block;
   font-size: 12px;
   line-height: 24px;
+  transition: color 150ms var(--ease-out);
 }
 
-.pill-dropdown__category:hover {
-  @apply text-[color:var(--color-muted)];
+@media (hover: hover) and (pointer: fine) {
+  .pill-dropdown__category:hover {
+    @apply text-[color:var(--color-muted)];
+  }
 }

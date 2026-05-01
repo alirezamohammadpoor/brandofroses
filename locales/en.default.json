@@ -141,6 +141,7 @@
     "filters": {
       "title": "Filter",
       "toolbar_label": "Filter and sort",
+      "section_label": "Filters",
       "reset": "Reset",
       "apply": "Apply",
       "clear_all": "Clear all",
@@ -150,7 +151,8 @@
       "max_price": "Max price"
     },
     "sort": {
-      "label": "Sort"
+      "label": "Sort",
+      "section_label": "Sort by"
     }
   },
   "contact": {
