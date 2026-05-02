@@ -1,0 +1,96 @@
+{% doc %}
+  Renders the body of the header search dropdown:
+    1. TRENDING — up to `query_limit` query suggestions (each links to /search?q=…)
+    2. PRODUCTS — up to `product_limit` compact product cards in a 2-column grid
+
+  When `products` is empty AND `queries` is empty, renders an empty state with a
+  "see all results" link to the full search page.
+
+  @param {object} [queries]       - predictive_search.resources.queries
+  @param {object} [products]      - predictive_search.resources.products
+  @param {string} [q]             - the search term (for the empty-state link)
+  @param {number} [query_limit]   - max queries to show (default 3)
+  @param {number} [product_limit] - max products to show (default 4)
+
+  @example
+  {% render 'predictive-search-results',
+            queries: predictive_search.resources.queries,
+            products: predictive_search.resources.products,
+            q: search.terms %}
+{% enddoc %}
+
+{%- liquid
+  assign query_limit = query_limit | default: 3
+  assign product_limit = product_limit | default: 4
+  assign has_queries = false
+  assign has_products = false
+  if queries and queries.size > 0
+    assign has_queries = true
+  endif
+  if products and products.size > 0
+    assign has_products = true
+  endif
+-%}
+
+<div class="predictive-search-results">
+  {% if has_queries == false and has_products == false %}
+    <p class="predictive-search-results__empty">
+      {{ 'general.search.no_results' | t }}
+      {% if q != blank %}
+        <a href="{{ routes.search_url }}?q={{ q | url_encode }}" class="predictive-search-results__empty-link">
+          {{ 'general.search.see_all' | t }}
+        </a>
+      {% endif %}
+    </p>
+  {% else %}
+    {% if has_queries %}
+      <section class="predictive-search-results__section" aria-labelledby="predictive-search-trending-label">
+        <h3 id="predictive-search-trending-label" class="text-section-label predictive-search-results__label">
+          {{ 'general.search.trending' | t }}
+        </h3>
+        <ul class="predictive-search-results__queries" role="list">
+          {% for query in queries limit: query_limit %}
+            <li>
+              <a href="{{ routes.search_url }}?q={{ query.text | url_encode }}" class="predictive-search-results__query">
+                {{ query.text | upcase }}
+              </a>
+            </li>
+          {% endfor %}
+        </ul>
+      </section>
+    {% endif %}
+
+    {% if has_queries and has_products %}
+      <hr class="predictive-search-results__divider" aria-hidden="true">
+    {% endif %}
+
+    {% if has_products %}
+      {%- liquid
+        assign product_count = products.size
+        if product_count > product_limit
+          assign product_count = product_limit
+        endif
+        if product_count == 1
+          assign product_count_label = 'general.search.results_count_singular' | t
+        else
+          assign product_count_label = 'general.search.results_count_plural' | t: count: product_count
+        endif
+      -%}
+      <section class="predictive-search-results__section" aria-labelledby="predictive-search-products-label">
+        <header class="predictive-search-results__section-header">
+          <h3 id="predictive-search-products-label" class="text-section-label predictive-search-results__label">
+            {{ 'general.search.products' | t }}
+          </h3>
+          <span class="predictive-search-results__count">{{ product_count_label | upcase }}</span>
+        </header>
+        <ul class="predictive-search-results__grid" role="list">
+          {% for product in products limit: product_limit %}
+            <li>
+              {% render 'product-card-compact', product: product %}
+            </li>
+          {% endfor %}
+        </ul>
+      </section>
+    {% endif %}
+  {% endif %}
+</div>

@@ -300,4 +300,5 @@ img.lazy-image {
 @import './components/_ajax-cart.css';
 @import './components/_drawer.css';
 @import './components/_collapsible.css';
+@import './components/_predictive-search.css';
 @import './components/_policy.css';

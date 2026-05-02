@@ -41,6 +41,7 @@ import CustomerLoginInline from '@/components/customerLoginInline'
 import CollectionToolbar from '@/components/collectionToolbar'
 import ProductRecommendations from '@/components/productRecommendations'
 import CollapsibleToggle from '@/components/collapsibleToggle'
+import PredictiveSearch from '@/components/search/predictiveSearch'
 
 // Use this to expose anything needed throughout the rest of the app
 window.app = window.app || {};
@@ -91,6 +92,7 @@ function init() {
     CollectionToolbar,
     ProductRecommendations,
     CollapsibleToggle,
+    PredictiveSearch,
   ]
 
   const mountInRoot = (
