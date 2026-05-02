@@ -133,12 +133,6 @@
             aria-controls="utility-menu-panel-search"
             aria-expanded="false"
           >Search</button>
-          {%- comment -%}
-            Search input is rendered inline in the nav row. Hidden by default;
-            CSS reveals it (and hides the SEARCH toggle) when the pill's
-            `data-active-key="search"` is set, so the input shares the row
-            with ACCOUNT and BAG instead of dropping below them.
-          {%- endcomment -%}
           <div class="pill-dropdown__nav-search-slot">
             {% render 'search-inline', id: section.id | append: '-search' %}
           </div>

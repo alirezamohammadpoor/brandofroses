@@ -42,13 +42,12 @@ export default class PredictiveSearch extends BaseComponent {
   #debounceMs: number
   #aborter: AbortController | null = null
   #debounceTimer: ReturnType<typeof setTimeout> | null = null
-
-  #onInputBound: () => void
+  #onInputBound: (() => void) | null = null
 
   constructor(el: HTMLElement) {
     super(el)
 
-    const pill = this.el.closest<HTMLElement>('.pill-dropdown')
+    const pill = this.el.closest<HTMLElement>('[data-component="pill-dropdown"]')
     this.#input = pill?.querySelector<HTMLInputElement>('input[name="q"]') ?? null
     this.#target = this.el.querySelector<HTMLElement>('[data-predictive-results]')
     this.#debounceMs = Number(this.el.dataset.debounce ?? 200)
@@ -63,7 +62,7 @@ export default class PredictiveSearch extends BaseComponent {
   }
 
   destroy() {
-    if (this.#input) {
+    if (this.#input && this.#onInputBound) {
       this.#input.removeEventListener('input', this.#onInputBound)
     }
     if (this.#debounceTimer) {
@@ -98,13 +97,14 @@ export default class PredictiveSearch extends BaseComponent {
     }
 
     this.#aborter?.abort()
-    this.#aborter = new AbortController()
+    const aborter = new AbortController()
+    this.#aborter = aborter
 
     const url = `/search/suggest?q=${encodeURIComponent(q)}&section_id=${SECTION_ID}&${RESOURCE_PARAMS}`
     target.setAttribute('aria-busy', 'true')
 
     try {
-      const res = await fetch(url, { signal: this.#aborter.signal })
+      const res = await fetch(url, { signal: aborter.signal })
       if (!res.ok) return
 
       const html = await res.text()
@@ -124,7 +124,12 @@ export default class PredictiveSearch extends BaseComponent {
       console.warn('[predictive-search] fetch failed', err)
     }
     finally {
-      target.setAttribute('aria-busy', 'false')
+      // Only clear aria-busy if THIS request is still the active one — an
+      // aborted older fetch shouldn't lie about the state of the in-flight
+      // newer fetch that just superseded it.
+      if (this.#aborter === aborter) {
+        target.setAttribute('aria-busy', 'false')
+      }
     }
   }
 }

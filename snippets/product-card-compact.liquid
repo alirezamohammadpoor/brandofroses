@@ -141,12 +141,12 @@
           {% for value in color_option.values limit: max_visible %}
             <li
               class="block w-2 h-2 rounded-full border border-muted/30"
-              style="background-color: {% if value.swatch.color != blank %}{{ value.swatch.color }}{% else %}#1A1A18{% endif %};"
+              style="background-color: {% if value.swatch.color != blank %}{{ value.swatch.color }}{% else %}var(--color-fg){% endif %};"
               title="{{ value }}"
             ><span class="sr-only">{{ value }}</span></li>
           {% endfor %}
           {% if overflow > 0 %}
-            <li class="text-[9px] text-muted ml-1" aria-label="{{ 'products.product.more_colors' | t: count: overflow }}">+{{ overflow }}</li>
+            <li class="text-section-label text-muted ml-1" aria-label="{{ 'products.product.more_colors' | t: count: overflow }}">+{{ overflow }}</li>
           {% endif %}
         </ul>
       {% endif %}
