@@ -58,7 +58,7 @@
     },
     "search": {
       "no_results_html": "Nothing was found for '{{ terms }}'",
-      "no_results": "No search results found",
+      "no_results": "No matches.",
       "results_for_html": "Search results for '{{ terms }}'",
       "results_for_singular_html": "Search result for '{{ terms }}'",
       "results_count_singular": "1 result",
@@ -67,7 +67,10 @@
       "placeholder": "Search",
       "mobile_placeholder": "Tap to search",
       "submit": "Search",
-      "search": "Search"
+      "search": "Search",
+      "trending": "Trending",
+      "products": "Products",
+      "see_all": "See all results"
     }
   },
   "accessibility": {

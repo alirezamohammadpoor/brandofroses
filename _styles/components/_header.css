@@ -64,9 +64,118 @@ header.header {
    Only wrappers/variants that are meaningful to the header live here. */
 
 /* Right utility pill — same primitive as the left nav pill, just anchored
-   to the right side of the header row. */
+   to the right side of the header row. Pill width is content-driven (no
+   `inline-size` override anywhere): when search opens, the SEARCH toggle
+   shrinks to zero while the input slot grows; their widths swap in sync
+   so the pill's `max-content` advances monotonically — no clash with a
+   fixed override, no end-of-transition bounce. */
 .pill-dropdown--utility {
   margin-left: auto;
+}
+
+/* Toggle + input slot animate via `flex-basis` (not width / max-width).
+ * The pill is `inline-size: max-content`, which means the pill's rendered
+ * width = sum of children's contributions to max-content. `flex-basis`
+ * IS that contribution; `max-width` only constrains rendered size and
+ * doesn't feed into max-content, so the pill wouldn't grow with the
+ * slot. `min-width: 0` + `overflow: hidden` defeats the default
+ * `min-width: auto` for flex items so the basis value can actually take
+ * effect at zero. */
+.pill-dropdown__item--search-toggle {
+  flex: 0 0 80px;
+  min-width: 0;
+  overflow: hidden;
+  transition:
+    flex-basis 500ms var(--ease-in-out),
+    padding 500ms var(--ease-in-out),
+    opacity 250ms var(--ease-in-out);
+}
+
+.pill-dropdown--utility[data-active-key="search"] .pill-dropdown__item--search-toggle {
+  flex: 0 0 0;
+  padding-inline: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    flex-basis 500ms var(--ease-out),
+    padding 500ms var(--ease-out),
+    opacity 200ms var(--ease-out);
+}
+
+.pill-dropdown__nav-search-slot {
+  display: flex;
+  align-items: center;
+  flex: 0 0 0;
+  min-width: 0;
+  padding-inline: 0;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    flex-basis 500ms var(--ease-in-out),
+    padding 500ms var(--ease-in-out),
+    opacity 250ms var(--ease-in-out);
+}
+
+.pill-dropdown--utility[data-active-key="search"] .pill-dropdown__nav-search-slot {
+  flex: 0 0 480px;
+  padding-inline: 12px;
+  opacity: 1;
+  pointer-events: auto;
+  transition:
+    flex-basis 500ms var(--ease-out),
+    padding 500ms var(--ease-out),
+    opacity 250ms var(--ease-out) 150ms;
+}
+
+/* The form fills the slot; without an explicit width the form-control
+ * keeps its natural max-content which would expand the slot beyond its
+ * max-width. Forcing 100% lets the slot's max-width control the visible
+ * width while overflow: hidden clips the input cleanly during transition. */
+.pill-dropdown__nav-search-slot > form {
+  width: 100%;
+}
+
+/* Inside the pill the form-control is borderless — the pill's own border
+ * is the visual container. Submit-icon hidden because Enter still
+ * submits the form; the icon would just be redundant chrome. */
+.pill-dropdown__nav-search-slot .form-group {
+  width: 100%;
+  margin: 0;
+}
+
+.pill-dropdown__nav-search-slot .form-control {
+  border: 0;
+  background: transparent;
+  gap: 0;
+}
+
+.pill-dropdown__nav-search-slot input[type="search"] {
+  background: transparent;
+  border: 0;
+  outline: none;
+  padding: 8px 0;
+  font-size: 12px;
+  color: var(--color-fg);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  width: 100%;
+}
+
+.pill-dropdown__nav-search-slot input[type="search"]::placeholder {
+  color: var(--color-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.pill-dropdown__nav-search-slot input[type="search"]::-webkit-search-cancel-button,
+.pill-dropdown__nav-search-slot input[type="search"]::-webkit-search-decoration {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.pill-dropdown__nav-search-slot .form-control__affix {
+  display: none;
 }
 
 /* --- Panel content variants (search / account / bag) ---

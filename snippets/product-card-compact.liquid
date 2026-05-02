@@ -1,0 +1,155 @@
+{% doc %}
+  @param {product} product - The product to display - required
+  @param {string} [loading] - Image loading attribute - defaults to "lazy"
+  @param {string} [sizes] - Optional sizes attribute for the image
+  @param {number} [image_min_width] - Image-widths min - defaults to 200
+  @param {number} [image_max_width] - Image-widths max - defaults to 400
+  @param {object} [collection] - Optional collection for `within:` PDP context
+
+  Compact variant of `product-card.liquid` for tight contexts (predictive search
+  panel, cart upsell rails, etc.). Mirrors the badge logic + price/swatch shape
+  but trims: no hover-image swap, no color name row, smaller text.
+
+  Figma: `Product Card / Compact` (Components page, node 302:619).
+
+  @example
+  {% render 'product-card-compact', product: product %}
+{% enddoc %}
+
+{% if product %}
+  {%- liquid
+    if image_min_width == blank
+      assign image_min_width = 200
+    endif
+    if image_max_width == blank
+      assign image_max_width = 400
+    endif
+    if loading == blank
+      assign loading = 'lazy'
+    endif
+    if sizes == blank
+      assign sizes = '(max-width: 1023.98px) 50vw, 220px'
+    endif
+
+    capture image_widths
+      render 'image-widths', min_width: image_min_width, max_width: image_max_width
+    endcapture
+
+    assign product_url = product.url
+    if collection and collection.handle != 'all'
+      assign product_url = product.url | within: collection
+    endif
+
+    assign current_variant = product.selected_or_first_available_variant
+    assign on_sale = false
+    assign discount_pct = 0
+    if current_variant.compare_at_price > current_variant.price
+      assign on_sale = true
+      assign discount_pct = current_variant.compare_at_price | minus: current_variant.price | times: 100 | divided_by: current_variant.compare_at_price
+    endif
+
+    assign badge_text = blank
+    assign badge_classes = ''
+    if product.available == false
+      assign badge_text = 'products.product.sold_out' | t | upcase
+      assign badge_classes = 'bg-accent text-bg'
+    elsif on_sale
+      assign badge_text = '-' | append: discount_pct | append: '%'
+      assign badge_classes = 'bg-accent text-bg'
+    else
+      for tag in product.tags
+        if tag == 'badge:pre-order'
+          assign badge_text = 'products.product.pre_order' | t | upcase
+          assign badge_classes = 'bg-fg text-bg'
+          break
+        elsif tag == 'badge:new'
+          assign badge_text = 'products.product.new' | t | upcase
+          assign badge_classes = 'bg-accent text-bg'
+          break
+        endif
+      endfor
+    endif
+
+    assign color_option = nil
+    for option in product.options_with_values
+      if option.name == 'Color'
+        assign color_option = option
+        break
+      endif
+    endfor
+  -%}
+
+  {%- capture alt_text -%}
+    {% if product.featured_image.alt %}{{ product.featured_image.alt }}{% else %}"{{ product.title }}" Featured Image{% endif %}
+  {%- endcapture -%}
+  {%- assign alt_text = alt_text | strip_newlines | strip -%}
+  {%- assign card_title_id = 'ProductCardCompactTitle-' | append: product.id -%}
+
+  <article
+    class="product-card-compact group relative pb-2"
+    data-component="product-card-compact"
+    aria-labelledby="{{ card_title_id }}"
+  >
+    <a href="{{ product_url }}" class="flex flex-col gap-1" tabindex="-1" aria-hidden="true">
+      <div class="relative w-full aspect-square overflow-hidden bg-bg-surface">
+        {{ product.featured_image
+          | image_url: width: image_max_width
+          | image_tag:
+            loading: loading,
+            widths: image_widths,
+            alt: alt_text,
+            class: 'h-full w-full object-cover lazy-image absolute inset-0',
+            sizes: sizes
+        }}
+
+        {% if badge_text != blank %}
+          <span class="absolute top-2 left-2 text-[10px] font-medium uppercase tracking-[0.5px] leading-[12px] {{ badge_classes }} px-2 py-[3px] rounded-[4px]">
+            {{ badge_text }}
+          </span>
+        {% endif %}
+      </div>
+    </a>
+
+    <div class="mt-2 flex items-start justify-between gap-2">
+      <div class="flex flex-col gap-1 min-w-0">
+        <a
+          href="{{ product_url }}"
+          id="{{ card_title_id }}"
+          class="text-caption text-fg uppercase truncate"
+        >{{ product.title }}</a>
+
+        <div class="flex items-center gap-2 text-caption">
+          {% if on_sale %}
+            <s class="text-muted" aria-hidden="true">{{ current_variant.compare_at_price | money_without_trailing_zeros }}</s>
+            <span class="text-accent font-medium">
+              <span class="sr-only">{{ 'products.product.price.sale_price' | t }}</span>
+              {{ current_variant.price | money_without_trailing_zeros }}
+            </span>
+          {% else %}
+            <span class="text-fg">{{ current_variant.price | money_without_trailing_zeros }}</span>
+          {% endif %}
+        </div>
+      </div>
+
+      {% if color_option %}
+        {%- liquid
+          assign color_count = color_option.values.size
+          assign max_visible = 2
+          assign overflow = color_count | minus: max_visible
+        -%}
+        <ul class="flex items-center gap-1 mt-1 shrink-0" role="list" aria-label="{{ 'products.product.available_colors' | t }}">
+          {% for value in color_option.values limit: max_visible %}
+            <li
+              class="block w-2 h-2 rounded-full border border-muted/30"
+              style="background-color: {% if value.swatch.color != blank %}{{ value.swatch.color }}{% else %}#1A1A18{% endif %};"
+              title="{{ value }}"
+            ><span class="sr-only">{{ value }}</span></li>
+          {% endfor %}
+          {% if overflow > 0 %}
+            <li class="text-[9px] text-muted ml-1" aria-label="{{ 'products.product.more_colors' | t: count: overflow }}">+{{ overflow }}</li>
+          {% endif %}
+        </ul>
+      {% endif %}
+    </div>
+  </article>
+{% endif %}

@@ -1,0 +1,33 @@
+{%- comment -%}
+  Predictive search results — fetched as a fragment by `predictiveSearch.ts`
+  via Shopify's Section Rendering API:
+
+      /?section_id=predictive-search&q=<query>
+
+  Shopify's `predictive_search` Liquid object handles the actual querying;
+  this section just renders its results through the
+  `predictive-search-results` snippet. Limits are intentionally fixed (3
+  queries, 4 products) to match the Figma `Active Search State` mock — bump
+  via the snippet params if you ever need a different shape.
+{%- endcomment -%}
+
+{%- liquid
+  assign q = predictive_search.terms | default: search.terms
+  assign queries = predictive_search.resources.queries
+  assign products = predictive_search.resources.products
+-%}
+
+{% render 'predictive-search-results',
+          queries: queries,
+          products: products,
+          q: q,
+          query_limit: 3,
+          product_limit: 6
+%}
+
+{% schema %}
+{
+  "name": "Predictive Search",
+  "settings": []
+}
+{% endschema %}

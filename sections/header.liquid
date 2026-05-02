@@ -127,12 +127,21 @@
         <nav class="pill-dropdown__nav" aria-label="Utility">
           <button
             type="button"
-            class="pill-dropdown__item pill-dropdown__item--toggle"
+            class="pill-dropdown__item pill-dropdown__item--toggle pill-dropdown__item--search-toggle"
             data-pill-toggle
             data-panel-key="search"
             aria-controls="utility-menu-panel-search"
             aria-expanded="false"
           >Search</button>
+          {%- comment -%}
+            Search input is rendered inline in the nav row. Hidden by default;
+            CSS reveals it (and hides the SEARCH toggle) when the pill's
+            `data-active-key="search"` is set, so the input shares the row
+            with ACCOUNT and BAG instead of dropping below them.
+          {%- endcomment -%}
+          <div class="pill-dropdown__nav-search-slot">
+            {% render 'search-inline', id: section.id | append: '-search' %}
+          </div>
           <span class="pill-dropdown__divider" aria-hidden="true"></span>
           <button
             type="button"
@@ -162,8 +171,8 @@
           class="pill-dropdown__panel pill-dropdown__panel--search"
           data-panel-key="search"
         >
-          <div class="pill-dropdown__panel-inner">
-            {% render 'search-inline', id: section.id | append: '-search' %}
+          <div class="pill-dropdown__panel-inner" data-component="predictive-search" data-debounce="200">
+            <div data-predictive-results aria-live="polite" aria-atomic="true"></div>
           </div>
         </div>
 
