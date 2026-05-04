@@ -81,12 +81,12 @@
     --backdrop-color: #000;
     --backdrop-opacity: 0.6;      
 
-    --header-height: 48px;
+    --header-height: 72px;
     --announcement-height: 32px;
     --chrome-height: calc(var(--header-height) + var(--announcement-height));
 
     @media (min-width: 1024px) {
-      --header-height: 56px;
+      --header-height: 96px;
     }
 
     --layout-padding-top: 24px;

@@ -9,6 +9,15 @@
  */
 {
   "sections": {
+    "hero": {
+      "type": "hero",
+      "settings": {
+        "eyebrow": "New collection",
+        "cta_label": "Shop now",
+        "link": "shopify://collections/new-arrivals",
+        "text_color": "#1A1A18"
+      }
+    },
     "featured-products": {
       "type": "featured-products",
       "settings": {
@@ -99,6 +108,7 @@
     }
   },
   "order": [
+    "hero",
     "featured-products",
     "journal_featured",
     "product_as_seen_on_RWngnY",
