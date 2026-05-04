@@ -1,0 +1,53 @@
+{% doc %}
+  Header logo — renders the brand wordmark. Resolution order:
+
+    1. `logo` param (theme-editor upload, passed by caller from
+       `section.settings.header_logo`). Animation preserved for GIF/WebP.
+    2. Hardcoded fallback URL — lets the header look right out of the
+       box on new installs without a merchant upload step.
+    3. Plain text wordmark from `shop.name` — final fallback.
+
+  @param {image} [logo] - Image from a section setting; pass via render arg
+                          since snippets don't have `section.settings` access.
+  @param {string} [class] - Extra classes on the rendered <img>.
+
+  @example
+    <a href="{{ routes.root_url }}" class="header__wordmark header__wordmark--center">
+      {% render 'header-logo', logo: section.settings.header_logo, class: 'header__logo--center' %}
+    </a>
+{% enddoc %}
+
+{%- liquid
+  assign fallback_url = '//brandofroses.com/cdn/shop/files/ezgif.com-resize.gif?v=1681848267'
+  assign img_class = 'header__logo'
+  if class != blank
+    assign img_class = img_class | append: ' ' | append: class
+  endif
+-%}
+
+{%- if logo != blank -%}
+  {{ logo | image_url: width: 340 | image_tag:
+       class: img_class,
+       alt: shop.name,
+       sizes: '(max-width: 1023.98px) 160px, 240px',
+       widths: '160, 240, 320, 480'
+  }}
+{%- elsif fallback_url != blank -%}
+  {%- comment -%}
+    Fallback image dimensions match the source GIF's natural ratio
+    (170×96 ≈ 16:9). The CSS `.header__logo` constrains rendered
+    height; the width/height attrs here are just intrinsic ratio
+    hints to prevent CLS.
+  {%- endcomment -%}
+  <img
+    src="{{ fallback_url }}"
+    alt="{{ shop.name | escape }}"
+    class="{{ img_class }}"
+    width="170"
+    height="96"
+    loading="eager"
+    decoding="async"
+  >
+{%- else -%}
+  <span class="header__wordmark-text">{{ shop.name | upcase }}</span>
+{%- endif -%}

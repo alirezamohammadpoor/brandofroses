@@ -29,9 +29,9 @@
 
     {% if section.settings.left_title != blank %}
       <div class="absolute bottom-6 left-2 text-bg">
-        <h2 class="text-[16px] font-normal">{{ section.settings.left_title }}</h2>
+        <h2 class="text-[16px] font-medium">{{ section.settings.left_title }}</h2>
         {% if section.settings.left_subtitle != blank %}
-          <p class="text-[16px] mt-1">{{ section.settings.left_subtitle }}</p>
+          <p class="text-[16px] font-medium mt-1">{{ section.settings.left_subtitle }}</p>
         {% endif %}
       </div>
     {% endif %}
@@ -60,9 +60,9 @@
 
     {% if section.settings.right_title != blank %}
       <div class="absolute bottom-6 left-2 text-bg">
-        <h2 class="text-[16px] font-normal">{{ section.settings.right_title }}</h2>
+        <h2 class="text-[16px] font-medium">{{ section.settings.right_title }}</h2>
         {% if section.settings.right_subtitle != blank %}
-          <p class="text-[16px] mt-1">{{ section.settings.right_subtitle }}</p>
+          <p class="text-[16px] font-medium mt-1">{{ section.settings.right_subtitle }}</p>
         {% endif %}
       </div>
     {% endif %}

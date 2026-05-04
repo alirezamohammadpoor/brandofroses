@@ -1,0 +1,132 @@
+{%- comment -%}
+  Hero
+  ------------------------------------------------------------------------------
+  Full-bleed image hero with bottom-left eyebrow + small pill CTA. Used as the
+  homepage opener. Distinct from `hero-split` (which is a 50/50 image diptych);
+  this is the single-image "lead with the campaign" variant.
+
+  Sizing note: the hero fills the viewport minus the announcement bar + header
+  (`--chrome-height`) on both breakpoints so it reads as a full-screen splash
+  starting right below the chrome. Mobile uses `svh` (small viewport — URL bar
+  visible) so the height doesn't shift when the browser chrome retracts on
+  scroll; desktop uses `dvh` since there's no dynamic browser UI to worry about.
+{%- endcomment -%}
+
+{%- liquid
+  assign focal = section.settings.image.presentation.focal_point | default: 'center center'
+  assign focal_style = 'object-position: ' | append: focal
+  assign cta_label = section.settings.cta_label | default: 'Shop now'
+  assign eyebrow = section.settings.eyebrow
+  assign link = section.settings.link
+-%}
+
+<section
+  class="relative w-full overflow-hidden bg-bg-surface h-[calc(100svh-var(--chrome-height))] lg:h-[calc(100dvh-var(--chrome-height))]"
+  data-section-id="{{ section.id }}"
+  data-section-type="hero"
+>
+  {%- if section.settings.image != blank -%}
+    {%- if link != blank -%}
+      <a href="{{ link }}" class="absolute inset-0 block" aria-label="{{ eyebrow | default: cta_label | escape }}">
+        {{ section.settings.image
+          | image_url: width: 2400
+          | image_tag:
+            loading: 'eager',
+            fetchpriority: 'high',
+            widths: '600,800,1200,1600,2000,2400',
+            sizes: '100vw',
+            class: 'absolute inset-0 w-full h-full object-cover',
+            style: focal_style,
+            alt: eyebrow | default: shop.name
+        }}
+      </a>
+    {%- else -%}
+      {{ section.settings.image
+        | image_url: width: 2400
+        | image_tag:
+          loading: 'eager',
+          fetchpriority: 'high',
+          widths: '600,800,1200,1600,2000,2400',
+          sizes: '100vw',
+          class: 'absolute inset-0 w-full h-full object-cover',
+          style: focal_style,
+          alt: eyebrow | default: shop.name
+      }}
+    {%- endif -%}
+  {%- endif -%}
+
+  {%- comment -%}
+    Bottom-left overlay. Position uses the same gutter as the rest of the
+    layout (`--layout-padding-x`) so the eyebrow lines up with footer/header
+    edges. Bottom inset is generous (32/40px) so the CTA clears mobile system
+    UI. Text color is configurable since hero images vary brightness.
+  {%- endcomment -%}
+  {%- if eyebrow != blank or link != blank -%}
+    <div
+      class="absolute left-0 right-0 bottom-8 lg:bottom-10 flex flex-col items-start gap-3"
+      style="padding-inline: var(--layout-padding-x); color: {{ section.settings.text_color }};"
+    >
+      {%- if eyebrow != blank -%}
+        <p class="text-h2">{{ eyebrow }}</p>
+      {%- endif -%}
+
+      {%- if link != blank -%}
+        {%- comment -%}
+          Pill CTA — borderless background with a 1px outline matching the
+          current text color via `currentColor` so it works on both dark and
+          light hero photography without a separate variant. Sized to body
+          (16px) so the CTA reads at conversational scale next to the h2
+          eyebrow above it.
+        {%- endcomment -%}
+        <a
+          href="{{ link }}"
+          class="inline-flex items-center justify-center rounded-full uppercase font-medium tracking-[0.04em] text-xs leading-none px-4 h-9 border border-current transition-colors duration-200"
+        >{{ cta_label }}</a>
+      {%- endif -%}
+    </div>
+  {%- endif -%}
+</section>
+
+{% schema %}
+{
+  "name": "Hero",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Background image",
+      "info": "Full-bleed campaign image. Use a hi-res 16:9 or taller crop."
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow text",
+      "default": "New collection",
+      "info": "Short label shown above the CTA — usually a campaign name."
+    },
+    {
+      "type": "text",
+      "id": "cta_label",
+      "label": "CTA label",
+      "default": "Shop now"
+    },
+    {
+      "type": "url",
+      "id": "link",
+      "label": "CTA link"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#1A1A18",
+      "info": "Color for both the eyebrow and the CTA pill outline. Use light text on dark images, dark text on light."
+    }
+  ],
+  "presets": [
+    {
+      "name": "Hero"
+    }
+  ]
+}
+{% endschema %}

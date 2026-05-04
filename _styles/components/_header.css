@@ -1,8 +1,8 @@
 header.header {
   @apply relative z-(--z-header) bg-bg;
 
-  --header-height-mobile: 48px;
-  --header-height-desktop: 56px;
+  --header-height-mobile: 72px;
+  --header-height-desktop: 96px;
 
   height: var(--header-height-mobile);
 
@@ -15,16 +15,20 @@ header.header {
 }
 
 .header__row {
-  @apply relative flex items-center justify-between h-full;
+  @apply relative flex items-center justify-between h-full py-2;
   padding-inline: var(--layout-padding-x);
 
   @media (min-width: 1024px) {
     /* Align to top so the pill group can grow downward without
-       dragging the wordmark or right nav with it. The 10px top-pad
-       keeps closed pill vertically centered in the 56px row. */
+       dragging the wordmark or right nav with it. Top-pad re-centers
+       the closed pill against the current 96px header height
+       ((96 - 36) / 2 ≈ 30px) so it visually aligns with the wordmark
+       at rest. When a panel opens, the pill still grows downward from
+       this baseline — the wordmark stays put because it's absolutely
+       positioned. Update this if --header-height changes. */
     .header--pill & {
       align-items: flex-start;
-      padding-top: 10px;
+      padding-top: 30px;
     }
   }
 
@@ -49,14 +53,32 @@ header.header {
 }
 
 .header__wordmark--center {
-  @apply absolute left-1/2 -translate-x-1/2;
-  top: 20px; /* visually centered in the 56px header when row uses items-start */
+  @apply absolute left-1/2;
+  top: 50%;
+  transform: translate(-50%, -50%);
 }
 
 .header__wordmark--mobile {
   @apply absolute left-1/2 -translate-x-1/2;
   top: 50%;
   transform: translate(-50%, -50%);
+}
+
+/* Logo image — slightly overflows the header height so the brand mark
+ * has presence without bumping `--header-height` everywhere. The header
+ * has `overflow: visible` so this paints correctly. Width auto preserves
+ * the natural aspect ratio. */
+.header__logo {
+  display: block;
+  width: auto;
+  max-height: 56px;
+  object-fit: contain;
+}
+
+@media (min-width: 1024px) {
+  .header__logo {
+    max-height: 80px;
+  }
 }
 
 /* --- Header-specific pill-dropdown variants ---
@@ -353,9 +375,11 @@ header.header {
   letter-spacing: 0.04em;
 }
 
-/* --- Mobile pill buttons — standalone pills (not the dropdown primitive) --- */
+/* --- Mobile pill buttons — standalone pills (not the dropdown primitive).
+   Borderless on purpose: keep the mobile chrome quiet so the wordmark
+   stays the focal point. --- */
 .header__pill-btn {
-  @apply inline-flex items-center border border-[color:var(--color-muted)] rounded-full overflow-hidden;
+  @apply inline-flex items-center rounded-full overflow-hidden;
   height: 32px;
 }
 
