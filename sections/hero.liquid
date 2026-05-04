@@ -6,9 +6,10 @@
   this is the single-image "lead with the campaign" variant.
 
   Sizing note: the hero fills the viewport minus the announcement bar + header
-  (`--chrome-height`) on desktop so it reads as a full-screen splash. On mobile
-  it falls back to `100svh` (small viewport height — accounts for the URL bar
-  showing) to avoid a janky height shift on scroll.
+  (`--chrome-height`) on both breakpoints so it reads as a full-screen splash
+  starting right below the chrome. Mobile uses `svh` (small viewport — URL bar
+  visible) so the height doesn't shift when the browser chrome retracts on
+  scroll; desktop uses `dvh` since there's no dynamic browser UI to worry about.
 {%- endcomment -%}
 
 {%- liquid
@@ -20,7 +21,7 @@
 -%}
 
 <section
-  class="relative w-full overflow-hidden bg-bg-surface h-[100svh] lg:h-[calc(100dvh-var(--chrome-height))]"
+  class="relative w-full overflow-hidden bg-bg-surface h-[calc(100svh-var(--chrome-height))] lg:h-[calc(100dvh-var(--chrome-height))]"
   data-section-id="{{ section.id }}"
   data-section-type="hero"
 >
