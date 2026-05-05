@@ -24,7 +24,11 @@
     },
     "404": {
       "title": "404 Page Not Found",
-      "subtext_html": "The page you requested does not exist. Click <a href=\"/collections/all\">here</a> to continue shopping."
+      "subtext_html": "The page you requested does not exist. Click <a href=\"/collections/all\">here</a> to continue shopping.",
+      "eyebrow": "Not found",
+      "body": "The page you're looking for doesn't exist anymore.",
+      "return_home": "Return home",
+      "recommendations_title": "You may like"
     },
     "password_page": {
       "opening_soon": "Opening Soon",
