@@ -1,116 +1,158 @@
-<section>
-  <div class="container">
-    {%- capture title -%}
-      Order {{ order.name }}
-    {%- endcapture -%}
+{%- comment -%}
+  Main Order (Order Confirmation / Order Details)
+  ------------------------------------------------------------------------------
+  Two-column receipt layout matching Figma node 193:438:
+    - Left: thank-you message (eyebrow + body)
+    - Right: order header → line items → totals → billing / shipping addresses
 
-    {%- capture actions -%}
-      <a href="{{ routes.account_url }}">Return to Account Details</a>
-    {%- endcapture -%}
+  Stacks to single column on mobile. All section labels are 12px uppercase,
+  values are 16px regular — matches the rest of the brand's typography system.
 
-    {% render 'section-header',
-              title: title,
-              actions: actions,
-              title_tag: 'h1'
-    %}    
+  Line items render variant title parts on separate lines (e.g. "White Silk"
+  on one line, "Size 46" below) by splitting `variant.title` on " / ", which
+  is Shopify's default option separator.
+{%- endcomment -%}
 
-    <div class="account-main">
-      <div class="flex-1">
-        <h3>Order Items</h3>
-        <table class="table">
-          <thead>
-            <tr>
-              <th>Product</th>
-              <th>Price</th>
-              <th>Qty</th>
-              <th>Total</th>
-            </tr>
-          </thead>          
-          <tbody>
-            {% for line_item in order.line_items %} 
-              <tr>
-                <td>
-                  <div>{{ line_item.product.title | link_to: line_item.product.url }}</div>
-                  {% comment %} Only show this line if there is non-default content {% endcomment %}
-                  {% if line_item.variant.title != "Default Title" %}
-                    <div>{{ line_item.variant.title }}</div>
-                  {% endif %}                
-                </td>
-                <td>{{ line_item.price | money }}</td>
-                <td>{{ line_item.quantity }}</td>
-                <td>{{ line_item.quantity | times: line_item.price | money }}</td>                
-              </tr>
-            {% endfor %}
-          </tbody>
-          <tfoot>
-            <tr>
-              <td colspan="3">{{ 'customer.order.subtotal' | t }}</td>
-              <td>{{ order.subtotal_price | money }}</td>
-            </tr>
+<section
+  data-section-id="{{ section.id }}"
+  data-section-type="main-order"
+  class="px-2 lg:px-8 pt-12 lg:pt-24 pb-(--layout-padding-bottom)"
+>
+  <div class="flex flex-col lg:flex-row lg:gap-16 max-w-[1376px] mx-auto">
 
-            {% for discount in order.discounts %}
-              <tr>
-                <td colspan="3">{{ discount.code }} {{ 'customer.order.discount' | t }}</td>
-                <td>{{ discount.savings | money }}</td>
-              </tr>
-            {% endfor %}
+    {%- comment -%} ===== LEFT: THANK YOU ===== {%- endcomment -%}
+    <div class="flex flex-col gap-1 lg:w-1/2 lg:max-w-[600px] mb-12 lg:mb-0">
+      <p class="text-[12px] leading-[16px] uppercase">{{ 'customer.order.thank_you' | t }}</p>
+      <p class="text-[16px] leading-[24px]">{{ 'customer.order.summary' | t }}</p>
+    </div>
 
-            {% for shipping_method in order.shipping_methods %}
-              <tr>
-                <td colspan="3">{{ 'customer.order.shipping' | t }} ({{ shipping_method.title }})</td>
-                <td>
-                  {% if shipping_method.price == 0 %}
-                    Free
-                  {% else %}
-                    {{ shipping_method.price | money }}
-                  {% endif %}
-                </td>
-              </tr>
-            {% endfor %}
+    {%- comment -%} ===== RIGHT: RECEIPT ===== {%- endcomment -%}
+    <div class="flex flex-col gap-10 lg:w-1/2 lg:max-w-[600px]">
 
-            {% for tax_line in order.tax_lines %}
-              <tr>
-                <td colspan="3">{{ 'customer.order.tax' | t }} ({{ tax_line.title }} {{ tax_line.rate | times: 100 }}%)</td>
-                <td>{{ tax_line.price | money }}</td>
-              </tr>
-            {% endfor %}
-
-            <tr>
-              <td colspan="3">{{ 'customer.order.total' | t }}</td>
-              <td>
-                {% if order.total_price == 0 %}
-                  Free
-                {% else %}
-                  {{ order.total_price | money }}
-                {% endif %}
-              </td>              
-            </tr>
-          </tfoot>          
-        </table>
-      </div>
-
-      <div>
-        <h3>Details</h3>
-
-        <p>
-          <span>{{ 'customer.order.payment_status' | t }}: </span> {{- order.financial_status_label -}}
-          <br />
-          <span>{{ 'customer.order.fulfillment_status' | t }}: </span> {{- order.fulfillment_status_label -}}
+      {%- comment -%} Order header {%- endcomment -%}
+      <div class="flex flex-col gap-[2px] text-[12px] leading-[16px]">
+        <p>{{ 'customer.order.title' | t: name: order.name | upcase }}</p>
+        <p class="text-muted">
+          <time datetime="{{ order.created_at | date: '%Y-%m-%dT%H:%M:%S' }}">
+            {{ order.created_at | date: '%Y-%m-%d %H:%M:%S' }}
+          </time>
         </p>
-        
-        <br />
-        <p class="type-fine">Shipping Status</p>
-        {{- order.shipping_address | format_address -}}
-        
-        <br />
-        <p class="type-fine">Billing Address</p>
-        {{- order.billing_address | format_address -}}
-
-        <br />
-        <p>
-          <a href="{{ routes.account_url }}" class="btn">View Account</a>
-        </p>        
       </div>
+
+      {%- comment -%} Line items {%- endcomment -%}
+      {%- for line_item in order.line_items -%}
+        <div class="flex gap-4 items-start">
+          {%- if line_item.image != blank -%}
+            {{ line_item.image
+              | image_url: width: 144
+              | image_tag:
+                loading: 'lazy',
+                widths: '72,144',
+                sizes: '72px',
+                alt: line_item.title,
+                class: 'w-[72px] h-[96px] object-cover bg-bg-surface shrink-0'
+            }}
+          {%- else -%}
+            <div class="w-[72px] h-[96px] bg-muted shrink-0" aria-hidden="true"></div>
+          {%- endif -%}
+          <div class="flex flex-col gap-1 pt-1">
+            <p class="text-[12px] leading-[16px] uppercase">{{ line_item.product.title }}</p>
+            {%- if line_item.variant.title != 'Default Title' -%}
+              {%- assign variant_parts = line_item.variant.title | split: ' / ' -%}
+              {%- for part in variant_parts -%}
+                <p class="text-[16px] leading-[24px]">{{ part }}</p>
+              {%- endfor -%}
+            {%- endif -%}
+            {%- if line_item.quantity > 1 -%}
+              <p class="text-[12px] leading-[16px] text-muted uppercase">
+                {{ 'customer.order.line_item_quantity' | t }} {{ line_item.quantity }}
+              </p>
+            {%- endif -%}
+          </div>
+        </div>
+      {%- endfor -%}
+
+      {%- comment -%} Totals {%- endcomment -%}
+      <div class="flex flex-col gap-1 text-[12px] leading-[16px] uppercase w-full">
+        <div class="flex justify-between">
+          <p>{{ 'customer.order.subtotal' | t }}</p>
+          <p>{{ order.subtotal_price | money }}</p>
+        </div>
+        {%- for discount_application in order.discount_applications -%}
+          <div class="flex justify-between">
+            <p>{{ discount_application.title }}</p>
+            <p>-{{ discount_application.total_allocated_amount | money }}</p>
+          </div>
+        {%- endfor -%}
+        {%- for shipping_method in order.shipping_methods -%}
+          <div class="flex justify-between">
+            <p>{{ 'customer.order.shipping' | t }}</p>
+            <p>{{ shipping_method.price | money }}</p>
+          </div>
+        {%- endfor -%}
+        {%- for tax_line in order.tax_lines -%}
+          <div class="flex justify-between">
+            <p>{{ 'customer.order.tax' | t }} ({{ tax_line.title }})</p>
+            <p>{{ tax_line.price | money }}</p>
+          </div>
+        {%- endfor -%}
+        <div class="flex justify-between">
+          <p>{{ 'customer.order.total' | t }}</p>
+          <p>{{ order.total_price | money }}</p>
+        </div>
+      </div>
+
+      {%- comment -%} Billing address {%- endcomment -%}
+      {%- if order.billing_address -%}
+        <div class="flex flex-col gap-1">
+          <p class="text-[12px] leading-[16px] uppercase">{{ 'customer.order.billing_address' | t }}</p>
+          <div class="flex flex-col text-[16px] leading-[24px] pt-1">
+            <p>{{ order.billing_address.name }}</p>
+            {%- if order.billing_address.company != blank -%}<p>{{ order.billing_address.company }}</p>{%- endif -%}
+            <p>{{ order.billing_address.address1 }}</p>
+            {%- if order.billing_address.address2 != blank -%}<p>{{ order.billing_address.address2 }}</p>{%- endif -%}
+            <p>{{ order.billing_address.zip }} {{ order.billing_address.city }}</p>
+            <p>{{ order.billing_address.country }}</p>
+            {%- if order.email != blank -%}<p>{{ order.email }}</p>{%- endif -%}
+            {%- if order.billing_address.phone != blank -%}<p>{{ order.billing_address.phone }}</p>{%- endif -%}
+          </div>
+        </div>
+      {%- endif -%}
+
+      {%- comment -%} Shipping address {%- endcomment -%}
+      {%- if order.shipping_address -%}
+        <div class="flex flex-col gap-1">
+          <p class="text-[12px] leading-[16px] uppercase">{{ 'customer.order.shipping_address' | t }}</p>
+          <div class="flex flex-col text-[16px] leading-[24px] pt-1">
+            <p>{{ order.shipping_address.name }}</p>
+            {%- if order.shipping_address.company != blank -%}<p>{{ order.shipping_address.company }}</p>{%- endif -%}
+            <p>{{ order.shipping_address.address1 }}</p>
+            {%- if order.shipping_address.address2 != blank -%}<p>{{ order.shipping_address.address2 }}</p>{%- endif -%}
+            <p>{{ order.shipping_address.zip }} {{ order.shipping_address.city }}</p>
+            <p>{{ order.shipping_address.country }}</p>
+            {%- if order.email != blank -%}<p>{{ order.email }}</p>{%- endif -%}
+            {%- if order.shipping_address.phone != blank -%}<p>{{ order.shipping_address.phone }}</p>{%- endif -%}
+          </div>
+        </div>
+      {%- endif -%}
+
+      {%- comment -%}
+        Status footnote — Figma doesn't show this but a customer hitting the
+        order page months later wants to know fulfillment state. Tucked under
+        the addresses in muted small caps so it doesn't compete with the
+        receipt above.
+      {%- endcomment -%}
+      {%- if order.financial_status_label != blank or order.fulfillment_status_label != blank -%}
+        <div class="flex flex-col gap-1 text-[12px] leading-[16px] text-muted uppercase">
+          {%- if order.financial_status_label != blank -%}
+            <p>{{ 'customer.order.payment_status' | t }}: {{ order.financial_status_label }}</p>
+          {%- endif -%}
+          {%- if order.fulfillment_status_label != blank -%}
+            <p>{{ 'customer.order.fulfillment_status' | t }}: {{ order.fulfillment_status_label }}</p>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+
     </div>
   </div>
 </section>
