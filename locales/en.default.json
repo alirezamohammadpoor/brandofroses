@@ -238,6 +238,8 @@
       "none": "You haven't placed any orders yet."
     },
     "order": {
+      "thank_you": "Thank you for your purchase!",
+      "summary": "See your order summary below. Your receipt will be sent out by e-mail.",
       "title": "Order {{ name }}",
       "date": "Placed on {{ date }}",
       "cancelled": "Order Cancelled on {{ date }}",
