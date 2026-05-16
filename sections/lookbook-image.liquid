@@ -1,0 +1,68 @@
+{%- comment -%}
+  Lookbook Image
+  ------------------------------------------------------------------------------
+  Full-bleed editorial image used between lookbook sections. Desktop renders
+  at the full 1440px design width (height: 800px to match Figma); mobile
+  falls back to natural aspect ratio.
+
+  The image alignment setting is metadata only — there's no visible alignment
+  difference at full-bleed widths. Kept so the merchant's editor matches the
+  Figma terminology ("Image Section (left)" / "(right)") and can be used by
+  future variants that don't fill the viewport.
+
+  Figma nodes: 148:106, 148:109, 148:115, 148:118
+{%- endcomment -%}
+
+{%- liquid
+  assign focal = section.settings.image.presentation.focal_point | default: 'center center'
+  assign focal_style = 'object-position: ' | append: focal
+-%}
+
+<section
+  data-section-id="{{ section.id }}"
+  data-section-type="lookbook-image"
+  class="w-full bg-bg-surface h-[520px] lg:h-[800px]"
+>
+  {%- if section.settings.image != blank -%}
+    {{ section.settings.image
+      | image_url: width: 2400
+      | image_tag:
+        loading: 'lazy',
+        widths: '600,800,1200,1600,2000,2400',
+        sizes: '100vw',
+        class: 'w-full h-full object-cover block',
+        style: focal_style,
+        alt: section.settings.image.alt | default: ''
+    }}
+  {%- endif -%}
+</section>
+
+{% schema %}
+{
+  "name": "Lookbook Image",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image",
+      "info": "Full-bleed editorial image. Recommended: 2400px wide, taller than 800px so it crops cleanly."
+    },
+    {
+      "type": "select",
+      "id": "alignment",
+      "label": "Alignment (editorial label)",
+      "info": "Visual only — full-bleed images don't actually shift. Helps the theme editor mirror Figma layout names.",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "left"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Lookbook Image"
+    }
+  ]
+}
+{% endschema %}

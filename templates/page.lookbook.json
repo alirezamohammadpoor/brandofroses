@@ -1,0 +1,69 @@
+{
+  "sections": {
+    "lookbook_hero": {
+      "type": "lookbook-hero",
+      "settings": {
+        "title": "ESSENTIALS VOL. 01",
+        "breadcrumb": "LOOKBOOKS / ESSENTIALS VOL. 01",
+        "date": "15.04.26",
+        "description": "Essentials Vol. 01 is our foundational drop — pieces built for everyday wear. Clean silhouettes, refined proportions, and muted tones that sit alongside whatever's already in your rotation. Designed to last, made to return to."
+      }
+    },
+    "image_1": {
+      "type": "lookbook-image",
+      "settings": {
+        "alignment": "left"
+      }
+    },
+    "image_2": {
+      "type": "lookbook-image",
+      "settings": {
+        "alignment": "right"
+      }
+    },
+    "image_pair": {
+      "type": "lookbook-image-pair",
+      "settings": {}
+    },
+    "image_3": {
+      "type": "lookbook-image",
+      "settings": {
+        "alignment": "right"
+      }
+    },
+    "image_4": {
+      "type": "lookbook-image",
+      "settings": {
+        "alignment": "left"
+      }
+    },
+    "products": {
+      "type": "featured-products",
+      "settings": {
+        "title": "",
+        "display": "grid",
+        "source": "collection",
+        "collection": "new-arrivals",
+        "product_list": [],
+        "limit": 4
+      }
+    },
+    "cta": {
+      "type": "lookbook-cta",
+      "settings": {
+        "label": "Shop Essentials Vol. 01",
+        "text_color": "#FAFAF8"
+      }
+    }
+  },
+  "order": [
+    "lookbook_hero",
+    "image_1",
+    "image_2",
+    "image_pair",
+    "image_3",
+    "image_4",
+    "products",
+    "cta"
+  ]
+}
