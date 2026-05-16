@@ -1,9 +1,11 @@
 {%- comment -%}
   Lookbook Image
   ------------------------------------------------------------------------------
-  Full-bleed editorial image used between lookbook sections. Desktop renders
-  at the full 1440px design width (height: 800px to match Figma); mobile
-  falls back to natural aspect ratio.
+  Full-bleed editorial image used between lookbook sections. **No fixed
+  height** — the image renders at its natural aspect ratio so the
+  photographer's crop (square, portrait, or landscape) drives the layout.
+  Earlier `lg:h-[800px]` forced landscape on desktop and cropped portrait
+  source images awkwardly; letting the source decide is more honest.
 
   The image alignment setting is metadata only — there's no visible alignment
   difference at full-bleed widths. Kept so the merchant's editor matches the
@@ -21,7 +23,7 @@
 <section
   data-section-id="{{ section.id }}"
   data-section-type="lookbook-image"
-  class="w-full bg-bg-surface h-[520px] lg:h-[800px]"
+  class="w-full"
 >
   {%- if section.settings.image != blank -%}
     {{ section.settings.image
@@ -30,7 +32,7 @@
         loading: 'lazy',
         widths: '600,800,1200,1600,2000,2400',
         sizes: '100vw',
-        class: 'w-full h-full object-cover block',
+        class: 'w-full h-auto block',
         style: focal_style,
         alt: section.settings.image.alt | default: ''
     }}
@@ -45,7 +47,7 @@
       "type": "image_picker",
       "id": "image",
       "label": "Image",
-      "info": "Full-bleed editorial image. Recommended: 2400px wide, taller than 800px so it crops cleanly."
+      "info": "Full-bleed editorial image. Renders at the source's natural aspect ratio — pick the crop that suits the campaign (portrait / landscape / square)."
     },
     {
       "type": "select",
