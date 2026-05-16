@@ -46,7 +46,7 @@
   {% if section.settings.show_hero %}
     <div class="flex flex-col gap-4 px-2 py-10 lg:flex-row lg:items-stretch lg:gap-0 lg:py-16 lg:px-2">
       <div class="flex flex-col gap-4 lg:w-1/2 lg:pr-2">
-        <h1 class="text-h2 font-light text-fg">{{ collection.title }}</h1>
+        <h1 class="text-h1 font-medium text-fg">{{ collection.title }}</h1>
         {% if collection.description != blank %}
           <p class="text-body text-fg lg:text-muted max-w-[300px] lg:max-w-[400px]">
             {{ collection.description }}
@@ -54,7 +54,7 @@
         {% endif %}
       </div>
       {% if hero_image %}
-        <div class="w-full overflow-hidden bg-[#d9d4cc] lg:w-1/2 lg:h-auto">
+        <div class="w-full overflow-hidden bg-bg-editorial lg:w-1/2 lg:h-auto">
           {{ hero_image
             | image_url: width: 1440
             | image_tag:

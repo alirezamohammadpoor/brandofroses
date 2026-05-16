@@ -10,7 +10,7 @@
      .btn--sm | .btn--md | .btn--lg
      .btn--block                full width
 
-   Tokens respected: --color-fg, --color-bg, --color-muted, --color-fg-dark.
+   Tokens respected: --color-fg, --color-bg, --color-muted, --color-fg-warm.
 */
 
 button[disabled] {
@@ -48,7 +48,7 @@ button[disabled] {
 
 /* Hover states gated on hover-capable pointer; touch uses :active. */
 .btn--primary {
-  @apply bg-fg-dark text-bg border-fg-dark;
+  @apply bg-fg-warm text-bg border-fg-warm;
 
   @media (hover: hover) and (pointer: fine) {
     &:not([disabled]):hover {

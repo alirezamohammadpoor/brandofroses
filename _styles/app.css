@@ -3,16 +3,16 @@
 @source not '../assets/app.bundle.js';
 
 @theme {
-  /* Design tokens — Brand of Roses. Match the Figma source of truth. */
-  --color-bg:         #FAFAF8;  /* warm cream — page background */
-  --color-bg-surface: #F5F0E8;  /* warm beige — footer, surfaces */
-  --color-fg:         #1A1A18;  /* near-black — primary text */
-  --color-fg-dark:    #2C2826;  /* warmer dark — on-surface text */
-  --color-muted:      #8A8580;  /* mid stone — secondary text, dividers */
-  --color-accent:     #722F37;  /* oxblood — accent, sale, badges */
-
-  --color-white: #FFFFFF;
-  --color-black: #000000;
+  /* Design tokens — Brand of Roses. Mirror of Figma `Colour` variable
+     collection (8 colors). Update Figma first if these change. */
+  --color-bg:             #FAFAF8;  /* warm cream — page background */
+  --color-bg-surface:     #F5F0E8;  /* warm beige — drawers, footers */
+  --color-bg-placeholder: #E8E5E0;  /* image skeleton placeholder */
+  --color-bg-editorial:   #D9D4CC;  /* editorial content blocks */
+  --color-fg:             #1A1A18;  /* near-black — primary text */
+  --color-fg-warm:        #2C2826;  /* warmer dark — on-surface text */
+  --color-muted:          #8A8580;  /* mid stone — secondary text, dividers */
+  --color-accent:         #722F37;  /* oxblood — error states */
 
   --spacing-container: 8px;
 
@@ -32,26 +32,22 @@
   --z-skip: 10000;
 }
 
-/* Typography — mirrors Figma text styles. */
-@utility text-display { font-size: 48px; font-weight: 700; line-height: 110%; letter-spacing: -0.01em; }
-@utility text-h1 { font-size: 40px; font-weight: 700; line-height: 110%; letter-spacing: -0.005em; }
-@utility text-h2 { font-size: 32px; font-weight: 700; line-height: 120%; }
-@utility text-h3 { font-size: 24px; font-weight: 700; line-height: 125%; }
-@utility text-body { font-size: 16px; font-weight: 400; line-height: 150%; }
-@utility text-body-medium { font-size: 16px; font-weight: 500; line-height: 150%; }
-@utility text-caption { font-size: 12px; font-weight: 400; line-height: 140%; }
-@utility text-nav { font-size: 12px; font-weight: 400; line-height: 140%; text-transform: uppercase; letter-spacing: 0.04em; }
-@utility text-label { font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; }
-@utility text-section-label { font-size: 10px; font-weight: 500; line-height: 140%; text-transform: uppercase; letter-spacing: 0.08em; }
-/* `text-label-tight` — same family as `text-label` but with a tighter
-   `letter-spacing: 0.3px` (≈ 0.025em at 12px) matching Figma's PDP info-
-   column label spec. Used for section headings inside the PDP info
-   column (Match With, Model, Color: XYZ, info accordion row labels).
-   A separate utility from `text-label` because bumping `text-label` to
-   0.025em would also tighten cart headers, article-card labels, blog
-   tags, etc. that use the looser 0.08em convention elsewhere in the
-   theme. */
-@utility text-label-tight { font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.3px; }
+/* Typography — mirror of Figma text styles (8 total). Editorial / Patta-style
+   stance: **Medium 500 minimum across the system.** Headlines sentence-case,
+   labels and buttons uppercase, all Medium. Hierarchy carried by size +
+   tracking, not weight. Use `font-bold` for emphasis, `font-light` as a
+   deliberate editorial accent. Update Figma first if these change.
+
+   PDP-specific tighter tracking (formerly `text-label-tight`) should be applied
+   per-call with `text-label tracking-[0.3px]` rather than a dedicated utility. */
+@utility text-display-l { font-size: 96px; font-weight: 500; line-height: 100px; }
+@utility text-display { font-size: 64px; font-weight: 500; line-height: 70px; }
+@utility text-h1 { font-size: 40px; font-weight: 500; line-height: 44px; }
+@utility text-h2 { font-size: 24px; font-weight: 500; line-height: 28px; }
+@utility text-body { font-size: 16px; font-weight: 500; line-height: 24px; }
+@utility text-button { font-size: 12px; font-weight: 500; line-height: 16px; text-transform: uppercase; letter-spacing: 0.5px; }
+@utility text-label { font-size: 12px; font-weight: 500; line-height: 16px; text-transform: uppercase; letter-spacing: 0.08em; }
+@utility text-tiny { font-size: 10px; font-weight: 500; line-height: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
 
 @utility container {
   max-width: none;

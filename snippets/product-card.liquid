@@ -113,12 +113,15 @@
   >
     <a href="{{ product_url }}" class="flex flex-col gap-2" tabindex="-1" aria-hidden="true">
       {%- comment -%}
-        Image — 1:1 ratio. Source product photos are roughly square, so a
-        square container sidesteps the baked-in vertical whitespace we saw
-        with the earlier 3:4 container (Figma frame 85:80 is 3:3.88, but
-        matches the render, not the source images).
+        Image — 1:1. Brand of Roses product photography is shot square
+        (studio convention), so a square container is the only ratio that
+        doesn't visibly fight the source. Tried 2:3 and 4:5 — both crop
+        sleeves (object-cover) or letterbox awkwardly (object-contain).
+        Square + object-cover lets the product fill the column cleanly.
+        PDP gallery and editorial frames stay at 2:3 since they have room
+        to breathe; PLP cards are tight and need the source-matching ratio.
       {%- endcomment -%}
-      <div class="relative w-full aspect-square overflow-hidden bg-bg-surface">
+      <div class="relative w-full aspect-square overflow-hidden">
         {{ product.featured_image
           | image_url: width: image_max_width
           | image_tag:
@@ -160,10 +163,10 @@
           Badge spec — Figma 38:21 (PLP Product Card > Badge): 10px
           Inter Medium uppercase, 12px line-height, 0.5px tracking,
           `bg-accent` + `text-bg` for NEW / -XX% states. Inline classes
-          here instead of the shared `text-section-label` utility —
+          here instead of the shared `text-tiny` utility —
           that utility is also used by the `+N` color-overflow chip
           further down in this file (line ~246), and the chip's looser
-          line-height + tracking (`text-section-label` = 140% +
+          line-height + tracking (`text-tiny` = 140% +
           0.08em) read fine there; tightening the utility would drift
           the chip off-spec too.
         {%- endcomment -%}
@@ -203,16 +206,16 @@
       <a
         href="{{ product_url }}"
         id="{{ card_title_id }}"
-        class="text-caption text-fg uppercase truncate"
+        class="text-label tracking-normal text-fg truncate"
       >{{ product.title }}</a>
 
       {%- comment -%} Price — strikethrough compare + sale price when on sale {%- endcomment -%}
-      <div class="flex items-center gap-2 text-caption">
+      <div class="flex items-center gap-2 text-label tracking-normal">
         {% if on_sale %}
           <s class="text-muted" aria-hidden="true">
             {{ current_variant.compare_at_price | money_without_trailing_zeros }}
           </s>
-          <span class="text-accent font-medium">
+          <span class="text-accent font-bold">
             <span class="sr-only">{{ 'products.product.price.sale_price' | t }}</span>
             {{ current_variant.price | money_without_trailing_zeros }}
           </span>
@@ -229,7 +232,7 @@
 
       {% if color_option %}
         {%- comment -%} Color name — reflects the currently-selected variant {%- endcomment -%}
-        <p class="text-caption text-muted uppercase">{{ color_option.selected_value }}</p>
+        <p class="text-label tracking-normal text-muted">{{ color_option.selected_value }}</p>
 
         {%- comment -%}
           Swatches — visual only. Show the first 3; spill the rest into a
@@ -258,7 +261,7 @@
           {% endfor %}
           {% if overflow > 0 %}
             <li
-              class="text-section-label text-muted ml-1"
+              class="text-tiny text-muted ml-1"
               aria-label="{{ 'products.product.more_colors' | t: count: overflow }}"
             >+{{ overflow }}</li>
           {% endif %}

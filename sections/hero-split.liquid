@@ -24,14 +24,14 @@
           alt: section.settings.left_title | default: ''
       }}
     {% else %}
-      <div class="w-full h-full bg-[#E8E5E0]"></div>
+      <div class="w-full h-full bg-bg-placeholder"></div>
     {% endif %}
 
     {% if section.settings.left_title != blank %}
       <div class="absolute bottom-6 left-2 text-bg">
-        <h2 class="text-[16px] font-medium">{{ section.settings.left_title }}</h2>
+        <h2 class="text-body">{{ section.settings.left_title }}</h2>
         {% if section.settings.left_subtitle != blank %}
-          <p class="text-[16px] font-medium mt-1">{{ section.settings.left_subtitle }}</p>
+          <p class="text-body mt-1">{{ section.settings.left_subtitle }}</p>
         {% endif %}
       </div>
     {% endif %}
@@ -55,14 +55,14 @@
           alt: section.settings.right_title | default: ''
       }}
     {% else %}
-      <div class="w-full h-full bg-[#E8E5E0]"></div>
+      <div class="w-full h-full bg-bg-placeholder"></div>
     {% endif %}
 
     {% if section.settings.right_title != blank %}
       <div class="absolute bottom-6 left-2 text-bg">
-        <h2 class="text-[16px] font-medium">{{ section.settings.right_title }}</h2>
+        <h2 class="text-body">{{ section.settings.right_title }}</h2>
         {% if section.settings.right_subtitle != blank %}
-          <p class="text-[16px] font-medium mt-1">{{ section.settings.right_subtitle }}</p>
+          <p class="text-body mt-1">{{ section.settings.right_subtitle }}</p>
         {% endif %}
       </div>
     {% endif %}

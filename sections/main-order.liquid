@@ -22,8 +22,8 @@
 
     {%- comment -%} ===== LEFT: THANK YOU ===== {%- endcomment -%}
     <div class="flex flex-col gap-1 lg:w-1/2 lg:max-w-[600px] mb-12 lg:mb-0">
-      <p class="text-[12px] leading-[16px] uppercase">{{ 'customer.order.thank_you' | t }}</p>
-      <p class="text-[16px] leading-[24px]">{{ 'customer.order.summary' | t }}</p>
+      <p class="text-label">{{ 'customer.order.thank_you' | t }}</p>
+      <p class="text-body">{{ 'customer.order.summary' | t }}</p>
     </div>
 
     {%- comment -%} ===== RIGHT: RECEIPT ===== {%- endcomment -%}
@@ -56,11 +56,11 @@
             <div class="w-[72px] h-[96px] bg-muted shrink-0" aria-hidden="true"></div>
           {%- endif -%}
           <div class="flex flex-col gap-1 pt-1">
-            <p class="text-[12px] leading-[16px] uppercase">{{ line_item.product.title }}</p>
+            <p class="text-label">{{ line_item.product.title }}</p>
             {%- if line_item.variant.title != 'Default Title' -%}
               {%- assign variant_parts = line_item.variant.title | split: ' / ' -%}
               {%- for part in variant_parts -%}
-                <p class="text-[16px] leading-[24px]">{{ part }}</p>
+                <p class="text-body">{{ part }}</p>
               {%- endfor -%}
             {%- endif -%}
             {%- if line_item.quantity > 1 -%}
@@ -73,7 +73,7 @@
       {%- endfor -%}
 
       {%- comment -%} Totals {%- endcomment -%}
-      <div class="flex flex-col gap-1 text-[12px] leading-[16px] uppercase w-full">
+      <div class="flex flex-col gap-1 text-label w-full">
         <div class="flex justify-between">
           <p>{{ 'customer.order.subtotal' | t }}</p>
           <p>{{ order.subtotal_price | money }}</p>
@@ -105,8 +105,8 @@
       {%- comment -%} Billing address {%- endcomment -%}
       {%- if order.billing_address -%}
         <div class="flex flex-col gap-1">
-          <p class="text-[12px] leading-[16px] uppercase">{{ 'customer.order.billing_address' | t }}</p>
-          <div class="flex flex-col text-[16px] leading-[24px] pt-1">
+          <p class="text-label">{{ 'customer.order.billing_address' | t }}</p>
+          <div class="flex flex-col text-body pt-1">
             <p>{{ order.billing_address.name }}</p>
             {%- if order.billing_address.company != blank -%}<p>{{ order.billing_address.company }}</p>{%- endif -%}
             <p>{{ order.billing_address.address1 }}</p>
@@ -122,8 +122,8 @@
       {%- comment -%} Shipping address {%- endcomment -%}
       {%- if order.shipping_address -%}
         <div class="flex flex-col gap-1">
-          <p class="text-[12px] leading-[16px] uppercase">{{ 'customer.order.shipping_address' | t }}</p>
-          <div class="flex flex-col text-[16px] leading-[24px] pt-1">
+          <p class="text-label">{{ 'customer.order.shipping_address' | t }}</p>
+          <div class="flex flex-col text-body pt-1">
             <p>{{ order.shipping_address.name }}</p>
             {%- if order.shipping_address.company != blank -%}<p>{{ order.shipping_address.company }}</p>{%- endif -%}
             <p>{{ order.shipping_address.address1 }}</p>

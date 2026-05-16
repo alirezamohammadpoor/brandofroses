@@ -80,7 +80,7 @@
           {%- comment -%}
             Size tile (Figma 33:25): 72×44 rounded-6. Three states:
               Default  — 1px muted border, fg text, normal weight
-              Active   — bg-fg-dark fill, bg-colored (inverse) text, medium
+              Active   — bg-fg-warm fill, bg-colored (inverse) text, medium
                          weight, NO border
               Sold out — 40% opacity, muted text, 1px muted border (same as
                          default), cursor not-allowed (no line-through per
@@ -97,7 +97,7 @@
           {%- endcomment -%}
           <label
             for="{{ input_id }}"
-            class="cursor-pointer{% if is_size %} flex items-center justify-center w-full h-11 rounded-[6px] text-[12px] uppercase leading-none border border-muted peer-checked:border-transparent peer-checked:bg-fg-dark peer-checked:text-bg peer-checked:font-medium peer-disabled:opacity-40 peer-disabled:text-muted peer-disabled:cursor-not-allowed{% endif %}"
+            class="cursor-pointer{% if is_size %} flex items-center justify-center w-full h-11 rounded-[6px] text-[12px] uppercase leading-none border border-muted peer-checked:border-transparent peer-checked:bg-fg-warm peer-checked:text-bg peer-checked:font-medium peer-disabled:opacity-40 peer-disabled:text-muted peer-disabled:cursor-not-allowed{% endif %}"
           >
             {% if is_color %}
               {%- comment -%}
@@ -181,7 +181,7 @@
         the currently-selected value inline ("Color: Black") at the same
         weight so the emphasis is on the full phrase, not the value.
       {%- endcomment -%}
-      <div class="text-label-tight text-fg mb-3 flex items-center justify-between">
+      <div class="text-label tracking-[0.3px] text-fg mb-3 flex items-center justify-between">
         <span>{{ option.name }}{% if is_color %}: <span data-selected-color>{{ option.selected_value }}</span>{% endif %}</span>
 
         {%- comment -%}
@@ -222,7 +222,7 @@
     {%- comment -%} Color sync and size toggle behavior handled by TS component (variantPickerOption.ts) {%- endcomment -%}
   {% else %}
     <div>
-      <label for="{{ option_parent_id }}" class="text-[12px] font-normal text-fg mb-3 block">
+      <label for="{{ option_parent_id }}" class="text-label tracking-normal text-fg mb-3 block">
         {{ option.name }}
       </label>
 

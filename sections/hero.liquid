@@ -67,7 +67,7 @@
       style="padding-inline: var(--layout-padding-x); color: {{ section.settings.text_color }};"
     >
       {%- if eyebrow != blank -%}
-        <p class="text-h2">{{ eyebrow }}</p>
+        <p class="text-h1">{{ eyebrow }}</p>
       {%- endif -%}
 
       {%- if link != blank -%}
@@ -80,7 +80,7 @@
         {%- endcomment -%}
         <a
           href="{{ link }}"
-          class="inline-flex items-center justify-center rounded-full uppercase font-medium tracking-[0.04em] text-xs leading-none px-4 h-9 border border-current transition-colors duration-200"
+          class="inline-flex items-center justify-center rounded-full text-button leading-none px-4 h-9 border border-current transition-colors duration-200"
         >{{ cta_label }}</a>
       {%- endif -%}
     </div>

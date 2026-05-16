@@ -75,7 +75,7 @@
 .mobile-menu__primary-link {
   @apply flex items-center text-[color:var(--color-fg)] uppercase whitespace-nowrap bg-transparent text-left;
   font-size: 20px;
-  font-weight: 600;
+  font-weight: 500;
   line-height: 28px;
   letter-spacing: 0;
   gap: 8px;
@@ -102,7 +102,7 @@
 .mobile-menu__category {
   @apply text-[color:var(--color-fg)] uppercase whitespace-nowrap block;
   font-size: 16px;
-  font-weight: 400;
+  font-weight: 500;
   line-height: 24px;
 }
 
@@ -145,6 +145,7 @@
 .mobile-menu__secondary-link {
   @apply text-[color:var(--color-fg)] uppercase leading-[16px] whitespace-nowrap;
   font-size: 12px;
+  font-weight: 500;
 }
 
 /* Spacer pushes social to the bottom */

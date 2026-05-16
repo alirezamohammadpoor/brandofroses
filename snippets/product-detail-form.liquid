@@ -71,7 +71,7 @@
           -%}
           {% if breadcrumb_col %}
             <nav class="mb-3" aria-label="Breadcrumb">
-              <ol class="flex items-center gap-1 text-[12px] text-muted uppercase">
+              <ol class="flex items-center gap-1 text-label tracking-normal text-muted">
                 {% if breadcrumb_parent and breadcrumb_parent.title != breadcrumb_col.title %}
                   <li><a href="{{ breadcrumb_parent.url }}">{{ breadcrumb_parent.title }}</a></li>
                   <li>/</li>
@@ -83,8 +83,8 @@
             </nav>
           {% endif %}
 
-          {%- comment -%} Title — Figma 6:2 spec: 28px bold uppercase on desktop {%- endcomment -%}
-          <h1 class="text-[20px] lg:text-[28px] font-bold text-left text-fg uppercase mb-2">
+          {%- comment -%} Title — page-title presence at 20/28; weight Medium per editorial stance (was Bold) {%- endcomment -%}
+          <h1 class="text-[20px] lg:text-[28px] font-medium text-left text-fg uppercase mb-2">
             {{ product.title }}
           </h1>
 
@@ -110,8 +110,24 @@
             class toggle — keeps a single source of truth.
           {%- endcomment -%}
           {% if product.description != blank %}
-            {%- assign desc_id = 'product-desc-' | append: product.id -%}
-            {%- assign desc_toggle_id = desc_id | append: '-toggle' -%}
+            {%- liquid
+              assign desc_id = 'product-desc-' | append: product.id
+              assign desc_toggle_id = desc_id | append: '-toggle'
+
+              comment
+                Decide whether the description is long enough to need the
+                Read more / Read less toggle. Threshold (~120 chars) is the
+                empirical 2-line limit at `text-[12px] leading-5 uppercase`
+                inside the ~400px info column. Below that, the description
+                fits in 2 lines as-is and the toggle is meaningless.
+              endcomment
+              assign desc_plain = product.description | strip_html | strip
+              assign desc_chars = desc_plain | size
+              assign needs_expander = false
+              if desc_chars > 120
+                assign needs_expander = true
+              endif
+            -%}
             <div class="mb-6">
               {%- comment -%}
                 Single-copy description that max-height-animates between
@@ -121,30 +137,36 @@
                 `.collapsible` (which starts at 0 height, not 2 lines).
                 The `CollapsibleToggle` component flips `is-open` here
                 just like it does on info-accordion panels.
+
+                Short descriptions (no toggle) get `is-open` baked in —
+                that disables the 40px clamp and the line-clamp on the
+                inner text so the full copy renders without animation.
               {%- endcomment -%}
               <div
                 id="{{ desc_id }}"
-                class="description-expander__content"
+                class="description-expander__content{% unless needs_expander %} is-open{% endunless %}"
                 role="region"
-                aria-labelledby="{{ desc_toggle_id }}"
+                {% if needs_expander %}aria-labelledby="{{ desc_toggle_id }}"{% endif %}
                 data-fit-content
               >
                 <div class="description-expander__text text-[12px] text-fg uppercase leading-5">
                   {{ product.description }}
                 </div>
               </div>
-              <button
-                type="button"
-                id="{{ desc_toggle_id }}"
-                class="collapsible-toggle group mt-2 text-[10px] text-muted uppercase tracking-[0.04em] underline cursor-pointer"
-                aria-expanded="false"
-                aria-controls="{{ desc_id }}"
-                aria-label="{{ 'products.toggle_description' | t }}"
-                data-component="collapsible-toggle"
-              >
-                <span class="group-aria-expanded:hidden">{{ 'products.read_more' | t }}</span>
-                <span class="hidden group-aria-expanded:inline">{{ 'products.read_less' | t }}</span>
-              </button>
+              {% if needs_expander %}
+                <button
+                  type="button"
+                  id="{{ desc_toggle_id }}"
+                  class="collapsible-toggle group mt-2 text-[10px] text-fg uppercase tracking-[0.04em] underline cursor-pointer"
+                  aria-expanded="false"
+                  aria-controls="{{ desc_id }}"
+                  aria-label="{{ 'products.toggle_description' | t }}"
+                  data-component="collapsible-toggle"
+                >
+                  <span class="group-aria-expanded:hidden">{{ 'products.read_more' | t }}</span>
+                  <span class="hidden group-aria-expanded:inline">{{ 'products.read_less' | t }}</span>
+                </button>
+              {% endif %}
             </div>
           {% endif %}
 
@@ -217,7 +239,7 @@
               Add to Bag button
               ------------------------------------------------------------
               Two state visual per Figma 173:446:
-                Default — `bg-fg-dark` + `text-bg`, label left + price right
+                Default — `bg-fg-warm` + `text-bg`, label left + price right
                           (`justify-between`).
                 Disabled — `bg-muted` + `text-accent`, label centered
                            (`justify-center`), price hidden entirely.
@@ -248,7 +270,7 @@
             <button
               type="submit"
               name="add"
-              class="w-full h-12 rounded-[6px] flex items-center px-6 mt-6 text-[14px] font-medium uppercase tracking-[0.5px] bg-fg-dark text-bg justify-between data-[sold-out]:bg-accent data-[sold-out]:text-bg data-[sold-out]:justify-center disabled:cursor-not-allowed"
+              class="w-full h-12 rounded-[6px] flex items-center px-6 mt-6 text-[14px] font-medium uppercase tracking-[0.5px] bg-fg-warm text-bg justify-between data-[sold-out]:bg-accent data-[sold-out]:text-bg data-[sold-out]:justify-center disabled:cursor-not-allowed"
               {% if current_variant.available == false %}
                 disabled="disabled"
                 data-sold-out
@@ -262,7 +284,7 @@
                   {{ 'app.sold_out' | t }}
                 {% endif %}
               </span>
-              <span data-atc-price class="font-normal">
+              <span data-atc-price>
                 {{ current_variant.price | money_without_trailing_zeros }}
               </span>
             </button>
@@ -386,7 +408,7 @@
                   aria-controls="{{ panel_id }}"
                   data-component="collapsible-toggle"
                 >
-                  <span class="text-label-tight text-fg">
+                  <span class="text-label tracking-[0.3px] text-fg">
                     {{ row_label }}
                   </span>
                   <span class="text-[16px] text-muted" aria-hidden="true" data-chevron>›</span>

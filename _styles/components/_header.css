@@ -42,7 +42,7 @@ header.header {
 
 /* --- Wordmark --- */
 .header__wordmark {
-  @apply text-[color:var(--color-fg)] font-bold uppercase whitespace-nowrap leading-[16px];
+  @apply text-[color:var(--color-fg)] font-medium uppercase whitespace-nowrap leading-[16px];
   font-size: 10px;
   letter-spacing: 1px;
 
@@ -178,6 +178,7 @@ header.header {
   outline: none;
   padding: 8px 0;
   font-size: 12px;
+  font-weight: 500;
   color: var(--color-fg);
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -186,6 +187,7 @@ header.header {
 
 .pill-dropdown__nav-search-slot input[type="search"]::placeholder {
   color: var(--color-muted);
+  font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
@@ -233,11 +235,13 @@ header.header {
   outline: none;
   padding: 8px 0;
   font-size: 14px;
+  font-weight: 500;
   color: var(--color-fg);
 }
 
 .pill-dropdown__panel--search input[type="search"]::placeholder {
   color: var(--color-muted);
+  font-weight: 500;
 }
 
 .pill-dropdown__panel--search [data-icon] {
@@ -328,7 +332,7 @@ header.header {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: var(--color-fg-dark);
+  background-color: var(--color-fg-warm);
   color: var(--color-bg);
   font-size: 12px;
   font-weight: 500;
@@ -383,10 +387,9 @@ header.header {
   height: 32px;
 }
 
-.header__pill-btn .pill-dropdown__item {
-  font-size: 10px;
-  padding-inline: 12px;
-}
+/* Mobile pill content inherits the desktop pill-dropdown__item spec
+   (12px Medium 500 uppercase + 16px padding). No mobile-specific override:
+   one chrome style across breakpoints. */
 
 /* --- Flat nav (desktop) --- */
 .header__flat-nav {
