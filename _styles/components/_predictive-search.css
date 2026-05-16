@@ -1,0 +1,100 @@
+.predictive-search-results {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 12px 8px 0;
+}
+
+.predictive-search-results__section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.predictive-search-results__section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.predictive-search-results__label {
+  color: var(--color-muted);
+  margin: 0;
+}
+
+.predictive-search-results__count {
+  font-size: 11px;
+  color: var(--color-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.predictive-search-results__queries {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.predictive-search-results__query {
+  display: block;
+  padding: 6px 0;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-fg);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  transition: color 150ms var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .predictive-search-results__query:hover {
+    color: var(--color-muted);
+  }
+}
+
+.predictive-search-results__divider {
+  height: 1px;
+  border: 0;
+  background-color: color-mix(in srgb, var(--color-muted) 40%, transparent);
+  margin: 0;
+}
+
+/* 3 columns × 2 rows = 6 square cards. Each card lands at ~205px wide
+ * (the panel's 624px content area minus the 8px column gaps, divided by
+ * three) which matches the original Figma `Product Card / Compact` spec.
+ * Total grid height ~490px keeps the dropdown comfortably above the
+ * fold on standard lg viewports. */
+.predictive-search-results__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.predictive-search-results__empty {
+  font-size: 12px;
+  color: var(--color-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 8px 0;
+  margin: 0;
+}
+
+.predictive-search-results__empty-link {
+  color: var(--color-fg);
+  text-decoration: underline;
+  margin-left: 4px;
+  transition: color 150ms var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .predictive-search-results__empty-link:hover {
+    color: var(--color-muted);
+  }
+}

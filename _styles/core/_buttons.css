@@ -10,7 +10,7 @@
      .btn--sm | .btn--md | .btn--lg
      .btn--block                full width
 
-   Tokens respected: --color-fg, --color-bg, --color-muted, --color-fg-dark.
+   Tokens respected: --color-fg, --color-bg, --color-muted, --color-fg-warm.
 */
 
 button[disabled] {
@@ -26,9 +26,9 @@ button[disabled] {
   @apply uppercase font-medium tracking-[0.04em];
   @apply rounded-md border border-transparent;
 
-  transition-property: background-color, border-color, color, opacity;
+  transition-property: background-color, border-color, color, opacity, transform;
   transition-duration: 250ms;
-  transition-timing-function: ease;
+  transition-timing-function: var(--ease-out);
 
   &:focus-visible {
     @apply outline outline-fg;
@@ -37,31 +37,43 @@ button[disabled] {
   &[disabled] {
     @apply opacity-50 pointer-events-none;
   }
+
+  &:not([disabled]):active {
+    transform: scale(0.97);
+    transition-duration: 160ms;
+  }
 }
 
 /* --- Variants --- */
 
+/* Hover states gated on hover-capable pointer; touch uses :active. */
 .btn--primary {
-  @apply bg-fg-dark text-bg border-fg-dark;
+  @apply bg-fg-warm text-bg border-fg-warm;
 
-  &:not([disabled]):hover {
-    @apply bg-fg border-fg;
+  @media (hover: hover) and (pointer: fine) {
+    &:not([disabled]):hover {
+      @apply bg-fg border-fg;
+    }
   }
 }
 
 .btn--secondary {
   @apply bg-transparent text-fg border-fg;
 
-  &:not([disabled]):hover {
-    @apply bg-fg text-bg;
+  @media (hover: hover) and (pointer: fine) {
+    &:not([disabled]):hover {
+      @apply bg-fg text-bg;
+    }
   }
 }
 
 .btn--ghost {
   @apply bg-transparent text-fg border-transparent;
 
-  &:not([disabled]):hover {
-    @apply text-muted;
+  @media (hover: hover) and (pointer: fine) {
+    &:not([disabled]):hover {
+      @apply text-muted;
+    }
   }
 }
 

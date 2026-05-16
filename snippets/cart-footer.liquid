@@ -25,7 +25,7 @@
 >
   {% if threshold_cents > 0 %}
     <p
-      class="text-[11px] text-muted uppercase text-center leading-[16px]"
+      class="text-[11px] font-medium text-muted uppercase text-center leading-[16px]"
       data-free-shipping
     >
       {%- if remaining_cents > 0 -%}
@@ -44,15 +44,8 @@
   <button
     type="submit"
     name="checkout"
-    class="w-full h-[52px] rounded-md bg-fg-dark text-bg text-[12px] font-medium uppercase tracking-[0.04em] flex items-center justify-center"
+    class="w-full h-[52px] rounded-md bg-fg-warm text-bg text-button flex items-center justify-center"
   >
     {{ 'ajax_cart.general.checkout' | t | upcase }}
   </button>
-
-  <a
-    href="{{ routes.cart_url }}"
-    class="text-[11px] text-muted uppercase tracking-[0.04em] text-center block mt-2"
-  >
-    {{ 'ajax_cart.general.view_cart' | t }}
-  </a>
 </div>

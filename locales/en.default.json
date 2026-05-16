@@ -24,7 +24,11 @@
     },
     "404": {
       "title": "404 Page Not Found",
-      "subtext_html": "The page you requested does not exist. Click <a href=\"/collections/all\">here</a> to continue shopping."
+      "subtext_html": "The page you requested does not exist. Click <a href=\"/collections/all\">here</a> to continue shopping.",
+      "eyebrow": "Not found",
+      "body": "The page you're looking for doesn't exist anymore.",
+      "return_home": "Return home",
+      "recommendations_title": "You may like"
     },
     "password_page": {
       "opening_soon": "Opening Soon",
@@ -58,7 +62,7 @@
     },
     "search": {
       "no_results_html": "Nothing was found for '{{ terms }}'",
-      "no_results": "No search results found",
+      "no_results": "No matches.",
       "results_for_html": "Search results for '{{ terms }}'",
       "results_for_singular_html": "Search result for '{{ terms }}'",
       "results_count_singular": "1 result",
@@ -67,7 +71,10 @@
       "placeholder": "Search",
       "mobile_placeholder": "Tap to search",
       "submit": "Search",
-      "search": "Search"
+      "search": "Search",
+      "trending": "Trending",
+      "products": "Products",
+      "see_all": "See all results"
     }
   },
   "accessibility": {
@@ -141,6 +148,7 @@
     "filters": {
       "title": "Filter",
       "toolbar_label": "Filter and sort",
+      "section_label": "Filters",
       "reset": "Reset",
       "apply": "Apply",
       "clear_all": "Clear all",
@@ -150,7 +158,8 @@
       "max_price": "Max price"
     },
     "sort": {
-      "label": "Sort"
+      "label": "Sort",
+      "section_label": "Sort by"
     }
   },
   "contact": {
@@ -229,6 +238,8 @@
       "none": "You haven't placed any orders yet."
     },
     "order": {
+      "thank_you": "Thank you for your purchase!",
+      "summary": "See your order summary below. Your receipt will be sent out by e-mail.",
       "title": "Order {{ name }}",
       "date": "Placed on {{ date }}",
       "cancelled": "Order Cancelled on {{ date }}",

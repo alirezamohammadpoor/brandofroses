@@ -30,32 +30,29 @@
               {% if link.links.size > 0 %}
                 <button
                   type="button"
-                  class="mobile-menu__primary-link mobile-menu__primary-link--toggle"
-                  data-mobile-menu-toggle
-                  data-panel-key="{{ forloop.index0 }}"
+                  class="mobile-menu__primary-link mobile-menu__primary-link--toggle collapsible-toggle"
+                  data-component="collapsible-toggle"
                   aria-controls="mobile-menu-panel-{{ forloop.index0 }}"
                   aria-expanded="false"
                 >
                   <span>{{ link.title }}</span>
-                  <span class="mobile-menu__caret" aria-hidden="true">▾</span>
                 </button>
-                <ul
-                  id="mobile-menu-panel-{{ forloop.index0 }}"
-                  class="mobile-menu__categories"
-                  data-panel-key="{{ forloop.index0 }}"
-                  role="menu"
-                >
-                  {% for sublink in link.links %}
-                    <li role="none">
-                      <a
-                        href="{{ sublink.url }}"
-                        class="mobile-menu__category"
-                        role="menuitem"
-                        {% if sublink.current %}aria-current="page"{% endif %}
-                      >{{ sublink.title }}</a>
-                    </li>
-                  {% endfor %}
-                </ul>
+                <div id="mobile-menu-panel-{{ forloop.index0 }}" class="collapsible">
+                  <div class="collapsible__inner">
+                    <ul class="mobile-menu__categories" role="menu">
+                      {% for sublink in link.links %}
+                        <li role="none">
+                          <a
+                            href="{{ sublink.url }}"
+                            class="mobile-menu__category"
+                            role="menuitem"
+                            {% if sublink.current %}aria-current="page"{% endif %}
+                          >{{ sublink.title }}</a>
+                        </li>
+                      {% endfor %}
+                    </ul>
+                  </div>
+                </div>
               {% else %}
                 <a
                   href="{{ link.url }}"

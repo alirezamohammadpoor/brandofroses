@@ -1,0 +1,91 @@
+{%- comment -%}
+  Lookbook Hero
+  ------------------------------------------------------------------------------
+  Title + meta on the left, description on the right (desktop two-col,
+  justify-between aligned to baseline). Stacks vertically on mobile as a
+  basic fallback — mobile pass to be tuned separately.
+
+  Figma node: 148:98
+{%- endcomment -%}
+
+{%- liquid
+  assign title = section.settings.title
+  assign breadcrumb = section.settings.breadcrumb
+  assign date = section.settings.date
+  assign description = section.settings.description
+-%}
+
+<section
+  data-section-id="{{ section.id }}"
+  data-section-type="lookbook-hero"
+  class="flex flex-col gap-6 px-4 pt-20 pb-20 lg:flex-row lg:items-end lg:justify-between lg:gap-12 lg:px-8 lg:pt-40 lg:pb-[200px]"
+>
+  {%- comment -%}
+    Title + meta share a wrapper so they stay paired on the left column on
+    desktop. On mobile the wrapper's gap-6 (24px) lines up with the section's
+    gap-6 — title → meta → description all spaced evenly at 24px. On desktop
+    the wrapper switches to gap-4 with meta's pt-4 to mirror Figma's title-
+    block stack (16px gap between title and meta block).
+  {%- endcomment -%}
+  <div class="flex flex-col gap-6 lg:gap-4">
+    {%- if title != blank -%}
+      <h1 class="font-bold tracking-[-1px] text-[40px] leading-[44px] lg:text-[72px] lg:leading-[80px]">
+        {{ title }}
+      </h1>
+    {%- endif -%}
+
+    {%- if breadcrumb != blank or date != blank -%}
+      <div class="flex flex-col gap-1 lg:pt-4 text-[12px] leading-[16px]">
+        {%- if breadcrumb != blank -%}
+          <p class="text-fg">{{ breadcrumb }}</p>
+        {%- endif -%}
+        {%- if date != blank -%}
+          <p class="text-muted">{{ date }}</p>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+  </div>
+
+  {%- if description != blank -%}
+    <div class="lg:w-[380px] shrink-0">
+      <p class="text-[16px] leading-[24px]">{{ description }}</p>
+    </div>
+  {%- endif -%}
+</section>
+
+{% schema %}
+{
+  "name": "Lookbook Hero",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title",
+      "default": "ESSENTIALS VOL. 01"
+    },
+    {
+      "type": "text",
+      "id": "breadcrumb",
+      "label": "Breadcrumb / category line",
+      "default": "LOOKBOOKS / ESSENTIALS VOL. 01"
+    },
+    {
+      "type": "text",
+      "id": "date",
+      "label": "Date",
+      "default": "15.04.26"
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Description",
+      "default": "Essentials Vol. 01 is our foundational drop — pieces built for everyday wear. Clean silhouettes, refined proportions, and muted tones that sit alongside whatever's already in your rotation. Designed to last, made to return to."
+    }
+  ],
+  "presets": [
+    {
+      "name": "Lookbook Hero"
+    }
+  ]
+}
+{% endschema %}

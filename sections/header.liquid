@@ -88,14 +88,14 @@
     {% else %}
       {%- comment -%} Flat: wordmark sits on the left {%- endcomment -%}
       <a href="{{ routes.root_url }}" class="header__wordmark header__wordmark--left hidden lg:block" aria-label="{{ shop.name }}">
-        {{ shop.name | upcase }}
+        {% render 'header-logo', logo: section.settings.header_logo, class: 'header__logo--left' %}
       </a>
     {% endif %}
 
     {%- comment -%} --- Center: wordmark (pill mode) or inline nav (flat mode) --- {%- endcomment -%}
     {% if style == 'pill' %}
       <a href="{{ routes.root_url }}" class="header__wordmark header__wordmark--center" aria-label="{{ shop.name }}">
-        {{ shop.name | upcase }}
+        {% render 'header-logo', logo: section.settings.header_logo, class: 'header__logo--center' %}
       </a>
     {% else %}
       <nav class="header__flat-nav hidden lg:flex" aria-label="Primary">
@@ -112,7 +112,7 @@
     {%- comment -%} Mobile wordmark (always centered on mobile) {%- endcomment -%}
     {% if style == 'flat' %}
       <a href="{{ routes.root_url }}" class="header__wordmark header__wordmark--mobile lg:hidden" aria-label="{{ shop.name }}">
-        {{ shop.name | upcase }}
+        {% render 'header-logo', logo: section.settings.header_logo, class: 'header__logo--mobile' %}
       </a>
     {% endif %}
 
@@ -127,12 +127,15 @@
         <nav class="pill-dropdown__nav" aria-label="Utility">
           <button
             type="button"
-            class="pill-dropdown__item pill-dropdown__item--toggle"
+            class="pill-dropdown__item pill-dropdown__item--toggle pill-dropdown__item--search-toggle"
             data-pill-toggle
             data-panel-key="search"
             aria-controls="utility-menu-panel-search"
             aria-expanded="false"
           >Search</button>
+          <div class="pill-dropdown__nav-search-slot">
+            {% render 'search-inline', id: section.id | append: '-search' %}
+          </div>
           <span class="pill-dropdown__divider" aria-hidden="true"></span>
           <button
             type="button"
@@ -162,8 +165,8 @@
           class="pill-dropdown__panel pill-dropdown__panel--search"
           data-panel-key="search"
         >
-          <div class="pill-dropdown__panel-inner">
-            {% render 'search-inline', id: section.id | append: '-search' %}
+          <div class="pill-dropdown__panel-inner" data-component="predictive-search" data-debounce="200">
+            <div data-predictive-results aria-live="polite" aria-atomic="true"></div>
           </div>
         </div>
 
@@ -261,6 +264,12 @@
         { "value": "flat", "label": "Flat (wordmark left + inline nav)" }
       ],
       "default": "pill"
+    },
+    {
+      "type": "image_picker",
+      "id": "header_logo",
+      "label": "Logo",
+      "info": "Replaces the text wordmark in the header. Leave empty to use the brand wordmark text. Animated GIF/WebP supported."
     },
     {
       "type": "paragraph",

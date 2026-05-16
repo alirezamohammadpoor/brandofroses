@@ -1,13 +1,122 @@
-<div class="container">
-  {% render 'section-header',
-            title: 'Page Not Found',
-            title_tag: 'h1'
-  %}
+{%- comment -%}
+  Main 404
+  ------------------------------------------------------------------------------
+  Two-stack layout matching Figma node 169:289:
+    1. Error hero — fixed-height dark band, large 404 numerals + body + return link
+    2. Product rec rail — "YOU MAY LIKE" + 4-card grid
 
-  <div class="mx-auto" style="max-width: 600px;">
-    <div class="text-center">
-      <p>The page you're looking for does not exist.</p>
-      <p><a href="{{ routes.root_url }}" class="btn">Go Back Home</a>.</p>
+  The hero background is a content color, not a theme token (Figma uses
+  #59544d directly), so it's exposed as a section setting with that hex
+  as default. Text color follows the same pattern — cream by default,
+  overridable for inverse variants.
+
+  The rec rail pulls products from a merchant-picked collection. Falls back
+  to silent (no rail) if blank or empty so a fresh install doesn't render
+  empty cards.
+{%- endcomment -%}
+
+{%- liquid
+  assign bg_color = section.settings.bg_color | default: '#59544d'
+  assign text_color = section.settings.text_color | default: '#FAFAF8'
+  assign rec_collection = section.settings.recommendation_collection
+  assign rec_limit = section.settings.recommendation_limit | default: 4
+-%}
+
+<section
+  data-section-id="{{ section.id }}"
+  data-section-type="main-404"
+>
+  {%- comment -%}
+    ===== ERROR HERO =====
+    Fixed 780px on desktop matches Figma; mobile fits content with min-h-[60vh]
+    so the dark band still dominates on tall phone screens but doesn't dwarf
+    short ones.
+  {%- endcomment -%}
+  <div
+    class="flex items-center justify-center min-h-[60vh] lg:h-[780px]"
+    style="background-color: {{ bg_color }}; color: {{ text_color }};"
+  >
+    <div class="flex flex-col items-center gap-6 text-center px-2 py-16">
+      {%- comment -%}
+        Numerals: 200px on desktop matches Figma. Mobile scales to 140px so
+        the digit still reads as "huge" on small screens without overflowing
+        the 8px gutter. font-bold + tracking-[-4px] match the Inter Bold spec.
+      {%- endcomment -%}
+      <p class="font-bold leading-none tracking-[-4px] text-[140px] lg:text-[200px]">404</p>
+
+      <div class="flex flex-col items-center gap-1">
+        <p class="text-label">{{ 'general.404.eyebrow' | t }}</p>
+        <p class="text-body">{{ 'general.404.body' | t }}</p>
+      </div>
+
+      {%- comment -%}
+        16px vertical spacer between body and link — Figma calls this out as
+        a discrete element rather than just bumping the parent gap, so the
+        "RETURN HOME" link sits visually distinct from the explanatory copy.
+      {%- endcomment -%}
+      <div class="h-4" aria-hidden="true"></div>
+
+      <a
+        href="{{ routes.root_url }}"
+        class="text-label inline-flex items-center gap-1 transition-opacity duration-200 hover:opacity-70"
+      >{{ 'general.404.return_home' | t }} <span aria-hidden="true">→</span></a>
     </div>
   </div>
-</div>
+
+  {%- comment -%} ===== PRODUCT REC RAIL ===== {%- endcomment -%}
+  {%- if rec_collection != blank and rec_collection.products_count > 0 -%}
+    <div class="flex flex-col gap-6 px-2 pt-6 pb-(--layout-padding-bottom)">
+      <div class="px-6">
+        <p class="text-label">{{ 'general.404.recommendations_title' | t }}</p>
+      </div>
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 lg:gap-4">
+        {%- for product in rec_collection.products limit: rec_limit -%}
+          {% render 'product-card', product: product %}
+        {%- endfor -%}
+      </div>
+    </div>
+  {%- endif -%}
+</section>
+
+{% schema %}
+{
+  "name": "404 Page",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Hero"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Hero background",
+      "default": "#59544d"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Hero text color",
+      "default": "#FAFAF8"
+    },
+    {
+      "type": "header",
+      "content": "Recommendations"
+    },
+    {
+      "type": "collection",
+      "id": "recommendation_collection",
+      "label": "Recommendation collection",
+      "info": "Products shown under YOU MAY LIKE. Leave empty to hide the rail."
+    },
+    {
+      "type": "range",
+      "id": "recommendation_limit",
+      "label": "Number of products",
+      "min": 2,
+      "max": 8,
+      "step": 1,
+      "default": 4
+    }
+  ]
+}
+{% endschema %}

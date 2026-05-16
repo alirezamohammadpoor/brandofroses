@@ -85,10 +85,13 @@
   color: var(--color-muted);
   text-transform: uppercase;
   letter-spacing: 0.04em;
+  transition: color 150ms var(--ease-out);
 }
 
-.footer__column-link:hover {
-  color: var(--color-fg);
+@media (hover: hover) and (pointer: fine) {
+  .footer__column-link:hover {
+    color: var(--color-fg);
+  }
 }
 
 /* Utility row — social left, copyright right. Sits below the top zone. */

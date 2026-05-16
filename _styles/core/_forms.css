@@ -88,7 +88,7 @@ input[type="number"] {
 
   transition-property: background-color, border-color, color;
   transition-duration: 250ms;
-  transition-timing-function: ease;
+  transition-timing-function: var(--ease-out);
 
   /* Add hover states */
   @apply hover:border-fg active:border-fg focus:border-fg;

@@ -1,0 +1,26 @@
+{%- comment -%}
+  SRA endpoint for the header search dropdown — fetched by
+  `predictiveSearch.ts` at `/search/suggest?q=…&section_id=predictive-search`.
+  Limits are passed through to the snippet to match the Figma 3×2 grid.
+{%- endcomment -%}
+
+{%- liquid
+  assign q = predictive_search.terms | default: search.terms
+  assign queries = predictive_search.resources.queries
+  assign products = predictive_search.resources.products
+-%}
+
+{% render 'predictive-search-results',
+          queries: queries,
+          products: products,
+          q: q,
+          query_limit: 3,
+          product_limit: 6
+%}
+
+{% schema %}
+{
+  "name": "Predictive Search",
+  "settings": []
+}
+{% endschema %}

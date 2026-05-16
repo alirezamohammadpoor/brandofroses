@@ -8,14 +8,14 @@
 }
 
 .newsletter-form-inputs {
-  transition: opacity var(--t-d-end) ease-out;
+  transition: opacity var(--t-d-end) var(--ease-out);
   transition-delay: var(--t-d-start);
 }
 
 .newsletter-form-message {
   @apply absolute inset-0 z-1 flex items-center opacity-0 pointer-events-none;
 
-  transition: opacity var(--t-d-start) ease-out;
+  transition: opacity var(--t-d-start) var(--ease-out);
   transition-delay: 0ms;
 }
 
@@ -25,7 +25,7 @@
 
     transition-duration: var(--t-d-start);
     transition-delay: 0ms;
-    transition-timing-function: ease-in;
+    transition-timing-function: var(--ease-out);
   }
 
   .newsletter-form-message {
@@ -33,6 +33,6 @@
 
     transition-duration: var(--t-d-end);
     transition-delay: var(--t-d-start);
-    transition-timing-function: ease-out;
+    transition-timing-function: var(--ease-out);
   }
 }

@@ -1,8 +1,8 @@
 header.header {
   @apply relative z-(--z-header) bg-bg;
 
-  --header-height-mobile: 48px;
-  --header-height-desktop: 56px;
+  --header-height-mobile: 72px;
+  --header-height-desktop: 96px;
 
   height: var(--header-height-mobile);
 
@@ -15,16 +15,20 @@ header.header {
 }
 
 .header__row {
-  @apply relative flex items-center justify-between h-full;
+  @apply relative flex items-center justify-between h-full py-2;
   padding-inline: var(--layout-padding-x);
 
   @media (min-width: 1024px) {
     /* Align to top so the pill group can grow downward without
-       dragging the wordmark or right nav with it. The 10px top-pad
-       keeps closed pill vertically centered in the 56px row. */
+       dragging the wordmark or right nav with it. Top-pad re-centers
+       the closed pill against the current 96px header height
+       ((96 - 36) / 2 ≈ 30px) so it visually aligns with the wordmark
+       at rest. When a panel opens, the pill still grows downward from
+       this baseline — the wordmark stays put because it's absolutely
+       positioned. Update this if --header-height changes. */
     .header--pill & {
       align-items: flex-start;
-      padding-top: 10px;
+      padding-top: 30px;
     }
   }
 
@@ -38,7 +42,7 @@ header.header {
 
 /* --- Wordmark --- */
 .header__wordmark {
-  @apply text-[color:var(--color-fg)] font-bold uppercase whitespace-nowrap leading-[16px];
+  @apply text-[color:var(--color-fg)] font-medium uppercase whitespace-nowrap leading-[16px];
   font-size: 10px;
   letter-spacing: 1px;
 
@@ -49,8 +53,9 @@ header.header {
 }
 
 .header__wordmark--center {
-  @apply absolute left-1/2 -translate-x-1/2;
-  top: 20px; /* visually centered in the 56px header when row uses items-start */
+  @apply absolute left-1/2;
+  top: 50%;
+  transform: translate(-50%, -50%);
 }
 
 .header__wordmark--mobile {
@@ -59,14 +64,142 @@ header.header {
   transform: translate(-50%, -50%);
 }
 
+/* Logo image — slightly overflows the header height so the brand mark
+ * has presence without bumping `--header-height` everywhere. The header
+ * has `overflow: visible` so this paints correctly. Width auto preserves
+ * the natural aspect ratio. */
+.header__logo {
+  display: block;
+  width: auto;
+  max-height: 56px;
+  object-fit: contain;
+}
+
+@media (min-width: 1024px) {
+  .header__logo {
+    max-height: 80px;
+  }
+}
+
 /* --- Header-specific pill-dropdown variants ---
    The generic `.pill-dropdown` primitive lives in `_pill-dropdown.css`.
    Only wrappers/variants that are meaningful to the header live here. */
 
 /* Right utility pill — same primitive as the left nav pill, just anchored
-   to the right side of the header row. */
+   to the right side of the header row. Pill width is content-driven (no
+   `inline-size` override anywhere): when search opens, the SEARCH toggle
+   shrinks to zero while the input slot grows; their widths swap in sync
+   so the pill's `max-content` advances monotonically — no clash with a
+   fixed override, no end-of-transition bounce. */
 .pill-dropdown--utility {
   margin-left: auto;
+}
+
+/* Toggle + input slot animate via `flex-basis` (not width / max-width).
+ * The pill is `inline-size: max-content`, which means the pill's rendered
+ * width = sum of children's contributions to max-content. `flex-basis`
+ * IS that contribution; `max-width` only constrains rendered size and
+ * doesn't feed into max-content, so the pill wouldn't grow with the
+ * slot. `min-width: 0` + `overflow: hidden` defeats the default
+ * `min-width: auto` for flex items so the basis value can actually take
+ * effect at zero. */
+.pill-dropdown__item--search-toggle {
+  flex: 0 0 80px;
+  min-width: 0;
+  overflow: hidden;
+  transition:
+    flex-basis 500ms var(--ease-in-out),
+    padding 500ms var(--ease-in-out),
+    opacity 250ms var(--ease-in-out);
+}
+
+.pill-dropdown--utility[data-active-key="search"] .pill-dropdown__item--search-toggle {
+  flex: 0 0 0;
+  padding-inline: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    flex-basis 500ms var(--ease-out),
+    padding 500ms var(--ease-out),
+    opacity 200ms var(--ease-out);
+}
+
+.pill-dropdown__nav-search-slot {
+  display: flex;
+  align-items: center;
+  flex: 0 0 0;
+  min-width: 0;
+  padding-inline: 0;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    flex-basis 500ms var(--ease-in-out),
+    padding 500ms var(--ease-in-out),
+    opacity 250ms var(--ease-in-out);
+}
+
+.pill-dropdown--utility[data-active-key="search"] .pill-dropdown__nav-search-slot {
+  flex: 0 0 480px;
+  padding-inline: 12px;
+  opacity: 1;
+  pointer-events: auto;
+  transition:
+    flex-basis 500ms var(--ease-out),
+    padding 500ms var(--ease-out),
+    opacity 250ms var(--ease-out) 150ms;
+}
+
+/* The form fills the slot; without an explicit width the form-control
+ * keeps its natural max-content which would expand the slot beyond its
+ * max-width. Forcing 100% lets the slot's max-width control the visible
+ * width while overflow: hidden clips the input cleanly during transition. */
+.pill-dropdown__nav-search-slot > form {
+  width: 100%;
+}
+
+/* Inside the pill the form-control is borderless — the pill's own border
+ * is the visual container. Submit-icon hidden because Enter still
+ * submits the form; the icon would just be redundant chrome. */
+.pill-dropdown__nav-search-slot .form-group {
+  width: 100%;
+  margin: 0;
+}
+
+.pill-dropdown__nav-search-slot .form-control {
+  border: 0;
+  background: transparent;
+  gap: 0;
+}
+
+.pill-dropdown__nav-search-slot input[type="search"] {
+  background: transparent;
+  border: 0;
+  outline: none;
+  padding: 8px 0;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-fg);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  width: 100%;
+}
+
+.pill-dropdown__nav-search-slot input[type="search"]::placeholder {
+  color: var(--color-muted);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.pill-dropdown__nav-search-slot input[type="search"]::-webkit-search-cancel-button,
+.pill-dropdown__nav-search-slot input[type="search"]::-webkit-search-decoration {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.pill-dropdown__nav-search-slot .form-control__affix {
+  display: none;
 }
 
 /* --- Panel content variants (search / account / bag) ---
@@ -102,11 +235,13 @@ header.header {
   outline: none;
   padding: 8px 0;
   font-size: 14px;
+  font-weight: 500;
   color: var(--color-fg);
 }
 
 .pill-dropdown__panel--search input[type="search"]::placeholder {
   color: var(--color-muted);
+  font-weight: 500;
 }
 
 .pill-dropdown__panel--search [data-icon] {
@@ -147,10 +282,13 @@ header.header {
   text-transform: uppercase;
   letter-spacing: 0.04em;
   line-height: 24px;
+  transition: color 150ms var(--ease-out);
 }
 
-.customer-login-inline__account-link:hover {
-  color: var(--color-muted);
+@media (hover: hover) and (pointer: fine) {
+  .customer-login-inline__account-link:hover {
+    color: var(--color-muted);
+  }
 }
 
 .customer-login-inline__meta--center {
@@ -194,7 +332,7 @@ header.header {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: var(--color-fg-dark);
+  background-color: var(--color-fg-warm);
   color: var(--color-bg);
   font-size: 12px;
   font-weight: 500;
@@ -219,10 +357,13 @@ header.header {
   color: var(--color-muted);
   text-transform: uppercase;
   letter-spacing: 0.04em;
+  transition: color 150ms var(--ease-out);
 }
 
-.customer-login-inline__link:hover {
-  color: var(--color-fg);
+@media (hover: hover) and (pointer: fine) {
+  .customer-login-inline__link:hover {
+    color: var(--color-fg);
+  }
 }
 
 .customer-login-inline__errors {
@@ -238,16 +379,17 @@ header.header {
   letter-spacing: 0.04em;
 }
 
-/* --- Mobile pill buttons — standalone pills (not the dropdown primitive) --- */
+/* --- Mobile pill buttons — standalone pills (not the dropdown primitive).
+   Borderless on purpose: keep the mobile chrome quiet so the wordmark
+   stays the focal point. --- */
 .header__pill-btn {
-  @apply inline-flex items-center border border-[color:var(--color-muted)] rounded-full overflow-hidden;
+  @apply inline-flex items-center rounded-full overflow-hidden;
   height: 32px;
 }
 
-.header__pill-btn .pill-dropdown__item {
-  font-size: 10px;
-  padding-inline: 12px;
-}
+/* Mobile pill content inherits the desktop pill-dropdown__item spec
+   (12px Medium 500 uppercase + 16px padding). No mobile-specific override:
+   one chrome style across breakpoints. */
 
 /* --- Flat nav (desktop) --- */
 .header__flat-nav {
