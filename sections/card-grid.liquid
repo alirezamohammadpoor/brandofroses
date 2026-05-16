@@ -9,7 +9,7 @@
     {% if section.settings.title != blank or section.settings.subtitle != blank %}
       <div class="flex items-center justify-between mb-4">
         {% if section.settings.title != blank %}
-          <h3 class="text-h3 text-fg">{{ section.settings.title }}</h3>
+          <h3 class="text-h2 text-fg">{{ section.settings.title }}</h3>
         {% endif %}
         {% if section.settings.subtitle != blank %}
           <p class="text-[12px] text-muted">{{ section.settings.subtitle }}</p>
@@ -21,7 +21,7 @@
       {% for block in section.blocks %}
         <div class="w-[70%] shrink-0 snap-start lg:w-auto lg:shrink" {{ block.shopify_attributes }}>
           {% if block.settings.link != blank %}<a href="{{ block.settings.link }}" class="block" aria-label="{{ block.settings.label }}">{% endif %}
-            <div class="aspect-[2/3] overflow-hidden bg-[#E8E5E0]">
+            <div class="aspect-[2/3] overflow-hidden bg-bg-placeholder">
               {% if block.settings.image %}
                 {{ block.settings.image
                   | image_url: width: 800

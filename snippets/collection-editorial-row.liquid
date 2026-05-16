@@ -63,7 +63,7 @@
   {%- endcomment -%}
   <div class="lg:hidden flex flex-col gap-1">
     {% if ed_link != blank %}<a href="{{ ed_link }}" class="block">{% endif %}
-    <div class="w-full h-[80dvh] overflow-hidden bg-[#d9d4cc]">
+    <div class="w-full h-[80dvh] overflow-hidden bg-bg-editorial">
       {{ ed_block.settings.image
          | image_url: width: 780
          | image_tag:
@@ -88,7 +88,7 @@
   {%- endcomment -%}
   {%- capture image_block -%}
     {% if ed_link != blank %}<a href="{{ ed_link }}" class="w-1/2 shrink-0">{% endif %}
-    <div class="{% if ed_link == blank %}w-1/2 shrink-0{% endif %} overflow-hidden bg-[#d9d4cc] h-full">
+    <div class="{% if ed_link == blank %}w-1/2 shrink-0{% endif %} overflow-hidden bg-bg-editorial h-full">
       {{ ed_block.settings.image
          | image_url: width: 1420
          | image_tag:

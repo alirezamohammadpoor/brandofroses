@@ -73,7 +73,7 @@ These conventions are assumed by the shipped product/cart/gallery snippets. Any 
   - `.collapsible` / `.collapsible__inner` / `.collapsible-toggle` (`_styles/components/_collapsible.css` + `_scripts/components/collapsibleToggle.ts`) — expand/collapse any panel via a button with `aria-expanded` + `aria-controls`. Used by the PDP info accordion and the description Read more/less. Grid-rows auto-height animation at 500ms ease-in-out.
   - `product-meta-card.liquid` — horizontal 48×48-image + details-stack card on `bg-bg-surface`. Takes a captured `body` slot from the caller. Used by Match With + Model Info cards in the PDP info column.
   - `ProductRecommendations` component (`_scripts/components/productRecommendations.ts`) — async-fetches a Section Rendering API URL and swaps its content into an empty `[data-component="product-recommendations"]` placeholder. Used for PDP "You may also like" — pattern reusable for any recommendation rail.
-  - `text-label-tight` utility (`_styles/app.css`) — 12px medium uppercase + 0.3px tracking. Match With / Model / Color / info-row labels all share this. Distinct from `text-label` which uses a looser 0.08em tracking for cart/article/blog labels.
+  - PDP info-column labels (Match With / Model / Color / info-row labels) use `text-label tracking-[0.3px]` — the base `text-label` utility with a tighter override. Default `text-label` is 12px regular UPPERCASE 0.08em — see `DESIGN-SYSTEM.md` for the full type ramp.
 
 ## Build
 

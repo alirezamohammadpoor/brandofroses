@@ -45,7 +45,7 @@
   {% else %}
     {% if has_queries %}
       <section class="predictive-search-results__section" aria-labelledby="predictive-search-trending-label">
-        <h3 id="predictive-search-trending-label" class="text-section-label predictive-search-results__label">
+        <h3 id="predictive-search-trending-label" class="text-tiny predictive-search-results__label">
           {{ 'general.search.trending' | t }}
         </h3>
         <ul class="predictive-search-results__queries" role="list">
@@ -78,7 +78,7 @@
       -%}
       <section class="predictive-search-results__section" aria-labelledby="predictive-search-products-label">
         <header class="predictive-search-results__section-header">
-          <h3 id="predictive-search-products-label" class="text-section-label predictive-search-results__label">
+          <h3 id="predictive-search-products-label" class="text-tiny predictive-search-results__label">
             {{ 'general.search.products' | t }}
           </h3>
           <span class="predictive-search-results__count">{{ product_count_label | upcase }}</span>

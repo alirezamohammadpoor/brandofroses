@@ -51,6 +51,7 @@
 .pill-dropdown__item {
   @apply inline-flex items-center justify-center gap-[2px] text-[color:var(--color-fg)] uppercase leading-[16px] whitespace-nowrap bg-transparent;
   font-size: 12px;
+  font-weight: 500;
   padding-inline: 16px;
   height: 100%;
 }
@@ -151,6 +152,7 @@
 .pill-dropdown__category {
   @apply text-[color:var(--color-fg)] uppercase whitespace-nowrap block;
   font-size: 12px;
+  font-weight: 500;
   line-height: 24px;
   transition: color 150ms var(--ease-out);
 }

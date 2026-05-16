@@ -91,7 +91,7 @@
     aria-labelledby="{{ card_title_id }}"
   >
     <a href="{{ product_url }}" class="flex flex-col gap-1" tabindex="-1" aria-hidden="true">
-      <div class="relative w-full aspect-square overflow-hidden bg-bg-surface">
+      <div class="relative w-full aspect-square overflow-hidden">
         {{ product.featured_image
           | image_url: width: image_max_width
           | image_tag:
@@ -115,13 +115,13 @@
         <a
           href="{{ product_url }}"
           id="{{ card_title_id }}"
-          class="text-caption text-fg uppercase truncate"
+          class="text-label tracking-normal text-fg truncate"
         >{{ product.title }}</a>
 
-        <div class="flex items-center gap-2 text-caption">
+        <div class="flex items-center gap-2 text-label tracking-normal">
           {% if on_sale %}
             <s class="text-muted" aria-hidden="true">{{ current_variant.compare_at_price | money_without_trailing_zeros }}</s>
-            <span class="text-accent font-medium">
+            <span class="text-accent font-bold">
               <span class="sr-only">{{ 'products.product.price.sale_price' | t }}</span>
               {{ current_variant.price | money_without_trailing_zeros }}
             </span>
@@ -146,7 +146,7 @@
             ><span class="sr-only">{{ value }}</span></li>
           {% endfor %}
           {% if overflow > 0 %}
-            <li class="text-section-label text-muted ml-1" aria-label="{{ 'products.product.more_colors' | t: count: overflow }}">+{{ overflow }}</li>
+            <li class="text-tiny text-muted ml-1" aria-label="{{ 'products.product.more_colors' | t: count: overflow }}">+{{ overflow }}</li>
           {% endif %}
         </ul>
       {% endif %}

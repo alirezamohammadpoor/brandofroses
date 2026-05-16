@@ -45,8 +45,8 @@
       <p class="font-bold leading-none tracking-[-4px] text-[140px] lg:text-[200px]">404</p>
 
       <div class="flex flex-col items-center gap-1">
-        <p class="text-[12px] leading-[16px] uppercase">{{ 'general.404.eyebrow' | t }}</p>
-        <p class="text-[16px] leading-[24px]">{{ 'general.404.body' | t }}</p>
+        <p class="text-label">{{ 'general.404.eyebrow' | t }}</p>
+        <p class="text-body">{{ 'general.404.body' | t }}</p>
       </div>
 
       {%- comment -%}
@@ -58,7 +58,7 @@
 
       <a
         href="{{ routes.root_url }}"
-        class="text-[12px] leading-[16px] uppercase inline-flex items-center gap-1 transition-opacity duration-200 hover:opacity-70"
+        class="text-label inline-flex items-center gap-1 transition-opacity duration-200 hover:opacity-70"
       >{{ 'general.404.return_home' | t }} <span aria-hidden="true">→</span></a>
     </div>
   </div>

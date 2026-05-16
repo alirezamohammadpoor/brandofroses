@@ -16,7 +16,7 @@
     {% if section.settings.title != blank or section.settings.subtitle != blank %}
       <div class="flex items-center justify-between mb-4">
         {% if section.settings.title != blank %}
-          <h3 class="text-h3 text-fg">{{ section.settings.title }}</h3>
+          <h3 class="text-h2 text-fg">{{ section.settings.title }}</h3>
         {% endif %}
         {% if section.settings.subtitle != blank %}
           <a href="{{ selected_blog.url }}" class="text-label text-fg">{{ section.settings.subtitle }}</a>
@@ -29,7 +29,7 @@
         <div class="w-[70%] shrink-0 snap-start lg:w-auto lg:shrink">
           <article class="flex h-full flex-col gap-y-3">
             <a href="{{ article.url }}" title="{{ article.title | escape }}">
-              <div class="relative aspect-[2/3] overflow-hidden bg-[#E8E5E0]">
+              <div class="relative aspect-[2/3] overflow-hidden bg-bg-placeholder">
                 {% if article.image != blank %}
                   <img
                     src="{{ article.image | image_url: width: 900 }}"
@@ -45,7 +45,7 @@
 
             <div class="flex grow flex-col gap-y-2">
               <a href="{{ article.url }}" title="{{ article.title | escape }}">
-                <h3 class="text-h3 text-fg">{{ article.title }}</h3>
+                <h3 class="text-h2 text-fg">{{ article.title }}</h3>
               </a>
 
               {% if section.settings.show_excerpt and article.excerpt_or_content != blank %}
