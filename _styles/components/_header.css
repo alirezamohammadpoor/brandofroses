@@ -210,11 +210,23 @@ header.header {
 /* Padding on each panel's content root (not on .pill-dropdown__panel-inner) so
    the grid track can collapse cleanly when closed. */
 .pill-dropdown__panel--search .form-group,
-.pill-dropdown__panel--account .customer-login-inline,
-.pill-dropdown__panel--bag .ajax-cart__body,
-.pill-dropdown__panel--bag .ajax-cart__footer {
+.pill-dropdown__panel--account .customer-login-inline {
   margin: 0;
   padding: 8px 8px 12px;
+}
+
+/* Bag panel — items + footer need more breathing room than the tight search
+   / account form panels above. 16px horizontal padding matches the editorial
+   gutter elsewhere; 12px top + 20px bottom separates the cart from the pill
+   row and the checkout button gets some safe-area clearance. */
+.pill-dropdown__panel--bag .ajax-cart__body {
+  margin: 0;
+  padding: 12px 16px 0;
+}
+
+.pill-dropdown__panel--bag .ajax-cart__footer {
+  margin: 0;
+  padding: 16px 16px 20px;
 }
 
 .pill-dropdown__panel--search .form-control {

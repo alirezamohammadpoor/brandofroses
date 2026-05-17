@@ -63,7 +63,7 @@
 
 .ajax-cart__item-inner {
   @apply flex items-start gap-x-4;
-  padding: 16px 0;
+  padding: 20px 0;
 
   transition: opacity 250ms var(--ease-out);
 
@@ -88,7 +88,7 @@
 }
 
 .ajax-cart__footer {
-  @apply flex flex-col gap-y-4 bg-bg;
+  @apply flex flex-col gap-y-5 bg-bg;
   z-index: var(--z-footer);
   padding: 16px var(--ajax-cart-pad-x) calc(24px + env(safe-area-inset-bottom, 0px));
 }
