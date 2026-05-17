@@ -80,14 +80,6 @@ export default class BaseSection {
     this.graphicCoverVideos = this.qsa(GraphicCoverVideo.SELECTOR).map(el => {
       return new GraphicCoverVideo(el)
     })
-
-
-    // Good for testing...
-    // Array.from(container.querySelectorAll('img')).forEach(el => {
-    //   if (!el.getAttribute('alt')) {
-    //     console.log('No alt text found for => ', el)
-    //   }
-    // })    
   }
 
   get dataset(): DOMStringMap {

@@ -1,5 +1,4 @@
-import { slideUp } from '@/core/gsap'
-import { getDomFromString } from '@/core/utils/dom'
+import { getDomFromString, isVisible } from '@/core/utils/dom'
 import type { LiteCart, LiteLineItem } from '@/types/shopify'
 import CartAPI, { type CartAPIEvent } from '@/core/cartAPI'
 
@@ -32,7 +31,30 @@ export default class CartBody extends BaseComponent {
     this.onItemRemoveClick = this.onItemRemoveClick.bind(this)
     this.onItemQuantityAdjusterChange = this.onItemQuantityAdjusterChange.bind(this)
 
-    this.itemInstances = this.qsa(CartItem.SELECTOR).map((el, i) => this.createCartItemInstance(el, this.cartData.items[i]))
+    /*
+     * Defensive: when cart-json data and the rendered cart-body DOM get out
+     * of sync (e.g. Shopify's anti-bot challenge caching a stale cart-json
+     * blob while serving fresh HTML, or a partial AJAX update), `cartData.items`
+     * can be shorter than the DOM item count. Calling `new CartItem(el, undefined)`
+     * crashes on `this.itemData.id` and gets swallowed by HeaderSection's
+     * try/catch, leaving every subsequent item without click handlers — the
+     * entire cart goes dead. Skip items without backing data and log a
+     * warning so the desync is visible instead of silent.
+     */
+    const domItems = this.qsa(CartItem.SELECTOR)
+    if (domItems.length !== this.cartData.items.length) {
+      console.warn(
+        `[CartBody] DOM/cart-json mismatch: ${domItems.length} item nodes, ${this.cartData.items.length} JSON items. Skipping unbacked DOM items.`,
+      )
+    }
+
+    this.itemInstances = domItems
+      .map((el, i) => {
+        const itemData = this.cartData.items[i]
+        if (!itemData) return null
+        return this.createCartItemInstance(el, itemData)
+      })
+      .filter((instance): instance is CartItem => instance !== null)
   }
 
   createCartItemInstance(el: HTMLElement, itemData: LiteLineItem) {
@@ -52,17 +74,34 @@ export default class CartBody extends BaseComponent {
 
     // Remove from the itemInstances array
     this.itemInstances = this.itemInstances.filter(instance => instance !== removalInstance)
-    
-    // Animate the removal and then clean up the instance
-    slideUp(removalInstance.el, {
-      duration: 0.45,
-      onInterrupt: () => {
-        this.cleanupItemInstance(removalInstance)
-      },
-      onComplete: () => {
-        this.cleanupItemInstance(removalInstance)
-      }
-    })    
+
+    const el = removalInstance.el
+    const cleanup = () => this.cleanupItemInstance(removalInstance)
+
+    // When the panel/drawer is closed, the row can't be animated visibly —
+    // tear it down immediately so the DOM stays in sync with cart state.
+    if (!isVisible(el)) {
+      cleanup()
+      return
+    }
+
+    // Plain CSS transition. The shared slideUp/gsap helper has been
+    // unreliable here — the tween never applied opacity/height and the row
+    // sat in the DOM forever.
+    const h = el.offsetHeight
+    el.style.overflow = 'hidden'
+    el.style.height = `${h}px`
+    void el.offsetHeight
+    el.style.transition = 'opacity 0.25s ease, height 0.3s ease 0.05s'
+    el.style.opacity = '0'
+    el.style.height = '0px'
+
+    const onEnd = (e: TransitionEvent) => {
+      if (e.propertyName !== 'height') return
+      el.removeEventListener('transitionend', onEnd)
+      cleanup()
+    }
+    el.addEventListener('transitionend', onEnd)
   }
 
   performItemInstanceUpdate(updateInstance: CartItem, newItemData: LiteLineItem) {
@@ -73,11 +112,12 @@ export default class CartBody extends BaseComponent {
   }
 
   performItemInstanceAddition(newItemData: LiteLineItem, newIndex: number) {
-    if (!newItemData) return
-
     const newItemEl = getDomFromString(newItemData.item_html).querySelector(CartItem.SELECTOR) as HTMLElement
+    if (!newItemEl) return
+    if (!this.list) return
+
     const newItemInstance = this.createCartItemInstance(newItemEl, newItemData)
-    
+
     // Insert to list DOM
     this.list.insertBefore(newItemInstance.el, this.itemInstances[newIndex]?.el || null)
     

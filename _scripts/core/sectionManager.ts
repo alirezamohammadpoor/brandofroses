@@ -40,7 +40,7 @@ const THEME_EDITOR_EVENTS = [
  * getEventHandlerName('shopify:section:load') => 'onSectionLoad'
  */
 function getEventHandlerName(eventName: string): string {
-  const name = eventName.split(':').splice(1).map(startCase).join('')
+  const name = eventName.split(':').slice(1).map(startCase).join('')
 
   return `on${name}`
 }
