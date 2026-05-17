@@ -1,0 +1,174 @@
+{%- comment -%}
+  Lookbook Block
+  ------------------------------------------------------------------------------
+  Single reusable editorial block for lookbook pages. Replaces the old
+  `lookbook-image` + `lookbook-image-pair` sections — one section type
+  with a `layout` select that picks between four arrangements:
+
+    - left  : half-width image, left-anchored (right column blank)
+    - right : half-width image, right-anchored (left column blank)
+    - full  : full-width single image
+    - pair  : two half-width images side-by-side
+
+  All images render at `aspect-[3/4]` portrait for a deliberate editorial
+  rhythm — the source crop should be portrait or square; landscape sources
+  will get heavily side-cropped. Mobile always stacks full-width regardless
+  of layout (no editorial half-column is meaningful at 390px wide).
+
+  Optional caption renders as a small `text-label` line below the image(s).
+  Optional link makes the image clickable.
+
+  Figma reference: simplification of the original lookbook frames
+  (148:106, 148:109, 148:112, 148:115, 148:118).
+{%- endcomment -%}
+
+{%- liquid
+  assign layout = section.settings.layout | default: 'left'
+  assign image = section.settings.image
+  assign pair_image = section.settings.pair_image
+  assign caption = section.settings.caption
+  assign link = section.settings.link
+
+  assign focal = image.presentation.focal_point | default: 'center center'
+  assign focal_style = 'object-position: ' | append: focal
+
+  if pair_image
+    assign pair_focal = pair_image.presentation.focal_point | default: 'center center'
+    assign pair_focal_style = 'object-position: ' | append: pair_focal
+  endif
+-%}
+
+{%- comment -%}
+  Outer container — picks the row alignment for the half-width layouts.
+  Tailwind safelist: justify-start justify-end justify-between
+{%- endcomment -%}
+{%- assign outer_class = 'w-full px-2 lg:px-4 py-6 lg:py-10' -%}
+{%- if layout == 'left' -%}
+  {%- assign outer_class = outer_class | append: ' lg:flex lg:justify-start' -%}
+{%- elsif layout == 'right' -%}
+  {%- assign outer_class = outer_class | append: ' lg:flex lg:justify-end' -%}
+{%- elsif layout == 'pair' -%}
+  {%- assign outer_class = outer_class | append: ' lg:flex lg:justify-between lg:gap-4' -%}
+{%- endif -%}
+
+<section
+  data-section-id="{{ section.id }}"
+  data-section-type="lookbook-block"
+  data-layout="{{ layout }}"
+  class="{{ outer_class }}"
+>
+  {%- comment -%}
+    Image slot 1 — width depends on layout. Mobile is always full-width.
+    Tailwind safelist: lg:w-1/2 lg:w-full
+  {%- endcomment -%}
+  {%- assign image_width_class = 'w-full' -%}
+  {%- if layout == 'left' or layout == 'right' or layout == 'pair' -%}
+    {%- assign image_width_class = 'w-full lg:w-1/2' -%}
+  {%- endif -%}
+
+  <div class="{{ image_width_class }} flex flex-col gap-2">
+    {%- if image != blank -%}
+      {%- if link != blank -%}
+        <a href="{{ link }}" class="block w-full aspect-[3/4] overflow-hidden bg-bg-surface">
+          {{ image
+            | image_url: width: 1200
+            | image_tag:
+              loading: 'lazy',
+              widths: '400,600,800,1200,1600',
+              sizes: '(min-width: 1024px) 50vw, 100vw',
+              class: 'w-full h-full object-cover block',
+              style: focal_style,
+              alt: image.alt | default: ''
+          }}
+        </a>
+      {%- else -%}
+        <div class="w-full aspect-[3/4] overflow-hidden bg-bg-surface">
+          {{ image
+            | image_url: width: 1200
+            | image_tag:
+              loading: 'lazy',
+              widths: '400,600,800,1200,1600',
+              sizes: '(min-width: 1024px) 50vw, 100vw',
+              class: 'w-full h-full object-cover block',
+              style: focal_style,
+              alt: image.alt | default: ''
+          }}
+        </div>
+      {%- endif -%}
+    {%- endif -%}
+
+    {%- if caption != blank and layout != 'pair' -%}
+      <p class="text-label tracking-normal text-muted pt-1">{{ caption }}</p>
+    {%- endif -%}
+  </div>
+
+  {%- comment -%}
+    Image slot 2 — only renders when layout == 'pair'. Shares the same
+    aspect + sizing as slot 1 so the pair reads as a balanced diptych.
+  {%- endcomment -%}
+  {%- if layout == 'pair' and pair_image != blank -%}
+    <div class="w-full lg:w-1/2 flex flex-col gap-2 mt-6 lg:mt-0">
+      <div class="w-full aspect-[3/4] overflow-hidden bg-bg-surface">
+        {{ pair_image
+          | image_url: width: 1200
+          | image_tag:
+            loading: 'lazy',
+            widths: '400,600,800,1200,1600',
+            sizes: '(min-width: 1024px) 50vw, 100vw',
+            class: 'w-full h-full object-cover block',
+            style: pair_focal_style,
+            alt: pair_image.alt | default: ''
+        }}
+      </div>
+    </div>
+  {%- endif -%}
+</section>
+
+{% schema %}
+{
+  "name": "Lookbook Block",
+  "settings": [
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Layout",
+      "options": [
+        { "value": "left",  "label": "Half — left aligned" },
+        { "value": "right", "label": "Half — right aligned" },
+        { "value": "full",  "label": "Full width" },
+        { "value": "pair",  "label": "Pair (two images side by side)" }
+      ],
+      "default": "left",
+      "info": "Mobile always stacks full-width regardless of selection."
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image",
+      "info": "Renders at 3:4 portrait. Source should be portrait or square — landscape gets heavily cropped."
+    },
+    {
+      "type": "image_picker",
+      "id": "pair_image",
+      "label": "Second image (only used when layout = Pair)"
+    },
+    {
+      "type": "text",
+      "id": "caption",
+      "label": "Caption (optional)",
+      "info": "Small label rendered below the image. Hidden when layout = Pair."
+    },
+    {
+      "type": "url",
+      "id": "link",
+      "label": "Image link (optional)",
+      "info": "Makes the first image clickable."
+    }
+  ],
+  "presets": [
+    {
+      "name": "Lookbook Block"
+    }
+  ]
+}
+{% endschema %}

@@ -3,38 +3,38 @@
     "lookbook_hero": {
       "type": "lookbook-hero",
       "settings": {
-        "title": "ESSENTIALS VOL. 01",
-        "breadcrumb": "LOOKBOOKS / ESSENTIALS VOL. 01",
-        "date": "15.04.26",
-        "description": "Essentials Vol. 01 is our foundational drop — pieces built for everyday wear. Clean silhouettes, refined proportions, and muted tones that sit alongside whatever's already in your rotation. Designed to last, made to return to."
+        "breadcrumb": "LOOKBOOKS",
+        "date": "15.04.26"
       }
     },
-    "image_1": {
-      "type": "lookbook-image",
+    "block_1": {
+      "type": "lookbook-block",
       "settings": {
-        "alignment": "left"
+        "layout": "left"
       }
     },
-    "image_2": {
-      "type": "lookbook-image",
+    "block_2": {
+      "type": "lookbook-block",
       "settings": {
-        "alignment": "right"
+        "layout": "right"
       }
     },
-    "image_pair": {
-      "type": "lookbook-image-pair",
-      "settings": {}
-    },
-    "image_3": {
-      "type": "lookbook-image",
+    "block_3": {
+      "type": "lookbook-block",
       "settings": {
-        "alignment": "right"
+        "layout": "pair"
       }
     },
-    "image_4": {
-      "type": "lookbook-image",
+    "block_4": {
+      "type": "lookbook-block",
       "settings": {
-        "alignment": "left"
+        "layout": "full"
+      }
+    },
+    "block_5": {
+      "type": "lookbook-block",
+      "settings": {
+        "layout": "left"
       }
     },
     "products": {
@@ -51,18 +51,17 @@
     "cta": {
       "type": "lookbook-cta",
       "settings": {
-        "label": "Shop Essentials Vol. 01",
-        "text_color": "#FAFAF8"
+        "label": "Shop the drop"
       }
     }
   },
   "order": [
     "lookbook_hero",
-    "image_1",
-    "image_2",
-    "image_pair",
-    "image_3",
-    "image_4",
+    "block_1",
+    "block_2",
+    "block_3",
+    "block_4",
+    "block_5",
     "products",
     "cta"
   ]
