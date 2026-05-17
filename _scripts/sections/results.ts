@@ -62,6 +62,6 @@ export default class ResultsSection extends BaseSection {
   }
 
   onReplaceComplete(resultsDisplay: ResultsDisplay) {
-    // console.log('onReplaceComplete', resultsDisplay)
+    // override in subclass
   }
 }

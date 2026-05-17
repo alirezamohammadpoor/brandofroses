@@ -187,8 +187,16 @@
           data-header-cart-panel
         >
           <div class="pill-dropdown__panel-inner">
-            {% render 'cart-body' %}
-            {% render 'cart-footer', threshold: settings.free_shipping_threshold %}
+            {%- comment -%}
+              Form wraps cart-body + cart-footer so the CHECKOUT submit
+              button has somewhere to post. Matches the AJAX drawer's
+              structure (sections/ajax-cart.liquid). Without this the
+              checkout button is a no-op submit on a form-less button.
+            {%- endcomment -%}
+            <form action="{{ routes.cart_url }}" method="post" novalidate>
+              {% render 'cart-body' %}
+              {% render 'cart-footer', threshold: settings.free_shipping_threshold %}
+            </form>
             <script type="application/json" data-cart-json>
               {% render 'cart-json' %}
             </script>

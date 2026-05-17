@@ -53,24 +53,32 @@ input[type="radio"] + label .swatch {
   cursor: pointer;
 }
 
-/* Hover state — subtle inset ring so light swatches still feel "live". */
+/* Hover state — subtle outer ring with a small gap so light swatches
+   still register interaction. `outline` lives outside the box-model so
+   `overflow: hidden` on `.swatch` doesn't clip it, and it doesn't shift
+   layout the way a border would. */
 input[type="checkbox"]:not(:disabled):not(:checked) + label:hover .swatch,
 input[type="radio"]:not(:disabled):not(:checked) + label:hover .swatch {
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-fg) 50%, transparent);
+  outline: 1px solid color-mix(in srgb, var(--color-fg) 50%, transparent);
+  outline-offset: 2px;
 }
 
-/* Selected state — Figma 32:21: 1.5px fg border drawn INSIDE the swatch
-   (box-shadow inset so the 32×32 size doesn't shift). `overflow: hidden`
-   on `.swatch` clips the inset ring to the circular shape. */
+/* Selected state — 2px outer ring with 2px gap, matching the Figma
+   "outer ring with breathing room" pattern. Much more visible than the
+   former inset 1.5px which got lost on dark swatches and overlapped the
+   edge on light ones. The label container has enough horizontal gap
+   (gap-2 minimum) to keep adjacent rings from touching. */
 input[type="checkbox"]:checked + label .swatch,
 input[type="radio"]:checked + label .swatch {
-  box-shadow: inset 0 0 0 1.5px var(--color-fg);
+  outline: 2px solid var(--color-fg);
+  outline-offset: 2px;
 }
 
 /* Focus state — match selected so keyboard focus is obvious. */
 input[type="checkbox"]:focus-visible + label .swatch,
 input[type="radio"]:focus-visible + label .swatch {
-  box-shadow: inset 0 0 0 1.5px var(--color-fg);
+  outline: 2px solid var(--color-fg);
+  outline-offset: 2px;
 }
 
 /* Disabled state */

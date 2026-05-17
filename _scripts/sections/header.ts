@@ -27,10 +27,17 @@ export default class HeaderSection extends BaseSection {
     // Initialize the desktop Bag pill panel's cart components (separate instances
     // from the mobile ajax-cart drawer — both listen to cartAPI.UPDATE and sync
     // independently).
+    //
+    // Use raw querySelector instead of this.qs: BaseSection.qsa filters out
+    // elements whose closest [data-component] is not the section itself. The
+    // cart panel lives inside [data-component="pill-dropdown"], so this.qs
+    // would silently return undefined and the cart buttons would never get
+    // their click handlers bound.
     this.cartPanelBody = null
     this.cartPanelFooter = null
 
-    const cartPanel = this.qs(selectors.cartPanel)
+    const cartPanel = this.container.querySelector<HTMLElement>(selectors.cartPanel)
+
     if (cartPanel) {
       const cartJsonEl = cartPanel.querySelector(selectors.cartJson)
 
@@ -44,7 +51,7 @@ export default class HeaderSection extends BaseSection {
           if (footerEl) this.cartPanelFooter = new CartFooter(footerEl)
         }
         catch (err) {
-          console.error('HeaderSection: failed to initialize cart panel', err)
+          console.error('[HeaderSection] failed to initialize cart panel', err)
         }
       }
     }

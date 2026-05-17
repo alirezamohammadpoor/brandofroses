@@ -1,4 +1,12 @@
-<div data-section-id="{{ section.id }}" data-section-type="ajax-cart">
+{%- comment -%}
+  Section wrapper gets `lg:hidden` so the entire ajax-cart drawer is
+  display:none on desktop. Desktop uses the inline bag pill dropdown
+  inside the header instead (see sections/header.liquid bag panel).
+  JS still initializes the drawer on desktop but it never opens because
+  the toggle button is also lg:hidden — and even if cartAPI's UPDATE
+  event triggers an auto-open, it opens an invisible element. Harmless.
+{%- endcomment -%}
+<div data-section-id="{{ section.id }}" data-section-type="ajax-cart" class="lg:hidden">
   <div
     id="ajax-cart"
     class="ajax-cart overflow-hidden"
