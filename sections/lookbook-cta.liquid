@@ -1,71 +1,31 @@
 {%- comment -%}
   Lookbook CTA
   ------------------------------------------------------------------------------
-  Full-width editorial image with a small text-link overlay in the
-  bottom-left corner ("SHOP ESSENTIALS VOL. 01 →"). Sits at the end of the
-  lookbook page as the buy-now nudge.
+  Closing call-to-action — text-only link, centered, generous padding.
+  Simplified from the original image-with-overlay treatment because the
+  big editorial image was competing with the lookbook-block images above
+  and reading as "yet another hero". A quiet text link "Shop the drop →"
+  reads as the deliberate close of the editorial story.
 
-  Figma uses 24px padding around the image (`p-[24px]`) so the text floats
-  inside an 8px inset from the image edge. Match that on desktop.
-
-  Figma node: 148:167
+  Figma node (original): 148:167
 {%- endcomment -%}
 
 {%- liquid
-  assign focal = section.settings.image.presentation.focal_point | default: 'center center'
-  assign focal_style = 'object-position: ' | append: focal
   assign link = section.settings.link
   assign label = section.settings.label | default: 'Shop the collection'
-  assign text_color = section.settings.text_color | default: '#FAFAF8'
 -%}
 
 <section
   data-section-id="{{ section.id }}"
   data-section-type="lookbook-cta"
-  class="w-full lg:p-6"
+  class="w-full px-2 py-16 lg:py-24 flex justify-center"
 >
-  <div class="relative w-full h-[440px] bg-bg-surface lg:h-[560px]">
-    {%- if section.settings.image != blank -%}
-      {%- if link != blank -%}
-        <a href="{{ link }}" class="absolute inset-0 block" aria-label="{{ label | escape }}">
-          {{ section.settings.image
-            | image_url: width: 2400
-            | image_tag:
-              loading: 'lazy',
-              widths: '600,800,1200,1600,2000,2400',
-              sizes: '100vw',
-              class: 'w-full h-full object-cover block',
-              style: focal_style,
-              alt: label
-          }}
-        </a>
-      {%- else -%}
-        {{ section.settings.image
-          | image_url: width: 2400
-          | image_tag:
-            loading: 'lazy',
-            widths: '600,800,1200,1600,2000,2400',
-            sizes: '100vw',
-            class: 'w-full h-full object-cover block',
-            style: focal_style,
-            alt: label
-        }}
-      {%- endif -%}
-    {%- endif -%}
-
-    {%- if link != blank -%}
-      {%- comment -%}
-        Text anchored top-left on mobile (Figma node 149:230, x=16/y=16) but
-        bottom-left on desktop. `top-4` is overridden by `lg:top-auto` so the
-        `lg:bottom-6` value takes effect at the desktop breakpoint.
-      {%- endcomment -%}
-      <a
-        href="{{ link }}"
-        class="absolute top-4 left-4 lg:top-auto lg:bottom-6 lg:left-6 text-[12px] leading-[16px] uppercase inline-flex items-center gap-1 transition-opacity duration-200 hover:opacity-70"
-        style="color: {{ text_color }};"
-      >{{ label }} <span aria-hidden="true">→</span></a>
-    {%- endif -%}
-  </div>
+  {%- if link != blank -%}
+    <a
+      href="{{ link }}"
+      class="text-h2 text-fg inline-flex items-center gap-3 transition-opacity duration-200 hover:opacity-70"
+    >{{ label }} <span aria-hidden="true">→</span></a>
+  {%- endif -%}
 </section>
 
 {% schema %}
@@ -73,28 +33,15 @@
   "name": "Lookbook CTA",
   "settings": [
     {
-      "type": "image_picker",
-      "id": "image",
-      "label": "Background image",
-      "info": "Full-width editorial image. Renders at 560px tall on desktop."
-    },
-    {
       "type": "text",
       "id": "label",
       "label": "CTA label",
-      "default": "Shop Essentials Vol. 01"
+      "default": "Shop the drop"
     },
     {
       "type": "url",
       "id": "link",
       "label": "CTA link"
-    },
-    {
-      "type": "color",
-      "id": "text_color",
-      "label": "Text color",
-      "default": "#FAFAF8",
-      "info": "Color of the CTA text overlay. Use light text on dark images, dark on light."
     }
   ],
   "presets": [

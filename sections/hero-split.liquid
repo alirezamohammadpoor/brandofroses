@@ -1,12 +1,13 @@
 {%- comment -%}
   Hero Split Section
-  Two side-by-side images, each 50vw, full viewport height.
+  Two side-by-side editorial images at 4:5 portrait each.
+  Stacks vertically on mobile (each panel full-width 4:5).
   Each panel: clickable image with title + subtitle bottom-left.
 {%- endcomment -%}
 
-<section class="flex flex-col lg:flex-row lg:h-[calc(100dvh-var(--chrome-height))]" data-section-id="{{ section.id }}">
+<section class="flex flex-col lg:flex-row" data-section-id="{{ section.id }}">
   {%- comment -%} Left panel {%- endcomment -%}
-  <a href="{{ section.settings.left_link }}" class="relative w-full h-[100svh] lg:w-1/2 lg:h-full overflow-hidden block" aria-label="{{ section.settings.left_title | default: 'Shop collection' }}">
+  <a href="{{ section.settings.left_link }}" class="relative w-full aspect-[4/5] lg:w-1/2 overflow-hidden block" aria-label="{{ section.settings.left_title | default: 'Shop collection' }}">
     {% if section.settings.left_image %}
       {%- liquid
         assign left_focal = section.settings.left_image.presentation.focal_point | default: 'center center'
@@ -38,7 +39,7 @@
   </a>
 
   {%- comment -%} Right panel {%- endcomment -%}
-  <a href="{{ section.settings.right_link }}" class="relative w-full h-[100svh] lg:w-1/2 lg:h-full overflow-hidden block" aria-label="{{ section.settings.right_title | default: 'Shop collection' }}">
+  <a href="{{ section.settings.right_link }}" class="relative w-full aspect-[4/5] lg:w-1/2 overflow-hidden block" aria-label="{{ section.settings.right_title | default: 'Shop collection' }}">
     {% if section.settings.right_image %}
       {%- liquid
         assign right_focal = section.settings.right_image.presentation.focal_point | default: 'center center'
